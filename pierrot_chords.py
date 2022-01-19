@@ -3,6 +3,7 @@ Name: pierrot_chords.py
 Author: Jeff Martin
 Description:
 This file generates all chords that could be used in the Pierrot piece.
+Testing to see if commits work
 """
 
 from pctheory import pcset, tables, transformations
