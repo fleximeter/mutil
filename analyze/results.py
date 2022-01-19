@@ -1,0 +1,416 @@
+"""
+File: results.py
+Author: Jeff Martin
+Email: jeffreymartin@outlook.com
+This file contains the Results class for analysis results.
+Copyright (c) 2021 by Jeff Martin.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+
+class Results:
+    def __init__(self, slices, measure_num_first, measure_num_last):
+        """
+        Creates a Results object
+        :param slices: A list of slices
+        :param measure_num_first: The first measure number analyzed
+        :param measure_num_last: The last measure number analyzed
+        """
+        self._max_p_count = 0  # The maximum number of pitches in a chord (may be greater than PS)
+        self._duration = 0
+        self._ins_avg = 0  # The INS average
+        self._ins_max = 0
+        self._ins_min = 0
+        self._lns_avg = 0  # The LNS average
+        self._lns_max = 0
+        self._lns_min = 0
+        self._lower_bound = 0
+        self._lps_card = 0  # The cardinality of LPS
+        self._measure_num_first = measure_num_first
+        self._measure_num_last = measure_num_last
+        self._mediant_avg = 0  # The MT average
+        self._mediant_max = 0
+        self._mediant_min = 0
+        self._num_measures = measure_num_last - measure_num_first + 1
+        self._pc_duration = None
+        self._pc_frequency = None
+        self._pitch_duration = None
+        self._pitch_frequency = None
+        self._pitch_highest = 0
+        self._pitch_lowest = 0
+        self._ps_avg = 0  # The PS average
+        self._ps_max = 0
+        self._ps_min = 0
+        self._quarter_duration = 0
+        self._slices = slices
+        self._uns_avg = 0  # The UNS average
+        self._uns_max = 0
+        self._uns_min = 0
+        self._upper_bound = 0
+
+        # Calculate values
+        self._calculate_values()
+
+    @property
+    def max_p_count(self):
+        """
+        The maximum cardinality of the analyzed VSlices
+        :return: The maximum cardinality of the analyzed VSlices
+        """
+        return self._max_p_count
+
+    @property
+    def duration(self):
+        """
+        The total duration of all the VSlices
+        :return: The total duration of all the VSlices
+        """
+        return self._duration
+
+    @property
+    def ins_avg(self):
+        """
+        The average internal negative space (INS)
+        :return: The average internal negative space (INS)
+        """
+        return self._ins_avg
+
+    @property
+    def ins_max(self):
+        """
+        The maximum internal negative space (INS)
+        :return: The maximum internal negative space (INS)
+        """
+        return self._ins_max
+
+    @property
+    def ins_min(self):
+        """
+        The minimum internal negative space (INS)
+        :return: The minimum internal negative space (INS)
+        """
+        return self._ins_min
+
+    @property
+    def lns_avg(self):
+        """
+        The average lower negative space (LNS)
+        :return: The average LNS
+        """
+        return self._lns_avg
+
+    @property
+    def lns_max(self):
+        """
+        The maximum lower negative space (LNS)
+        :return: The maximum lower negative space (LNS)
+        """
+        return self._lns_max
+
+    @property
+    def lns_min(self):
+        """
+        The minimum lower negative space (LNS)
+        :return: The minimum lower negative space (LNS)
+        """
+        return self._lns_min
+
+    @property
+    def lower_bound(self):
+        """
+        The lower bound of the VSlices
+        :return: The lower bound of the VSlices
+        """
+        return self._lower_bound
+
+    @property
+    def lps_card(self):
+        """
+        The cardinality of local pitch space (LPS)
+        :return: The cardinality of local pitch space (LPS)
+        """
+        return self._lps_card
+
+    @property
+    def measure_num_first(self):
+        """
+        The first measure number analyzed
+        :return: The first measure number analyzed
+        """
+        return self._measure_num_first
+
+    @property
+    def measure_num_last(self):
+        """
+        The last measure number analyzed
+        :return: The last measure number analyzed
+        """
+        return self._measure_num_last
+
+    @property
+    def mediant_avg(self):
+        """
+        The average median trajectory
+        :return: The average median trajectory
+        """
+        return self._mediant_avg
+
+    @property
+    def mediant_max(self):
+        """
+        The maximum median trajectory
+        :return: The maximum median trajectory
+        """
+        return self._mediant_max
+
+    @property
+    def mediant_min(self):
+        """
+        The minimum median trajectory
+        :return: The minimum median trajectory
+        """
+        return self._mediant_min
+
+    @property
+    def num_measures(self):
+        """
+        The number of measures analyzed
+        :return: The number of measures analyzed
+        """
+        return self._num_measures
+
+    @property
+    def pc_duration(self):
+        """
+        A dictionary in which the pcs that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._pc_duration
+
+    @property
+    def pc_frequency(self):
+        """
+        A dictionary in which the pcs that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._pc_frequency
+
+    @property
+    def pitch_duration(self):
+        """
+        A dictionary in which the pitches that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._pitch_duration
+
+    @property
+    def pitch_frequency(self):
+        """
+        A dictionary in which the pitches that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._pitch_frequency
+
+    @property
+    def pitch_highest(self):
+        """
+        The highest pitch in the analyzed measures
+        :return: The highest pitch in the analyzed measures
+        """
+        return self._pitch_highest
+
+    @property
+    def pitch_lowest(self):
+        """
+        The lowest pitch in the analyzed measures
+        :return: The lowest pitch in the analyzed measures
+        """
+        return self._pitch_lowest
+
+    @property
+    def ps_avg(self):
+        """
+        The average positive space (PS)
+        :return: The average positive space (PS)
+        """
+        return self._ps_avg
+
+    @property
+    def ps_max(self):
+        """
+        The maximum positive space (PS)
+        :return: The maximum positive space (PS)
+        """
+        return self._ps_max
+
+    @property
+    def ps_min(self):
+        """
+        The minimum positive space (PS)
+        :return: The minimum positive space (PS)
+        """
+        return self._ps_min
+
+    @property
+    def quarter_duration(self):
+        """
+        The duration of the VSlices, in quarter notes
+        :return: The duration of the VSlices, in quarter notes
+        """
+        return self._quarter_duration
+
+    @property
+    def slices(self):
+        """
+        The VSlices
+        :return: The VSlices
+        """
+        return self._slices
+
+    @property
+    def uns_avg(self):
+        """
+        The average upper negative space (UNS)
+        :return: The average upper negative space (UNS)
+        """
+        return self._uns_avg
+
+    @property
+    def uns_max(self):
+        """
+        The maximum upper negative space (UNS)
+        :return: The maximum upper negative space (UNS)
+        """
+        return self._uns_max
+
+    @property
+    def uns_min(self):
+        """
+        The minimum upper negative space (UNS)
+        :return: The minimum upper negative space (UNS)
+        """
+        return self._uns_min
+
+    @property
+    def upper_bound(self):
+        """
+        The upper bound of the VSlices
+        :return: The upper bound of the VSlices
+        """
+        return self._upper_bound
+
+    def _calculate_values(self):
+        """
+        Calculates values for the results object
+        :return: None
+        """
+        if len(self._slices) > 0:
+            # Establish basic information
+            self._lower_bound = self._slices[0].lower_bound
+            self._lps_card = self._slices[0].upper_bound - self._slices[0].lower_bound + 1
+            self._upper_bound = self._slices[0].upper_bound
+            self._ins_min = self._lps_card
+            self._lns_min = self._lps_card
+            self._mediant_max = self._lower_bound
+            self._mediant_min = self._upper_bound
+            self._pc_duration = {}  # The total number of seconds that this pitch-class is active
+            self._pc_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch-class
+            self._pitch_duration = {}  # The total number of seconds that this pitch is active
+            self._pitch_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch
+            self._ps_min = self._lps_card
+            self._uns_min = self._lps_card
+
+            # Sum values for averages and establish maxes and mins
+            for s in self._slices:
+                self._duration += s.duration
+                self._quarter_duration += s.quarter_duration
+                if s.ps is not None:
+                    self._ps_avg += s.ps
+                    if self._ps_max < s.ps:
+                        self._ps_max = s.ps
+                    if self._ps_min > s.ps:
+                        self._ps_min = s.ps
+                    if s.p_cardinality > 0:
+                        if self._pitch_lowest > s.pseg[0].p:
+                            self._pitch_lowest = s.pseg[0].p
+                        if self._pitch_highest < s.pseg[len(s.pseg) - 1].p:
+                            self._pitch_highest = s.pseg[len(s.pseg) - 1].p
+                if s.uns is not None:
+                    self._ins_avg += s.ins
+                    self._lns_avg += s.lns
+                    self._mediant_avg += s.mediant
+                    self._uns_avg += s.uns
+                    if self._ins_max < s.ins:
+                        self._ins_max = s.ins
+                    if self._ins_min > s.ins:
+                        self._ins_min = s.ins
+                    if self._lns_max < s.lns:
+                        self._lns_max = s.lns
+                    if self._lns_min > s.lns:
+                        self._lns_min = s.lns
+                    if self._mediant_max < s.mediant:
+                        self._mediant_max = s.mediant
+                    if self._mediant_max > s.mediant:
+                        self._mediant_max = s.mediant
+                    if self._uns_max < s.uns:
+                        self._uns_max = s.uns
+                    if self._uns_min > s.uns:
+                        self._uns_min = s.uns
+                if self._max_p_count < s.p_cardinality:
+                    self._max_p_count = s.p_cardinality
+
+            # Calculate pitch frequency
+            for i in range(0, len(self._slices)):
+                for p in self._slices[i].pset:
+                    if p.p not in self._pitch_duration.keys():
+                        self._pitch_duration[p.p] = self._slices[i].duration
+                    else:
+                        self._pitch_duration[p.p] += self._slices[i].duration
+                    if p.p not in self._pitch_frequency.keys():
+                        self._pitch_frequency[p.p] = 1
+                    elif p not in self._slices[i-1].pset:
+                        self._pitch_frequency[p.p] += 1
+                for pc in self._slices[i].pcset:
+                    if pc.pc not in self._pc_duration.keys():
+                        self._pc_duration[pc.pc] = self._slices[i].duration
+                    else:
+                        self._pc_duration[pc.pc] += self._slices[i].duration
+                    if pc.pc not in self._pc_frequency.keys():
+                        self._pc_frequency[pc.pc] = 1
+                    elif pc not in self._slices[i-1].pcset:
+                        self._pc_frequency[pc.pc] += 1
+
+        # Finalize average calculation
+        non_null = self._get_non_null()
+        self._ins_avg /= non_null
+        self._lns_avg /= non_null
+        self._mediant_avg /= non_null
+        self._ps_avg /= len(self._slices)
+        self._uns_avg /= non_null
+
+    def _get_non_null(self):
+        """
+        Gets the number of slices that do not contain None for LNS and UNS
+        :return: The number of slices
+        """
+        counter = 0
+        for s in self._slices:
+            if s.uns is not None:
+                counter += 1
+        return counter
