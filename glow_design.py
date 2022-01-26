@@ -1,5 +1,5 @@
 """
-Name: orchestra_piece.py
+Name: glow_design.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 Date: 9/25/21
