@@ -1,5 +1,5 @@
 """
-Name: subset_finder.py
+Name: glow_subset_finder.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 Date: 11/13/21
