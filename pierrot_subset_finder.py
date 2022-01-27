@@ -24,6 +24,12 @@ if len(user_input) > 1:
     for char in user_input[1]:
         pcset1.add(pitch.PitchClass(t["hexToInt"][char]))
     pcsets.append(pcset1)
+elif len(user_input) == 1:
+    user_input[0] = user_input[0].strip(" {}")
+    pcset1 = set()
+    for char in user_input[0]:
+        pcset1.add(pitch.PitchClass(t["hexToInt"][char]))
+    pcsets.append(pcset1)
 
 # Print the filtered results
 for i in range(len(pcsets)):
