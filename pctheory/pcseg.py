@@ -253,6 +253,92 @@ def make_pcseg(*args):
     return [pitch.PitchClass(pc) for pc in args]
 
 
+def make_chain_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: float = 0.4, max_3_similarity: float = 1):
+    """
+    Makes a "weak" chain of pcsets. The result is a poset of the form
+    <pc_0 {...} pc_1 {...} pc_2 {...}>
+    where a member of each set-class in the list appears in order. The unordered set is unioned with the immediately
+    adjacent free pcs to form the actual set corresponding to the set-class in the list.
+    This is a weaker form of the "strong" chains in Morris 1987, where there must be complete overlap between adjacent
+    pcsets.
+    :param p0: The starting pitch
+    :param sc_list: The list of set-class names
+    :param max_2_similarity: The maximum adjacent similarity percentage (expressed as a decimal). Specifies
+    the maximum percentage of a set that can be duplicated in an adjacent set. For example, 0.4 means that 2 out of 5
+    pcs in a pentachord may be duplicated in each adjacent set.
+    :param max_3_similarity: The maximum similarity percentage in 3 adjacent sets. The default is 1 which means that
+    no similarity restriction is imposed.
+    :return: A list of weak chains. The list will be empty if it was impossible to generate any chains matching the
+    provided specifications.
+    """
+    # Store the chains
+    chain_build = [[p0]]
+    chain_build2 = []  # (a temporary storage place)
+
+    # The set-class object for pcset generation
+    sc = pcset.SetClass()
+
+    # Load the first pcset and initialize chains
+    sc.load_from_name(sc_list[0])
+    corpus = pcset.get_corpus(sc.pcset)
+    for pcset1 in corpus:
+        pcset2 = set(pcset1)
+        if p0 in pcset1:
+            new_chain = list(chain_build[0])
+            new_chain.append(pcset2)
+            new_chain[1].remove(p0)
+            chain_build2.append(new_chain)
+    chain_build = chain_build2
+    chain_build2 = []
+
+    # Continue building chains
+    for i in range(1, len(sc_list)):
+        sc.load_from_name(sc_list[i])
+        corpus = pcset.get_corpus(sc.pcset)
+        for pcset1 in corpus:
+            pcset2 = set(pcset1)
+            for chain in chain_build:
+                # Temporarily reconstruct the previous set
+                tempset = set(chain[len(chain) - 1])
+                tempset.add(chain[len(chain) - 2])
+
+                # Calculate the similarity of the last set with the current one
+                intersect = tempset.intersection(pcset2)
+                sim2 = len(intersect) / len(pcset2)
+
+                # Calculate the similarity of the last two sets with the current one
+                sim3 = 0
+                if len(chain) >= 4:
+                    tempset2 = set(chain[len(chain) - 3])
+                    tempset2.add(chain[len(chain) - 4])
+                    tempset2.add(chain[len(chain) - 2])
+                    union1 = tempset.union(tempset2)
+                    union2 = union1.union(pcset2)
+                    total_len = len(tempset) + len(tempset2) + len(pcset2)
+                    sim3 = (total_len - len(union2)) / total_len
+
+                if sim2 <= max_2_similarity and sim3 <= max_3_similarity:
+                    for pc in intersect:
+                        # We cannot use the same pc as an intersection point twice in a row.
+                        if pc != chain[len(chain) - 2]:
+                            chain1 = []
+                            # unfortunately we need to manually copy the data structures
+                            for item in chain:
+                                if type(item) == set:
+                                    chain1.append(set(item))
+                                else:
+                                    chain1.append(item)
+                            chain1.append(pc)
+                            chain1[len(chain1) - 2].remove(pc)
+                            chain1.append(set(pcset2))
+                            chain1[len(chain1) - 1].remove(pc)
+                            chain_build2.append(chain1)
+        chain_build = chain_build2
+        chain_build2 = []
+
+    return chain_build
+
+
 def multiply(pcseg: list, n: int):
     """
     Multiplies a pcseg
