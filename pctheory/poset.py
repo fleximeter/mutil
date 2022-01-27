@@ -25,7 +25,8 @@ from pctheory import pitch, pcset, pcseg, tables, transformations
 
 
 def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: float = 0.4,
-                         max_3_similarity: float = 1):
+                         min_2_similarity: float = 0, max_3_similarity: float = 1, min_3_similarity: float = 0,
+                         pn=None):
     """
     Generates all possible "weak" chains of pcsets that match the specified input criteria. The result is a list of
     posets of the form
@@ -42,8 +43,11 @@ def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: 
     are imposed (since we are allowing up to 100% similarity). A value that is too low to allow at least 1 duplicate
     pc will prevent the algorithm from generating any chains at all (since we need at least one duplicate between
     each pair of adjacent pcsets).
+    :param min_2_similarity: The corresponding minimum of max_2_similarity
     :param max_3_similarity: Like max_2_similarity, except this covers three adjacent pcsets. The default value is 1,
     which imposes no similarity restrictions.
+    :param min_3_similarity: The corresponding minimum of max_3_similarity
+    :param pn: The ending pitch (if left as None, no ending pitch will be separated out of the last sets)
     :return: A list of weak chains. The list will be empty if it was impossible to generate any chains matching the
     provided specifications.
     """
@@ -95,7 +99,7 @@ def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: 
                     sim3 = (total_len - len(union2)) / total_len
 
                 # If the similarity conditions are satisfied, we can continue building the chains
-                if sim2 <= max_2_similarity and sim3 <= max_3_similarity:
+                if max_2_similarity >= sim2 >= min_2_similarity and max_3_similarity >= sim3 >= min_3_similarity:
                     for pc in intersect:
                         # We cannot use the same pc as an intersection point twice in a row.
                         if pc != chain[len(chain) - 2]:
@@ -113,5 +117,14 @@ def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: 
                             chain_build2.append(chain1)
         chain_build = chain_build2
         chain_build2 = []
+
+    # If the last pitch is specified, we need to separate it out and prune the chains that don't have it.
+    if pn is not None:
+        for chain in chain_build:
+            if pn in chain[len(chain) - 1]:
+                chain.append(pn)
+                chain[len(chain) - 2].remove(pn)
+                chain_build2.append(chain)
+        return chain_build2
 
     return chain_build
