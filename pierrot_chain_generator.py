@@ -10,8 +10,8 @@ This file contains functionality for generating chains.
 from pctheory import pcseg, pitch
 
 pc = pitch.PitchClass(9)
-chains = pcseg.make_chain_weak(pc, ["[015]", "[014]", "[026]", "[037]"], 0.4, 0.4)
-chains = pcseg.make_chain_weak(pc, ["[0148]", "[0146]", "[0137]"], 0.4, 0.2)
+chains = pcseg.generate_chains_weak(pc, ["[015]", "[014]", "[026]", "[037]"], 0.4, 0.4)
+chains = pcseg.generate_chains_weak(pc, ["[0148]", "[0146]", "[0137]"], 0.4, 0.2)
 
 chains2 = []
 [chains2.append(c) for c in chains if c not in chains2]
