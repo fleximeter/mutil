@@ -19,7 +19,7 @@ sc_lists = [
     ["(5-30)[01468]", "(5-Z37)[03458]"],
     ["(6-31)[014579]", "(6-31)[014579]"]
 ]
-chains = poset.generate_chains_weak(pc0, sc_lists[2], 0.4, 0.4, 1, 0, pcn)
+chains = poset.generate_chains_weak(pc0, sc_lists[3], 0.4, 0.2, 1, 0, pcn)
 
 chains2 = []
 [chains2.append(c) for c in chains if c not in chains2]
