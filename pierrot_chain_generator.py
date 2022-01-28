@@ -9,8 +9,8 @@ This file contains functionality for generating chains.
 
 from pctheory import poset, pitch
 
-pc0 = pitch.PitchClass(9)  # The initial pc in the chain
-pcn = pitch.PitchClass(5)  # The initial pc in the chain
+pc0 = pitch.PitchClass(2)  # The initial pc in the chain
+pcn = pitch.PitchClass(6)  # The initial pc in the chain
 
 # Set-class name lists for use in chain generation
 sc_lists = [
@@ -19,7 +19,7 @@ sc_lists = [
     ["(5-30)[01468]", "(5-Z37)[03458]"],
     ["(6-31)[014579]", "(6-31)[014579]"]
 ]
-chains = poset.generate_chains_weak(pc0, sc_lists[3], 0.4, 0.2, 1, 0, pcn)
+chains = poset.generate_chains_weak(pc0, sc_lists[2], 0.4, 0.2, 1, 0, pcn)
 
 chains2 = []
 [chains2.append(c) for c in chains if c not in chains2]
