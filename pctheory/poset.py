@@ -95,7 +95,7 @@ def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: 
                     tempset2.add(chain[len(chain) - 2])
                     union1 = tempset.union(tempset2)
                     intersect2 = union1.intersect(pcset2)
-                    sim3 = intersect2 / len(pcset2)
+                    sim3 = len(intersect2) / len(pcset2)
 
                 # If the similarity conditions are satisfied, we can continue building the chains
                 if max_2_similarity >= sim2 >= min_2_similarity and max_3_similarity >= sim3 >= min_3_similarity:
