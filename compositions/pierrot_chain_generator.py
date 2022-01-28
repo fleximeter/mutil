@@ -9,8 +9,8 @@ This file contains functionality for generating chains.
 
 from pctheory import poset, pitch
 
-pc0 = pitch.PitchClass(9)  # The initial pc in the chain
-pcn = pitch.PitchClass(5)  # The initial pc in the chain
+# Create all pcs
+pc = [pitch.PitchClass(i) for i in range(12)]
 
 # Set-class name lists for use in chain generation
 sc_lists = [
@@ -19,12 +19,14 @@ sc_lists = [
     ["(5-30)[01468]", "(5-Z37)[03458]"],
     ["(6-31)[014579]", "(6-31)[014579]"]
 ]
-chains = poset.generate_chains_weak(pc0, sc_lists[3], 0.4, 0.2, 1, 0, pcn)
+chains = poset.generate_chains_weak(pc[0], sc_lists[3], 0.4, 0.2, 1, 0, pc[4])
 
+# Calculate the number of duplicates
 chains2 = []
 [chains2.append(c) for c in chains if c not in chains2]
 print(f"{len(chains)} chains total")
 print(f"{len(chains) - len(chains2)} duplicates")
 
+# Print the chains
 for chain in chains:
     print(chain)
