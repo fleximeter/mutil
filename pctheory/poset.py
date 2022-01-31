@@ -24,6 +24,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from pctheory import pitch, pcset, pcseg, tables, transformations
 
 
+def filter_poset_positions(posets: list, position_filter: list):
+    """
+    Filters a list of posets
+    :param posets: The posets
+    :param position_filter: The filter (length of filter must match length of each poset). Each position in the filter
+    must be either None or a pcset.
+    :return: A filtered list
+    """
+    filtered = []
+    for po in posets:
+        match = True
+        for i in range(len(po)):
+            # A position filter of None means we don't care what's in that position
+            if position_filter[i] is not None:
+                if type(po[i]) == set:
+                    if not po[i].issubset(position_filter[i]):
+                        match = False
+                else:
+                    if po[i] not in position_filter[i]:
+                        match = False
+        if match:
+            filtered.append(po)
+    return filtered
+
+
 def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: float = 0.4,
                          min_2_similarity: float = 0, max_3_similarity: float = 1, min_3_similarity: float = 0,
                          pn=None):
