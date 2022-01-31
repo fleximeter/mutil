@@ -7,7 +7,7 @@ Date: 1/27/22
 This file contains functionality for generating chains.
 """
 
-from pctheory import poset, pitch
+from pctheory import pcset, poset, pitch
 
 # Create all pcs
 pc = [pitch.PitchClass(i) for i in range(12)]
@@ -38,16 +38,17 @@ sc_lists = [
         ["(6-Z46)[012469]", "(6-Z48)[012579]", "(6-Z17)[012478]", "(6-31)[014579]"],
     ]
 ]
-chains = poset.generate_chains_weak(pc[2], sc_lists[0][3], 0.3, 0.2, 0.8, 0, pc[10])
+chains = poset.generate_chains_weak(pc[2], sc_lists[0][0], 0.3, 0.2, 0.8, 0, pc[10])
+
 chains = poset.filter_poset_positions(chains,
                                       [None,
-                                       {pc[0], pc[1], pc[2], pc[5], pc[6], pc[9], pc[11]},
-                                       {pc[1], pc[2], pc[5], pc[6], pc[9], pc[11]},
-                                       {pc[1], pc[2], pc[3], pc[4], pc[5], pc[6], pc[7], pc[10]},
-                                       {pc[2], pc[5], pc[6], pc[7], pc[9], pc[11]},
-                                       {pc[0], pc[1], pc[3], pc[4], pc[6], pc[7], pc[9], pc[11]},
-                                       {pc[2], pc[3], pc[4], pc[7], pc[9], pc[11]},
-                                       {pc[0], pc[1], pc[4], pc[5], pc[6], pc[8], pc[11]},
+                                       None,
+                                       pcset.make_pcset(1, 3, 5, 7),
+                                       None,
+                                       pcset.make_pcset(6, 10, 11),
+                                       None,
+                                       pcset.make_pcset(2, 7),
+                                       None,
                                        None])
 
 # Calculate the number of duplicates
