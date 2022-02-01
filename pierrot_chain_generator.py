@@ -38,8 +38,9 @@ sc_lists = [
         ["(6-Z46)[012469]", "(6-Z48)[012579]", "(6-Z17)[012478]", "(6-31)[014579]"],
     ]
 ]
-chains = poset.generate_chains_weak(pc[2], sc_lists[0][0], 0.3, 0.2, 0.8, 0, pc[10])
+chains = poset.generate_chains_weak(pc[0], sc_lists[2][0], 0.4, 0.2, 1, 0, pc[2])
 
+"""
 chains = poset.filter_poset_positions(chains,
                                       [None,
                                        None,
@@ -50,6 +51,7 @@ chains = poset.filter_poset_positions(chains,
                                        pcset.make_pcset(2, 7),
                                        None,
                                        None])
+"""
 
 # Calculate the number of duplicates
 chains2 = []
