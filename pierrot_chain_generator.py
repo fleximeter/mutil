@@ -40,18 +40,30 @@ sc_lists = [
 ]
 chains = poset.generate_chains_weak(pc[8], sc_lists[1][1], 0.4, 0.4, 0.6, 0.6, pc[9])
 
-"""
+# Filter exclusively
 chains = poset.filter_poset_positions(chains,
                                       [None,
                                        None,
-                                       pcset.make_pcset(1, 3, 5, 7),
+                                       pcset.make_pcset(4, 5),
                                        None,
-                                       pcset.make_pcset(6, 10, 11),
+                                       pcset.make_pcset(11, 7),
                                        None,
-                                       pcset.make_pcset(2, 7),
+                                       pcset.make_pcset(7, 2),
+                                       None,
+                                       None],
+                                       True)
+
+# Filter inclusively
+chains = poset.filter_poset_positions(chains,
+                                      [None,
+                                       None,
+                                       pcset.make_pcset(4, 5),
+                                       None,
+                                       pcset.make_pcset(11, 7),
+                                       None,
+                                       pcset.make_pcset(7, 2),
                                        None,
                                        None])
-"""
 
 # Print the chains
 print(f"{len(chains)} chains total")
