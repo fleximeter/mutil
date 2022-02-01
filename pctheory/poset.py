@@ -24,12 +24,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from pctheory import pitch, pcset, pcseg, tables, transformations
 
 
-def filter_poset_positions(posets: list, position_filter: list):
+def filter_poset_positions(posets: list, position_filter: list, exclude=False):
     """
     Filters a list of posets
     :param posets: The posets
     :param position_filter: The filter (length of filter must match length of each poset). Each position in the filter
     must be either None or a pcset.
+    :param exclude: Whether the filter searches for inclusion or exclusion
     :return: A filtered list
     """
     filtered = []
@@ -38,12 +39,22 @@ def filter_poset_positions(posets: list, position_filter: list):
         for i in range(len(po)):
             # A position filter of None means we don't care what's in that position
             if position_filter[i] is not None:
-                if type(po[i]) == set:
-                    if not po[i].issubset(position_filter[i]):
-                        match = False
+                # If we are filtering for exclusion
+                if exclude:
+                    if type(po[i]) == set:
+                        if len(po[i].intersection(position_filter[i])) > 0:
+                            match = False
+                    else:
+                        if po[i] in position_filter[i]:
+                            match = False
+                # If we are filtering for inclusion
                 else:
-                    if po[i] not in position_filter[i]:
-                        match = False
+                    if type(po[i]) == set:
+                        if not po[i].issubset(position_filter[i]):
+                            match = False
+                    else:
+                        if po[i] not in position_filter[i]:
+                            match = False
         if match:
             filtered.append(po)
     return filtered

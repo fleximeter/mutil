@@ -38,7 +38,7 @@ sc_lists = [
         ["(6-Z46)[012469]", "(6-Z48)[012579]", "(6-Z17)[012478]", "(6-31)[014579]"],
     ]
 ]
-chains = poset.generate_chains_weak(pc[2], sc_lists[0][0], 0.3, 0.2, 0.5, 0.5, pc[4])
+chains = poset.generate_chains_weak(pc[8], sc_lists[1][1], 0.4, 0.4, 0.6, 0.6, pc[9])
 
 """
 chains = poset.filter_poset_positions(chains,
