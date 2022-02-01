@@ -24,12 +24,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from pctheory import pitch, pcset, pcseg, tables, transformations
 
 
-def filter_poset_positions(posets: list, position_filter: list):
+def filter_poset_positions(posets: list, position_filter: list, exclude=False):
     """
     Filters a list of posets
     :param posets: The posets
     :param position_filter: The filter (length of filter must match length of each poset). Each position in the filter
     must be either None or a pcset.
+    :param exclude: Whether the filter searches for inclusion or exclusion
     :return: A filtered list
     """
     filtered = []
@@ -38,12 +39,22 @@ def filter_poset_positions(posets: list, position_filter: list):
         for i in range(len(po)):
             # A position filter of None means we don't care what's in that position
             if position_filter[i] is not None:
-                if type(po[i]) == set:
-                    if not po[i].issubset(position_filter[i]):
-                        match = False
+                # If we are filtering for exclusion
+                if exclude:
+                    if type(po[i]) == set:
+                        if len(po[i].intersection(position_filter[i])) > 0:
+                            match = False
+                    else:
+                        if po[i] in position_filter[i]:
+                            match = False
+                # If we are filtering for inclusion
                 else:
-                    if po[i] not in position_filter[i]:
-                        match = False
+                    if type(po[i]) == set:
+                        if not po[i].issubset(position_filter[i]):
+                            match = False
+                    else:
+                        if po[i] not in position_filter[i]:
+                            match = False
         if match:
             filtered.append(po)
     return filtered
@@ -76,7 +87,7 @@ def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: 
     :return: A list of weak chains. The list will be empty if it was impossible to generate any chains matching the
     provided specifications.
     """
-    chain_build = [[p0]]   # The chains will be stored here
+    chain_build = []   # The chains will be stored here
     chain_build2 = []      # (a temporary storage place for chains)
     sc = pcset.SetClass()  # The set-class object for pcset generation
 
@@ -85,60 +96,59 @@ def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: 
     corpus = pcset.get_corpus(sc.pcset)
 
     # If a pcset in the corpus matches the starting pc, we can use that pcset to start a chain.
-    for pcset1 in corpus:
-        pcset2 = set(pcset1)
-        if p0 in pcset1:
-            new_chain = list(chain_build[0])
-            new_chain.append(pcset2)
-            new_chain[1].remove(p0)
-            chain_build2.append(new_chain)
-
-    # Clear out the last generation of chains
-    chain_build = chain_build2
-    chain_build2 = []
+    for frozen_pcset in corpus:
+        pcset2 = set(frozen_pcset)
+        if p0 in pcset2:
+            pcset2.remove(p0)
+            chain_build.append([p0, pcset2])
 
     # Continue building chains in the same manner as before
     for i in range(1, len(sc_list)):
         sc.load_from_name(sc_list[i])
         corpus = pcset.get_corpus(sc.pcset)
-        for pcset1 in corpus:
-            pcset2 = set(pcset1)
-            for chain in chain_build:
+        for frozen_pcset in corpus:
+            pcset2 = set(frozen_pcset)
+            # Now we need to look at each chain we already have
+            for j in range(len(chain_build)):
                 # Temporarily reconstruct the previous set
-                tempset = set(chain[len(chain) - 1])
-                tempset.add(chain[len(chain) - 2])
+                tempset = set(chain_build[j][len(chain_build[j]) - 1])
+                tempset.add(chain_build[j][len(chain_build[j]) - 2])
 
                 # Calculate the similarity of the last set with the current one (sim2)
                 intersect = tempset.intersection(pcset2)
                 sim2 = len(intersect) / len(pcset2)
 
                 # Calculate the similarity of the last two sets with the current one (sim3)
-                sim3 = 0
-                if len(chain) >= 4:
-                    tempset2 = set(chain[len(chain) - 3])
-                    tempset2.add(chain[len(chain) - 4])
-                    tempset2.add(chain[len(chain) - 2])
+                sim3 = min_3_similarity
+                if len(chain_build[j]) >= 4:
+                    tempset2 = set(chain_build[j][len(chain_build[j]) - 3])
+                    tempset2.add(chain_build[j][len(chain_build[j]) - 4])
+                    tempset2.add(chain_build[j][len(chain_build[j]) - 2])
                     union1 = tempset.union(tempset2)
                     intersect2 = union1.intersection(pcset2)
                     sim3 = len(intersect2) / len(pcset2)
 
                 # If the similarity conditions are satisfied, we can continue building the chains
                 if max_2_similarity >= sim2 >= min_2_similarity and max_3_similarity >= sim3 >= min_3_similarity:
+                    # We consider each pc that can be used as an intersection point
                     for pc in intersect:
                         # We cannot use the same pc as an intersection point twice in a row.
-                        if pc != chain[len(chain) - 2]:
-                            chain1 = []
+                        if pc != chain_build[j][len(chain_build[j]) - 2]:
+                            new_chain = []
                             # Unfortunately we need to manually copy the data structures to avoid disaster
-                            for item in chain:
+                            for item in chain_build[j]:
                                 if type(item) == set:
-                                    chain1.append(set(item))
+                                    new_chain.append(set(item))
                                 else:
-                                    chain1.append(item)
-                            chain1.append(pc)
-                            chain1[len(chain1) - 2].remove(pc)
-                            chain1.append(set(pcset2))
-                            chain1[len(chain1) - 1].remove(pc)
-                            chain_build2.append(chain1)
+                                    new_chain.append(item)
+                            new_chain.append(pc)
+                            new_chain.append(set(pcset2))
+                            # Remove the intersecting pc from its surrounding sets
+                            new_chain[len(new_chain) - 3].remove(pc)
+                            new_chain[len(new_chain) - 1].remove(pc)
+                            chain_build2.append(new_chain)
+
+        # Clear out the previous generation of chains and add in the new chains
         chain_build = chain_build2
         chain_build2 = []
 
