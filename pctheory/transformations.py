@@ -284,6 +284,21 @@ class TTO:
             return (item * self._tto[1] + self._tto[0]) % 12
 
 
+def find_ttos(pcset1: set, pcset2: set):
+    """
+    Finds the TTOS that transform pcset1 into pcset2
+    :param pcset1: A pcset
+    :param pcset2: A transformed pcset
+    :return: A list of TTOS
+    """
+    ttos_tntni = get_ttos(OperatorType.Tn, OperatorType.TnI)
+    ttos_final = []
+    for t in ttos_tntni:
+        if t.transform(pcset1) == pcset2:
+            ttos_final.append(t)
+    return ttos_final
+
+
 def get_ros(*args):
     """
     Gets ROs

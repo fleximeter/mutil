@@ -84,5 +84,6 @@ def make_array_chain(array: list, length: int, alt_ret=True):
         for i in range(len(array)):
             pcset_end_temp.add(array[i][len(array[i])])
         r = transformations.RO()
+        transformation = transformations.find_ttos(pcset_end_temp, pcset_start)
         if i % 2 == 1 and alt_ret:
             pass
