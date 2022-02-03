@@ -38,18 +38,18 @@ sc_lists = [
         ["(6-Z46)[012469]", "(6-Z48)[012579]", "(6-Z17)[012478]", "(6-31)[014579]"],
     ]
 ]
-chains = poset.generate_chains_weak(pc[8], sc_lists[1][1], 0.4, 0.4, 0.6, 0.6, pc[9])
+chains = poset.generate_chains_weak(pc[11], sc_lists[2][2], 0.5, 0.5, 0.9, 0.5, pc[0])
 
 # Filter exclusively
 chains = poset.filter_poset_positions(chains,
                                       [None,
-                                       None,
-                                       pcset.make_pcset(4, 5),
-                                       None,
-                                       pcset.make_pcset(11, 7),
-                                       None,
-                                       pcset.make_pcset(7, 2),
-                                       None,
+                                       pcset.make_pcset(3),
+                                       None, # pcset.make_pcset(1, 5, 3),
+                                       pcset.make_pcset(1, 4),
+                                       None, # pcset.make_pcset(7, 10),
+                                       None, # pcset.make_pcset(3, 9),
+                                       None, # pcset.make_pcset(2, 5),
+                                       pcset.make_pcset(11),
                                        None],
                                        True)
 
@@ -57,11 +57,11 @@ chains = poset.filter_poset_positions(chains,
 chains = poset.filter_poset_positions(chains,
                                       [None,
                                        None,
-                                       pcset.make_pcset(4, 5),
+                                       pcset.make_pcset(1, 5, 3, 0, 9, 8),
                                        None,
-                                       pcset.make_pcset(11, 7),
+                                       pcset.make_pcset(7, 10, 11, 2, 5, 9),
                                        None,
-                                       pcset.make_pcset(7, 2),
+                                       pcset.make_pcset(9),
                                        None,
                                        None])
 
