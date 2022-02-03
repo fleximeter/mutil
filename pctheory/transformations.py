@@ -262,21 +262,26 @@ class TTO:
         """
         return TTO((self._tto[0] * self._tto[1] * -1) % 12, self._tto[1])
 
-    def transform(self, pcset):
+    def transform(self, item):
         """
-        Transforms a pcset
-        :param pcset: A pcset
-        :return: The transformed set
+        Transforms a pcset, pcseg, or pc
+        :param item: A pcset, pcseg, or pc
+        :return: The transformed item
         """
-        if type(pcset) == set:
+        if type(item) == set:
             pcset2 = set()
-            for pc in pcset:
+            for pc in item:
                 pcset2.add(pitch.PitchClass(pc.pc * self._tto[1] + self._tto[0]))
             return pcset2
-        elif type(pcset) == pitch.PitchClass:
-            return pitch.PitchClass(pcset.pc * self._tto[1] + self._tto[0])
+        elif type(item) == list:
+            pcseg2 = list()
+            for pc in item:
+                pcseg2.append(pitch.PitchClass(pc.pc * self._tto[1] + self._tto[0]))
+            return pcseg2
+        elif type(item) == pitch.PitchClass:
+            return pitch.PitchClass(item.pc * self._tto[1] + self._tto[0])
         else:
-            return (pcset * self._tto[1] + self._tto[0]) % 12
+            return (item * self._tto[1] + self._tto[0]) % 12
 
 
 def get_ros(*args):
