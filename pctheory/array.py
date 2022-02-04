@@ -35,7 +35,7 @@ def transform_row_content(array: list, ro: transformations.RO):
     for i in range(len(array)):
         row = []
         for j in range(len(array[i])):
-            if ro[1] > 0 and type(array[i][j]) == list:
+            if type(array[i][j]) == list:
                 row.append(ro.transform(array[i][j]))
             elif type(array[i][j]) == set:
                 cell = set()
@@ -63,7 +63,7 @@ def make_array_chain(array: list, length: int, alt_ret=True):
     # Populate the begin-set and end-set
     for i in range(len(array)):
         pcset_start.add(array[i][0])
-        pcset_end.add(array[i][len(array[i])])
+        pcset_end.add(array[i][len(array[i]) - 1])
 
     # Add the first array to the final array
     for i in range(len(array)):
@@ -81,9 +81,30 @@ def make_array_chain(array: list, length: int, alt_ret=True):
     for i in range(1, length):
         # Get the current end-set
         pcset_end_temp = set()
-        for i in range(len(array)):
-            pcset_end_temp.add(array[i][len(array[i])])
+        for j in range(len(array1)):
+            pcset_end_temp.add(array1[j][len(array1[j]) - 1])
+
+        # Get the row operator we need for the transformation, and transform the array
         r = transformations.RO()
-        transformation = transformations.find_ttos(pcset_end_temp, pcset_start)
-        if i % 2 == 1 and alt_ret:
-            pass
+        m = None
+        if alt_ret and i % 2:
+            transformation = transformations.find_ttos(pcset_end_temp, pcset_end)
+            r.ro = [transformation[0][0], 0, transformation[0][1]]
+            m = transform_row_content(array1, r)
+            for j in range(len(m)):
+                m[j].reverse()
+        else:
+            transformation = transformations.find_ttos(pcset_end_temp, pcset_start)
+            r.ro = [transformation[0][0], 0, transformation[0][1]]
+            m = transform_row_content(array1, r)
+
+        # Add the transformed array content to the end of the large array
+        for j in range(len(array1)):
+            for k in range(len(m)):
+                if m[k][0] == array1[j][len(array1[j]) - 1]:
+                    for n in range(1, len(m[k])):
+                        array1[j].append(m[k][n])
+                    del m[k]
+                    break
+
+    return array1
