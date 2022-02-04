@@ -97,6 +97,7 @@ def make_array_chain(array: list, length: int, alt_ret=True):
             transformation = transformations.find_ttos(pcset_end_temp, pcset_start)
             r.ro = [transformation[0][0], 0, transformation[0][1]]
             m = transform_row_content(array1, r)
+        m.reverse()
 
         # Add the transformed array content to the end of the large array
         for j in range(len(array1)):
