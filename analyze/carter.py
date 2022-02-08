@@ -115,21 +115,29 @@ def c_analyze_with_sections():
     # Make charts
     chart.chart_cardinality(results[0], "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
                             size=(14, 6), path=path + f"Register Analysis Files\\card")
-    chart.chart_pitch_onset(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
-                            path + f"Register Analysis Files\\onset")
+    chart.chart_pitch_onset_measure(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+                                    path + f"Register Analysis Files\\onset_measure")
+    chart.chart_pitch_onset_time(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+                                 path + f"Register Analysis Files\\onset_time")
 
     for i in range(1, 13):
         cname = section_names[i-1].split(" ")
         cpath = path + f"Register Analysis Files\\card_{i}_"
-        opath = path + f"Register Analysis Files\\onset_{i}_"
+        opath_m = path + f"Register Analysis Files\\onset_m_{i}_"
+        opath_t = path + f"Register Analysis Files\\onset_t_{i}_"
         for j in range(len(cname) - 1):
             cpath += cname[j] + "_"
-            opath += cname[j] + "_"
+            opath_m += cname[j] + "_"
+            opath_t += cname[j] + "_"
         cpath += cname[len(cname) - 1]
-        opath += cname[len(cname) - 1]
+        opath_m += cname[len(cname) - 1]
+        opath_t += cname[len(cname) - 1]
         chart.chart_cardinality(results[i], f"Pset Cardinality Graph for Section {i} – " + section_names[i-1],
                                 path=cpath)
-        chart.chart_pitch_onset(results[i], f"Pitch Onsets in Section {i} – " + section_names[i-1], path=opath)
+        chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+                                        path=opath_m)
+        chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+                                     path=opath_t)
 
     # Print elapsed time
     finish = time.time() - start
@@ -165,4 +173,4 @@ if __name__ == "__main__":
           "Copyright (c) 2021 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
     # c_analyze()
     c_analyze_with_sections()
-    metric_modulation()
+    # metric_modulation()
