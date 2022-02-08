@@ -43,5 +43,5 @@ if __name__ == "__main__":
     finish = time.time() - start
     print(int(finish / 60), "minutes,", finish % 60, "seconds")
     #chart.chart_cardinality(results)
-    chart.chart_pitch_onset(results)
+    chart.chart_pitch_onset_measure(results)
     #chart.chart_spaces(results)
