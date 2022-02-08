@@ -303,6 +303,6 @@ arrays = [
     ]
 ]
 
-m = array.make_array_chain(arrays[0][2], 3, False)
+m = array.make_array_chain(arrays[1][1], 12, False)
 for i in range(len(m)):
     print(m[i])
