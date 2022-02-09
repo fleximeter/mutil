@@ -392,6 +392,8 @@ class VSlice:
             self._pcset.add(pitch.PitchClass(p))
         self._pseg = list(self._pset)
         self._pseg.sort()
+        self._pitchseg.reverse()
+        self._pnameseg.reverse()
         for p in self._pseg:
             self._pcseg.append(pitch.PitchClass(p.pc))
         if len(self._ipseg) > 0:

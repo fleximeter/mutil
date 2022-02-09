@@ -659,7 +659,7 @@ def write_analysis_to_file(results, path):
             cslice["pc_cardinality"] = slice.pc_cardinality
             cslice["pcseg"] = [pc.pc for pc in slice.pcseg]
             cslice["pitchseg"] = [p for p in slice.pitchseg]
-            cslice["pnameseg"] = [pname for pname in slice.pitchseg]
+            cslice["pnameseg"] = [pname for pname in slice.pnameseg]
             cslice["pseg"] = [p.p for p in slice.pseg]
             cslice["quarter_duration"] = [slice.quarter_duration.numerator, slice.quarter_duration.denominator]
             cslice["sc_name"] = slice.sc_name
