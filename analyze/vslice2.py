@@ -42,11 +42,17 @@ class VSlice:
         self._p_count = 0            # The number of pitches present (including duplicates)
         self._pc_cardinality = 0     # The number of distinct pitch-classes present (excluding duplicates)
         self._pcseg = None           # The pcseg
+        self._pcsegs = []            # The pcsegs by voice
         self._pcset = None           # The pcset
+        self._pcsets = []            # The pcsets by voice
         self._pitchseg = []          # The pitch seg (contains duplicates)
+        self._pitchsegs = []         # The pitch segs by voice
         self._pnameseg = []          # A list of pitch names
+        self._pnamesegs = []         # The pnamesegs by voice
         self._pset = None            # The pset
+        self._psets = []             # The psets by voice
         self._pseg = None            # The pseg
+        self._psegs = []             # The psegs by voice
         self._quarter_duration = quarter_duration  # The duration in quarters
         self._sc_name = None         # The set-class name of the pcset
         self._sc_name_carter = None  # The Carter set-class name of the pcset
@@ -218,6 +224,22 @@ class VSlice:
         return self._pcset
 
     @property
+    def pcsegs(self):
+        """
+        The pcseg of the VSlice
+        :return: The pcseg
+        """
+        return self._pcsegs
+
+    @property
+    def pcsets(self):
+        """
+        The pcset of the VSlice
+        :return: The pcset
+        """
+        return self._pcsets
+
+    @property
     def pitchseg(self):
         """
         The pitchseg of the VSlice
@@ -234,6 +256,22 @@ class VSlice:
         return self._pnameseg
 
     @property
+    def pitchsegs(self):
+        """
+        The pitchseg of the VSlice
+        :return: The pitchseg
+        """
+        return self._pitchsegs
+
+    @property
+    def pnamesegs(self):
+        """
+        A list of pitch names
+        :return: A list of pitch names
+        """
+        return self._pnamesegs
+
+    @property
     def pseg(self):
         """
         The pseg of the VSlice (contains duplicates)
@@ -248,6 +286,22 @@ class VSlice:
         :return: The pset
         """
         return self._pset
+
+    @property
+    def psegs(self):
+        """
+        The pseg of the VSlice (contains duplicates)
+        :return: The pseg
+        """
+        return self._psegs
+
+    @property
+    def psets(self):
+        """
+        The pset of the VSlice
+        :return: The pset
+        """
+        return self._psets
 
     @property
     def quarter_duration(self):
@@ -341,16 +395,22 @@ class VSlice:
         """
         self._upper_bound = value
 
-    def add_pitches(self, pitches, pitch_names=None):
+    def add_pitches(self, pitches, pitch_names=None, voice=0):
         """
         Adds pitches to the v_slice
         :param pitches: A collection of pitches to add
         :param pitch_names: A collection of pitch names (as strings) corresponding to the pitch collection
+        :param voice: The voice
         """
+        if voice <= len(self._pitchsegs):
+            self._pitchsegs.append([])
+            self._pnamesegs.append([])
         # Add each pitch to the chord
         for i in range(len(pitches)):
             self._pitchseg.append(pitches[i])
+            self._pitchsegs[voice].append(pitches[i])
             self._pnameseg.append(pitch_names[i])
+            self._pnamesegs[voice].append(pitch_names[i])
             self._p_count += 1
 
     def get_ipseg_string(self):
@@ -387,11 +447,28 @@ class VSlice:
         self._pset = set()
         self._pcseg = []
         self._pcset = set()
-        for p in self._pitchseg:
-            self._pset.add(pitch.Pitch(p))
-            self._pcset.add(pitch.PitchClass(p))
+        for v in range(len(self._pitchsegs)):
+            self._pcsets.append(set())
+            self._psets.append(set())
+            for p in self._pitchsegs[v]:
+                p1 = pitch.Pitch(p)
+                pc = pitch.PitchClass(p)
+                self._psets[v].add(p1)
+                self._pcsets[v].add(pc)
+                self._pset.add(p1)
+                self._pcset.add(pc)
+            self._psegs.append(list(self._psets[v]))
+            self._psegs[v].sort()
+            self._pcsegs.append([])
+            for p in self._psegs[v]:
+                self._pcsegs[v].append(pitch.PitchClass(p.pc))
         self._pseg = list(self._pset)
         self._pseg.sort()
+        self._pitchseg.reverse()
+        self._pnameseg.reverse()
+        for v in range(len(self._pitchsegs)):
+            self._pitchsegs[v].reverse()
+            self._pnamesegs[v].reverse()
         for p in self._pseg:
             self._pcseg.append(pitch.PitchClass(p.pc))
         if len(self._ipseg) > 0:
@@ -402,7 +479,6 @@ class VSlice:
         # Calculate values
         self._p_cardinality = len(self._pset)
         self._pc_cardinality = len(self._pcset)
-
 
     def run_calculations(self, sc):
         """

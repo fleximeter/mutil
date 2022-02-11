@@ -389,7 +389,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                                         measure_slices.append(
                                             VSlice(Fraction(60 * tempo_multiplier, int(tempo * tempo_multiplier) * n),
                                                    Fraction(1, n.numerator), parts[a][next_indices[a]].number))
-                                    measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item)
+                                    measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                                     measure_slices[num_slices_taken].time_signature = time_signature
                                     measure_slices[num_slices_taken].start_position = Fraction(num_slices_taken,
                                                                                                n.numerator)
@@ -434,7 +434,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                                 measure_slices.append(
                                     VSlice(Fraction(60 * tempo_multiplier, int(tempo * tempo_multiplier) * n),
                                            Fraction(1, n.numerator), parts[a][next_indices[a]].number))
-                            measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item)
+                            measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                             measure_slices[num_slices_taken].time_signature = time_signature
                             measure_slices[num_slices_taken].start_position = Fraction(num_slices_taken,
                                                                                        n.numerator)
@@ -542,10 +542,18 @@ def read_analysis_from_file(path):
             cslice._pc_cardinality = dslice["pc_cardinality"]
             cslice._pcseg = [pitch.PitchClass(pc) for pc in dslice["pcseg"]]
             cslice._pcset = set(cslice.pcseg)
+            cslice._pcsegs = [[pitch.PitchClass(pc) for pc in dslice["pcsegs"][v]]
+                              for v in range(len(dslice["pcsegs"]))]
+            cslice._pcset = set(cslice.pcseg)
+            cslice._pcsets = [set(cslice.pcsegs[v]) for v in range(len(cslice.pcsegs))]
             cslice._pitchseg = dslice["pitchseg"]
+            cslice._pitchsegs = dslice["pitchsegs"]
             cslice._pnameseg = dslice["pnameseg"]
+            cslice._pnamesegs = dslice["pnamesegs"]
             cslice._pseg = [pitch.Pitch(p) for p in dslice["pseg"]]
+            cslice._psegs = [[pitch.Pitch(p) for p in dslice["psegs"][v]] for v in range(len(dslice["psegs"]))]
             cslice._pset = set(cslice.pseg)
+            cslice._psets = [set(cslice.psegs[v]) for v in range(len(cslice.psegs))]
             cslice._quarter_duration = Fraction(dslice["quarter_duration"][0], dslice["quarter_duration"][1])
             cslice._sc_name = dslice["sc_name"]
             cslice._sc_name_carter = dslice["sc_name_carter"]
@@ -658,9 +666,13 @@ def write_analysis_to_file(results, path):
             cslice["p_count"] = slice.p_count
             cslice["pc_cardinality"] = slice.pc_cardinality
             cslice["pcseg"] = [pc.pc for pc in slice.pcseg]
+            cslice["pcsegs"] = [[pc.pc for pc in slice.pcsegs[v]] for v in range(len(slice.pcsegs))]
             cslice["pitchseg"] = [p for p in slice.pitchseg]
-            cslice["pnameseg"] = [pname for pname in slice.pitchseg]
+            cslice["pitchsegs"] = [[p for p in slice.pitchsegs[v]] for v in range(len(slice.pitchsegs))]
+            cslice["pnameseg"] = [pname for pname in slice.pnameseg]
+            cslice["pnamesegs"] = [[pname for pname in slice.pnamesegs[v]] for v in range(len(slice.pnamesegs))]
             cslice["pseg"] = [p.p for p in slice.pseg]
+            cslice["psegs"] = [[p.p for p in slice.psegs[v]] for v in range(len(slice.psegs))]
             cslice["quarter_duration"] = [slice.quarter_duration.numerator, slice.quarter_duration.denominator]
             cslice["sc_name"] = slice.sc_name
             cslice["sc_name_carter"] = slice.sc_name_carter
