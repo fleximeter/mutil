@@ -18,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+import fractions
 import json
 import music21
 import numpy
@@ -351,8 +351,18 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
                     # Update the tempo if we find a new one
                     if type(item) == music21.tempo.MetronomeMark:
-                        tempo = item.number
-                        tempo_multiplier = 10 ** str(tempo)[::-1].find(".")
+                        tempo = fractions.Fraction(int(item.number), 1)
+
+                        # Specific adjustments for Carter 5
+                        if parts[a][next_indices[a]].number == 46:
+                            tempo = fractions.Fraction(512, 7)
+                        elif parts[a][next_indices[a]].number == 66:
+                            tempo = fractions.Fraction(384, 7)
+                        elif parts[a][next_indices[a]].number == 128:
+                            tempo = fractions.Fraction(1152, 10)
+                        # print(f"Tempo: {tempo}, Measure {parts[a][next_indices[a]].number}")
+                        # deprecated:
+                        # tempo_multiplier = 10 ** str(tempo)[::-1].find(".")
 
                     # If we have found multiple voices in the same part in the same measure
                     if type(item) == music21.stream.Voice:
@@ -387,7 +397,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                                 for j in range(num_slices):
                                     if num_slices_taken >= len(measure_slices):
                                         measure_slices.append(
-                                            VSlice(Fraction(60 * tempo_multiplier, int(tempo * tempo_multiplier) * n),
+                                            VSlice(Fraction(60, tempo * n),
                                                    Fraction(1, n.numerator), parts[a][next_indices[a]].number))
                                     measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                                     measure_slices[num_slices_taken].time_signature = time_signature
@@ -432,7 +442,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                         for j in range(num_slices):
                             if num_slices_taken >= len(measure_slices):
                                 measure_slices.append(
-                                    VSlice(Fraction(60 * tempo_multiplier, int(tempo * tempo_multiplier) * n),
+                                    VSlice(Fraction(60, tempo * n),
                                            Fraction(1, n.numerator), parts[a][next_indices[a]].number))
                             measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                             measure_slices[num_slices_taken].time_signature = time_signature

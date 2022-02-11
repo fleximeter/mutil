@@ -88,7 +88,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = True
+    use_cache = False
 
     # Analyze
     print("Analyzing...")
@@ -151,8 +151,8 @@ def metric_modulation():
     # q = 72
     m[24] = Fraction(Fraction(3, 4), 1)  # q = 96
     m[25] = Fraction(Fraction(1, 4), Fraction(1, 6))  # q = 64
-    m[45] = Fraction(Fraction(1, 8), Fraction(1, 7))  # q = 73+
-    m[65] = Fraction(Fraction(4, 3), 1)  # q = 55-
+    m[45] = Fraction(Fraction(1, 8), Fraction(1, 7))  # q = 73+ (512/7)
+    m[65] = Fraction(Fraction(4, 3), 1)  # q = 55- (384/7)
     m[71] = Fraction(Fraction(4, 7), 1)  # q = 96
     m[77] = Fraction(Fraction(8, 5), 1)  # q = 60
     m[123] = Fraction(Fraction(5, 4), 1)  # q = 48
