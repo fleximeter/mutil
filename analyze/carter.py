@@ -88,7 +88,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = True
+    use_cache = False
 
     # Analyze
     print("Analyzing...")
