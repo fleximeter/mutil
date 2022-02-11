@@ -156,6 +156,93 @@ def chart_pitch_onset_time(results, title="Pitch Onset Graph", size=(8, 6), path
         matplotlib.pyplot.close()
 
 
+def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), path=None):
+    """
+    Makes a pitch duration bar chart
+    :param results: A Results object
+    :param title: The title of the chart
+    :param size: The size of the plot
+    :param path: A path to save the chart
+    :return: None
+    """
+    matplotlib.pyplot.clf()
+    matplotlib.pyplot.rcParams["font.family"] = "Academico"
+    x = [i for i in range(results.pitch_lowest, results.pitch_highest + 1)]
+    y = []
+    for p in x:
+        if str(p) in results.pitch_duration:
+            y.append(float(results.pitch_duration[str(p)]))
+        else:
+            y.append(0)
+    draw = matplotlib.pyplot.figure(figsize=size)
+    axes = draw.add_subplot(111)
+    axes.bar(x, y)
+    xtick_tick = []
+    xtick_labels = []
+    for i in range(results.lower_bound, results.upper_bound + 1):
+        if i % 12 == 0:
+            xtick_tick.append(i)
+            xtick_labels.append(f"C{i // 12 + 4}/{i}")
+    matplotlib.pyplot.xticks(xtick_tick, xtick_labels)
+    matplotlib.pyplot.title(title, fontsize=18)
+    matplotlib.pyplot.xlabel("Pitch")
+    matplotlib.pyplot.ylabel("Duration (seconds)")
+
+    if path is None:
+        matplotlib.pyplot.show()
+    else:
+        matplotlib.pyplot.savefig(path)
+        matplotlib.pyplot.close()
+
+
+def chart_pc_duration(results, title="Pitch-Class Duration Graph", size=(8, 6), path=None):
+    """
+    Makes a pitch-class duration bar chart
+    :param results: A Results object
+    :param title: The title of the chart
+    :param size: The size of the plot
+    :param path: A path to save the chart
+    :return: None
+    """
+    matplotlib.pyplot.clf()
+    matplotlib.pyplot.rcParams["font.family"] = "Academico"
+    x = [i for i in range(12)]
+    y = []
+    for pc in x:
+        if str(pc) in results.pc_duration:
+            y.append(float(results.pc_duration[str(pc)]))
+        else:
+            y.append(0)
+    draw = matplotlib.pyplot.figure(figsize=size)
+    axes = draw.add_subplot(111)
+    axes.bar(x, y)
+    xtick_tick = [i for i in range(12)]
+    xtick_labels = [
+        "C\n0",
+        "C♯/D♭\n1",
+        "D\n2",
+        "D♯/E♭\n3",
+        "E\n4",
+        "F\n5",
+        "F♯/G♭\n6",
+        "G\n7",
+        "G♯/A♭\n8",
+        "A\n9",
+        "A♯/B♭\n10",
+        "B\n11"
+    ]
+    matplotlib.pyplot.xticks(xtick_tick, xtick_labels)
+    matplotlib.pyplot.title(title, fontsize=18)
+    matplotlib.pyplot.xlabel("Pitch-Class")
+    matplotlib.pyplot.ylabel("Duration (seconds)")
+
+    if path is None:
+        matplotlib.pyplot.show()
+    else:
+        matplotlib.pyplot.savefig(path)
+        matplotlib.pyplot.close()
+
+
 def chart_spaces(results, size=(8, 6), path=None):
     """
     Makes a pitch space stacked area chart
