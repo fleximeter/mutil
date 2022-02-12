@@ -3,7 +3,7 @@ File: chart.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains functionality for making analysis charts.
-Copyright (c) 2021 by Jeff Martin.
+Copyright (c) 2022 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

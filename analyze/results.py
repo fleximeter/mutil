@@ -3,7 +3,7 @@ File: results.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains the Results class for analysis results.
-Copyright (c) 2021 by Jeff Martin.
+Copyright (c) 2022 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import numpy
 
 
 class Results:
-    def __init__(self, slices, measure_num_first, measure_num_last):
+    def __init__(self, slices, measure_num_first, measure_num_last, voices):
         """
         Creates a Results object
         :param slices: A list of slices
@@ -46,6 +46,7 @@ class Results:
         self._mediant_max = 0
         self._mediant_min = 0
         self._num_measures = measure_num_last - measure_num_first + 1
+        self._num_voices = voices
         self._pc_duration = None
         self._pc_duration_voices = None
         self._pc_frequency = None
@@ -390,15 +391,15 @@ class Results:
             self._mediant_max = self._lower_bound
             self._mediant_min = self._upper_bound
             self._pc_duration = {}  # The total number of seconds that this pitch-class is active
-            self._pc_duration_voices = [{} for v in range(len(self._slices[0].psets))]
+            self._pc_duration_voices = [{} for v in range(len(self._num_voices))]
             self._pc_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch-class
-            self._pc_frequency_voices = [{} for v in range(len(self._slices[0].psets))]
+            self._pc_frequency_voices = [{} for v in range(len(self._num_voices))]
             self._pitch_duration = {}  # The total number of seconds that this pitch is active
-            self._pitch_duration_voices = [{} for v in range(len(self._slices[0].psets))]
+            self._pitch_duration_voices = [{} for v in range(len(self._num_voices))]
             self._pitch_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch
-            self._pitch_frequency_voices = [{} for v in range(len(self._slices[0].psets))]
-            self._pitch_highest_voices = [-numpy.inf for v in range(len(self._slices[0].psets))]
-            self._pitch_lowest_voices = [numpy.inf for v in range(len(self._slices[0].psets))]
+            self._pitch_frequency_voices = [{} for v in range(len(self._num_voices))]
+            self._pitch_highest_voices = [-numpy.inf for v in range(len(self._num_voices))]
+            self._pitch_lowest_voices = [numpy.inf for v in range(len(self._num_voices))]
             self._ps_min = self._lps_card
             self._uns_min = self._lps_card
 

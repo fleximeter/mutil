@@ -182,7 +182,7 @@ def metric_modulation():
 
 if __name__ == "__main__":
     print("################### Vertical Analyzer ####################\n" + \
-          "Copyright (c) 2021 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
+          "Copyright (c) 2022 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
     # c_analyze()
     c_analyze_with_sections()
     # metric_modulation()

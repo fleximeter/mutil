@@ -3,7 +3,7 @@ File: v_analyze.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains functions for analyzing vertical slices.
-Copyright (c) 2021 by Jeff Martin.
+Copyright (c) 2022 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -493,7 +493,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
         set_slice_bounds(section_slices, bounds)
         for s in section_slices:
             s.run_calculations(sc)
-        results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1]))
+        results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1], len(parts)))
 
     # Create overall results
     clean_slices(final_slices)
@@ -504,7 +504,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     set_slice_bounds(final_slices, bounds)
     for f_slice in final_slices:
         f_slice.run_calculations(sc)
-    results.insert(0, Results(final_slices, first_measure, last_measure))
+    results.insert(0, Results(final_slices, first_measure, last_measure, len(parts)))
     return results
 
 
@@ -593,6 +593,7 @@ def read_analysis_from_file(path):
         result._mediant_max = item["mediant_max"]
         result._mediant_min = item["mediant_min"]
         result._num_measures = item["num_measures"]
+        result._num_voices = len(item["pitch_highest_voices"])
         result._pitch_highest = item["pitch_highest"]
         result._pitch_highest_voices = item["pitch_highest_voices"]
         result._pitch_lowest = item["pitch_lowest"]
