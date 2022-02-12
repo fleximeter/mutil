@@ -19,12 +19,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import music21
-from pctheory import pitch, pcset, pset, tables
+from pctheory import pitch
+from decimal import Decimal
 
 
 class VSlice:
-    def __init__(self, duration=1, quarter_duration=1, measure=None, aslice=None):
+    def __init__(self, tempo=1, quarter_duration=1, measure=None, aslice=None):
         """
         Creates a v_slice
         :param duration: The duration of the slice, in seconds
@@ -35,7 +35,7 @@ class VSlice:
         self._core = False                      # Whether or not the chord is a core harmony
         self._derived_core = False              # Whether or not the chord is a derived core harmony
         self._derived_core_associations = None  # Derived core associations, if any
-        self._duration = duration    # The duration of the slice in seconds
+        self._duration = 0           # The duration of the slice in seconds
         self._ipseg = []             # The ipseg of the slice
         self._measure = measure      # The measure number in which the slice begins
         self._p_cardinality = 0      # The number of distinct pitches present (excluding duplicates)
@@ -56,6 +56,7 @@ class VSlice:
         self._quarter_duration = quarter_duration  # The duration in quarters
         self._sc_name = None         # The set-class name of the pcset
         self._sc_name_carter = None  # The Carter set-class name of the pcset
+        self._tempo = tempo          # The tempo
 
         self._ins = None  # The INS of the slice
         self._lns = None  # The LNS of the slice
@@ -439,6 +440,18 @@ class VSlice:
         pcset_str += "}"
         return pcset_str
 
+    def get_pset_str(self):
+        """
+        The pset
+        :return: The pset
+        """
+        pset_str = "{"
+        for p in self._pseg:
+            pset_str += f"{str(p.p)}, "
+        pset_str = pset_str.strip(' ,')
+        pset_str += "}"
+        return pset_str
+
     def make_sets(self):
         """
         Makes the pctheory objects. Run this function before calculating lower and upper bounds for the piece.
@@ -521,3 +534,6 @@ class VSlice:
         self._derived_core_associations = sc.derived_core
         if self._derived_core_associations is not None:
             self._derived_core = True
+
+        self._duration = (Decimal(60) / Decimal(self._tempo)) * (Decimal(self._quarter_duration.numerator) /
+                                                                 Decimal(self._quarter_duration.denominator))

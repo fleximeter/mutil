@@ -21,12 +21,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import fractions
 import json
 import music21
-import numpy
-import matplotlib.pyplot
 from vslice2 import VSlice
 from results import Results
 from fractions import Fraction
 from pctheory import pitch, pcset
+from decimal import Decimal
 
 
 def analyze(input_xml, first=-1, last=-1, use_local=False):
@@ -84,16 +83,17 @@ def analyze_with_sections(input_xml, section_divisions, use_local):
 
 
 #done
-def clean_slices(slices):
+def clean_slices(slices, match_tempo=False):
     """
     Cleans up a list of v_slices
     :param slices: A list of v_slices
+    :param match_tempo: Whether or not to force tempo match
     """
     # Remove duplicate slices, and update durations
     if len(slices) > 0:
         i = 1
         while i < len(slices):
-            if slice_compare(slices[i - 1], slices[i]):
+            if slice_compare(slices[i - 1], slices[i], match_tempo):
                 slices[i - 1].duration += slices[i].duration
                 slices[i - 1].quarter_duration += slices[i].quarter_duration
                 del slices[i]
@@ -294,10 +294,9 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     final_slices = []      # Holds the finalized slices to return
     first_measure = -1     # We assume that the first measure is -1
     last_measure = -1      # We assume that the last measure is -1
-    n = Fraction(n, 1)     # The number of slices per quarter note
     next_indices = [0 for i in range(len(parts))]  # The index of the next measure, for each part
     next_measure = -1      # The number of the next measure
-    tempo = 60.0           # We assume a tempo of 60 to begin
+    tempo = Decimal(60)    # We assume a tempo of 60 to begin
     tempo_multiplier = 10  # This is in place to avoid floats
     time_signature = None  # The current time signature
     transpose = [0 for i in range(len(parts))]  # The amount by which to transpose, for each part
@@ -351,15 +350,15 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
                     # Update the tempo if we find a new one
                     if type(item) == music21.tempo.MetronomeMark:
-                        tempo = fractions.Fraction(int(item.number), 1)
+                        tempo = Decimal(item.number)
 
                         # Specific adjustments for Carter 5
                         if parts[a][next_indices[a]].number == 46:
-                            tempo = fractions.Fraction(512, 7)
+                            tempo = Decimal(512) / Decimal(7)
                         elif parts[a][next_indices[a]].number == 66:
-                            tempo = fractions.Fraction(384, 7)
+                            tempo = Decimal(384) / Decimal(7)
                         elif parts[a][next_indices[a]].number == 128:
-                            tempo = fractions.Fraction(1152, 10)
+                            tempo = Decimal(1152) / Decimal(10)
                         # print(f"Tempo: {tempo}, Measure {parts[a][next_indices[a]].number}")
                         # deprecated:
                         # tempo_multiplier = 10 ** str(tempo)[::-1].find(".")
@@ -397,7 +396,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                                 for j in range(num_slices):
                                     if num_slices_taken >= len(measure_slices):
                                         measure_slices.append(
-                                            VSlice(Fraction(60, tempo * n),
+                                            VSlice(tempo,
                                                    Fraction(1, n.numerator), parts[a][next_indices[a]].number))
                                     measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                                     measure_slices[num_slices_taken].time_signature = time_signature
@@ -442,7 +441,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                         for j in range(num_slices):
                             if num_slices_taken >= len(measure_slices):
                                 measure_slices.append(
-                                    VSlice(Fraction(60, tempo * n),
+                                    VSlice(tempo,
                                            Fraction(1, n.numerator), parts[a][next_indices[a]].number))
                             measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                             measure_slices[num_slices_taken].time_signature = time_signature
@@ -451,6 +450,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                             num_slices_taken += 1
 
             # Clean up the slices from this measure
+            clean_slices(measure_slices, True)
             clean_slices(measure_slices)
             for item in measure_slices:
                 final_slices.append(item)
@@ -509,15 +509,18 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
 
 #done
-def slice_compare(slice1, slice2):
+def slice_compare(slice1, slice2, match_tempo=False):
     """
     Compares two v_slices for equality
     :param slice1: A v_slice
     :param slice2: A v_slice
+    :param match_tempo: Whether or not to match tempo
     :return: True if equal, False if not equal
     """
     equal = True
     if slice1.p_count != slice2.p_count:
+        equal = False
+    elif match_tempo and slice1._tempo != slice2._tempo:
         equal = False
     else:
         for p in slice1.pitchseg:
@@ -544,7 +547,7 @@ def read_analysis_from_file(path):
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
-            cslice._duration = Fraction(dslice["duration"][0], dslice["duration"][1])
+            cslice._duration = Decimal(dslice["duration"])
             cslice._ipseg = dslice["ipseg"]
             cslice._measure = dslice["measure"]
             cslice._p_cardinality = dslice["p_cardinality"]
@@ -580,7 +583,7 @@ def read_analysis_from_file(path):
             slices.append(cslice)
         result = Results(slices, item["measure_num_first"], item["measure_num_last"], len(item["pitch_highest_voices"]))
         result._max_p_count = item["max_p_count"]
-        result._duration = Fraction(item["duration"][0], item["duration"][1])
+        result._duration = Decimal(item["duration"])
         result._ins_avg = item["ins_avg"]
         result._ins_max = item["ins_max"]
         result._ins_min = item["ins_min"]
@@ -611,17 +614,17 @@ def read_analysis_from_file(path):
         result._pitch_duration = {}
         result._pitch_frequency = {}
         for key, val in item["pc_duration"].items():
-            result.pc_duration[int(key)] = Fraction(val[0], val[1])
+            result.pc_duration[int(key)] = Decimal(val[0])
         for v in range(len(item["pc_duration_voices"])):
             result.pc_duration_voices.append({})
             for key, val in item["pc_duration_voices"][v].items():
-                result.pc_duration_voices[v][int(key)] = Fraction(val[0], val[1])
+                result.pc_duration_voices[v][int(key)] = Decimal(val)
         for key, val in item["pitch_duration"].items():
-            result.pitch_duration[int(key)] = Fraction(val[0], val[1])
+            result.pitch_duration[int(key)] = Decimal(val)
         for v in range(len(item["pitch_duration_voices"])):
             result.pitch_duration_voices.append({})
             for key, val in item["pitch_duration_voices"][v].items():
-                result.pitch_duration_voices[v][int(key)] = Fraction(val[0], val[1])
+                result.pitch_duration_voices[v][int(key)] = Decimal(val)
         for key, val in item["pc_frequency"].items():
             result.pc_frequency[int(key)] = val
         for v in range(len(item["pc_frequency_voices"])):
@@ -650,7 +653,7 @@ def write_analysis_to_file(results, path):
     for i in range(len(results)):
         data.append({})
         data[i]["max_p_count"] = results[i].max_p_count
-        data[i]["duration"] = [results[i].duration.numerator, results[i].duration.denominator]
+        data[i]["duration"] = str(results[i].duration)
         data[i]["ins_avg"] = results[i].ins_avg
         data[i]["ins_max"] = results[i].ins_max
         data[i]["ins_min"] = results[i].ins_min
@@ -687,25 +690,23 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_frequency_voices"] = results[i].pitch_frequency_voices
         data[i]["slices"] = []
         for key, val in results[i].pc_duration.items():
-            data[i]["pc_duration"][key] = [val.numerator, val.denominator]
+            data[i]["pc_duration"][key] = str(val)
         for v in range(len(results[i].pc_duration_voices)):
             data[i]["pc_duration_voices"].append({})
             for key, val in results[i].pc_duration_voices[v].items():
-                data[i]["pc_duration_voices"][len(data[i]["pc_duration_voices"]) - 1][key] = [val.numerator,
-                                                                                              val.denominator]
+                data[i]["pc_duration_voices"][len(data[i]["pc_duration_voices"]) - 1][key] = str(val)
         for key, val in results[i].pitch_duration.items():
-            data[i]["pitch_duration"][key] = [val.numerator, val.denominator]
+            data[i]["pitch_duration"][key] = str(val)
         for v in range(len(results[i].pitch_duration_voices)):
             data[i]["pitch_duration_voices"].append({})
             for key, val in results[i].pitch_duration_voices[v].items():
-                data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = [val.numerator,
-                                                                                                    val.denominator]
+                data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = str(val)
         for rslice in results[i].slices:
             cslice = {}
             cslice["core"] = int(rslice.core)
             cslice["derived_core"] = int(rslice.derived_core)
             cslice["derived_core_associations"] = rslice.derived_core_associations
-            cslice["duration"] = [rslice.duration.numerator, rslice.duration.denominator]
+            cslice["duration"] = str(rslice.duration)
             cslice["ipseg"] = rslice.ipseg
             cslice["measure"] = rslice.measure
             cslice["p_cardinality"] = rslice.p_cardinality
@@ -834,7 +835,7 @@ def write_report(file, results):
 
             # Output column headings
             line = "Measure #,Start Time (seconds),Duration (seconds),Quarter duration,Chord cardinality," + \
-                   "PS,Match,NS,UNS,INS,LNS,MT,Name,Carter name,Core,Derived core,DC associations,pcset,ipseg"
+                   "PS,Match,NS,UNS,INS,LNS,MT,Morris name,Carter name,Core,Derived core,DC associations,pcset,pset,psc"
             for i in range(results.max_p_count):
                 line += ",Pitch " + str(i + 1)
             for i in range(results.ps_max):
@@ -886,6 +887,10 @@ def write_report(file, results):
                     line += ",N/A"
                 if item.pcset is not None:
                     line += ",\"" + item.get_pcset_str() + "\""
+                else:
+                    line += ",N/A"
+                if item.pset is not None:
+                    line += f",\"{item.get_pset_str()}\""
                 else:
                     line += ",N/A"
                 line += "," + item.get_ipseg_string()

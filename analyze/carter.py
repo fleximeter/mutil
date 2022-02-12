@@ -29,9 +29,9 @@ def c_analyze():
     """
     Analyzes Carter's fifth string quartet without analyzing each section separately
     """
-    xml = r"H:\My Drive\Composition\Carter Paper\Flows from String Quartet No. 5\Carter " \
+    xml = r"D:\Carter Paper\Flows from String Quartet No. 5\Carter " \
           r"String Quartet 5 - Full score - 01 Introduction.xml "
-    output = r"H:\My Drive\Composition\Carter Paper\RegisterAnalyzer\results_carter.csv"
+    output = r"D:\Carter Paper\RegisterAnalyzer\results_carter.csv"
     start = time.time()
     v_analyze.analyze(xml, output)
     finish = time.time() - start
@@ -65,7 +65,7 @@ def c_analyze_with_sections():
     # Path names
     google_drive_desktop = "H:\\My Drive"
     google_drive_laptop = "C:\\Users\\Jeffrey Martin\\Google Drive (jmartin8@umbc.edu)"
-    path = google_drive_desktop + "\\Composition\\Carter Paper\\"
+    path = "D:\\Carter Paper\\"
     xml = path + "Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml "
     output = path + "Register Analysis Files\\entire_piece.csv"
     output_general = path + "Register Analysis Files\\statistics.csv"
@@ -89,7 +89,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = True
+    use_cache = False
 
     # Analyze
     print("Analyzing...")
@@ -119,22 +119,26 @@ def c_analyze_with_sections():
     chart.chart_pitch_onset_measure(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
                                     path + f"Register Analysis Files\\Graphs\\onset_measure")
     for i in range(len(voices)):
-        chart.chart_pitch_onset_measure(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+        chart.chart_pitch_onset_measure(results[0], f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
+                                                    f"({voices[i]})", (14, 6),
                                         path + f"Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
     chart.chart_pitch_onset_time(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
                                  path + f"Register Analysis Files\\Graphs\\onset_time")
     for i in range(len(voices)):
-        chart.chart_pitch_onset_time(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+        chart.chart_pitch_onset_time(results[0], f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
+                                                 f"({voices[i]})", (14, 6),
                                      path + f"Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
     chart.chart_pitch_duration(results[0], "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
                                path + f"Register Analysis Files\\Graphs\\pitch_duration")
     for i in range(len(voices)):
-        chart.chart_pitch_duration(results[0], "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
+        chart.chart_pitch_duration(results[0], f"Pitch Duration in Elliott Carter’s Fifth String Quartet "
+                                               f"({voices[i]})", (14, 6),
                                    path + f"Register Analysis Files\\Graphs\\pitch_duration_{voices[i]}", i)
     chart.chart_pc_duration(results[0], "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (8, 6),
                             path + f"Register Analysis Files\\Graphs\\pc_duration")
     for i in range(len(voices)):
-        chart.chart_pc_duration(results[0], "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (8, 6),
+        chart.chart_pc_duration(results[0], f"Pitch-Class Duration in Elliott Carter’s Fifth String Quartet "
+                                            f"({voices[i]})", (8, 6),
                                 path + f"Register Analysis Files\\Graphs\\pc_duration_{voices[i]}", i)
 
     for i in range(1, 13):
@@ -158,23 +162,23 @@ def c_analyze_with_sections():
         chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
                                         path=om_path)
         for j in range(len(voices)):
-            chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
-                                            path=om_path + f"_{voices[j]}", voice=j)
+            chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} ({voices[j]}) – " +
+                                            section_names[i - 1], path=om_path + f"_{voices[j]}", voice=j)
         chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
                                      path=ot_path)
         for j in range(len(voices)):
-            chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
-                                         path=ot_path + f"_{voices[j]}", voice=j)
+            chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} ({voices[j]}) – " +
+                                         section_names[i - 1], path=ot_path + f"_{voices[j]}", voice=j)
         chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} – " + section_names[i - 1],
                                    path=dp_path)
         for j in range(len(voices)):
-            chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} – " + section_names[i - 1],
-                                       path=dp_path + f"_{voices[j]}", voice=j)
+            chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} ({voices[j]}) – " +
+                                       section_names[i - 1], path=dp_path + f"_{voices[j]}", voice=j)
         chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} – " + section_names[i - 1],
                                 path=dpc_path)
         for j in range(len(voices)):
-            chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} – " + section_names[i - 1],
-                                    path=dpc_path + f"_{voices[j]}", voice=j)
+            chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} ({voices[j]}) – " +
+                                    section_names[i - 1], path=dpc_path + f"_{voices[j]}", voice=j)
 
     # Print elapsed time
     finish = time.time() - start

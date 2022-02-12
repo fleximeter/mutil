@@ -466,7 +466,7 @@ class Results:
                             self._pitch_duration_voices[v][p.p] += self._slices[i].duration
                         if p.p not in self._pitch_frequency_voices[v].keys():
                             self._pitch_frequency_voices[v][p.p] = 1
-                        else:
+                        elif len(self._slices[i-1].psets) == 0 or p not in self._slices[i-1].psets[v]:
                             self._pitch_frequency_voices[v][p.p] += 1
                     for pc in self._slices[i].pcsets[v]:
                         if pc.pc not in self._pc_duration_voices[v].keys():
@@ -475,7 +475,7 @@ class Results:
                             self._pc_duration_voices[v][pc.pc] += self._slices[i].duration
                         if pc.pc not in self._pc_frequency_voices[v].keys():
                             self._pc_frequency_voices[v][pc.pc] = 1
-                        else:
+                        elif len(self._slices[i - 1].pcsets) == 0 or pc not in self._slices[i - 1].pcsets[v]:
                             self._pc_frequency_voices[v][pc.pc] += 1
                 for p in self._slices[i].pset:
                     if p.p not in self._pitch_duration.keys():
