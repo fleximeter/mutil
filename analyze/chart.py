@@ -56,13 +56,14 @@ def chart_cardinality(results, title="Cardinality Chart", size=(8, 6), path=None
         matplotlib.pyplot.close()
 
 
-def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), path=None):
+def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), path=None, voice=None):
     """
     Makes a pitch onset chart
     :param results: A Results object
     :param title: The title of the plot
     :param size: The size of the plot
     :param path: A path to save the chart
+    :param voice: The number of the voice (if None, charts all voices)
     :return: None
     """
     matplotlib.pyplot.clf()
@@ -73,17 +74,32 @@ def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), p
         position = results.slices[s].measure
         position += float(results.slices[s].start_position / results.slices[s].time_signature.barDuration.quarterLength)
         x.append(position)
+
+        # Add the pitches in the pseg of the current slice to the plot
         for i in range(len(pitches)):
-            if i < len(results.slices[s].pseg):
-                if s - 1 >= 0:
-                    if results.slices[s].pseg[i] not in results.slices[s - 1].pset:
-                        pitches[i].append(results.slices[s].pseg[i].p)
+            if voice is None:
+                if i < len(results.slices[s].pseg):
+                    if s - 1 >= 0:
+                        if results.slices[s].pseg[i] not in results.slices[s - 1].pset:
+                            pitches[i].append(results.slices[s].pseg[i].p)
+                        else:
+                            pitches[i].append(numpy.nan)
                     else:
-                        pitches[i].append(numpy.nan)
+                        pitches[i].append(results.slices[s].pseg[i].p)
                 else:
-                    pitches[i].append(results.slices[s].pseg[i].p)
+                    pitches[i].append(numpy.nan)
             else:
-                pitches[i].append(numpy.nan)
+                if i < len(results.slices[s].psegs[voice]):
+                    if s - 1 >= 0:
+                        if results.slices[s].psegs[voice][i] not in results.slices[s - 1].psets[voice]:
+                            pitches[i].append(results.slices[s].psegs[voice][i].p)
+                        else:
+                            pitches[i].append(numpy.nan)
+                    else:
+                        pitches[i].append(results.slices[s].psegs[voice][i].p)
+                else:
+                    pitches[i].append(numpy.nan)
+
     draw = matplotlib.pyplot.figure(figsize=size)
     axes = draw.add_subplot(111)
     for i in range(len(pitches)):
@@ -106,13 +122,14 @@ def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), p
         matplotlib.pyplot.close()
 
 
-def chart_pitch_onset_time(results, title="Pitch Onset Graph", size=(8, 6), path=None):
+def chart_pitch_onset_time(results, title="Pitch Onset Graph", size=(8, 6), path=None, voice=None):
     """
     Makes a pitch onset chart
     :param results: A Results object
     :param title: The title of the plot
     :param size: The size of the plot
     :param path: A path to save the chart
+    :param voice: The number of the voice (if None, charts all voices)
     :return: None
     """
     matplotlib.pyplot.clf()
@@ -124,16 +141,29 @@ def chart_pitch_onset_time(results, title="Pitch Onset Graph", size=(8, 6), path
         x.append(position_time/60)
         position_time += results.slices[s].duration
         for i in range(len(pitches)):
-            if i < len(results.slices[s].pseg):
-                if s - 1 >= 0:
-                    if results.slices[s].pseg[i] not in results.slices[s - 1].pset:
-                        pitches[i].append(results.slices[s].pseg[i].p)
+            if voice is None:
+                if i < len(results.slices[s].pseg):
+                    if s - 1 >= 0:
+                        if results.slices[s].pseg[i] not in results.slices[s - 1].pset:
+                            pitches[i].append(results.slices[s].pseg[i].p)
+                        else:
+                            pitches[i].append(numpy.nan)
                     else:
-                        pitches[i].append(numpy.nan)
+                        pitches[i].append(results.slices[s].pseg[i].p)
                 else:
-                    pitches[i].append(results.slices[s].pseg[i].p)
+                    pitches[i].append(numpy.nan)
             else:
-                pitches[i].append(numpy.nan)
+                if i < len(results.slices[s].psegs[voice]):
+                    if s - 1 >= 0:
+                        if results.slices[s].psegs[voice][i] not in results.slices[s - 1].psets[voice]:
+                            pitches[i].append(results.slices[s].psegs[voice][i].p)
+                        else:
+                            pitches[i].append(numpy.nan)
+                    else:
+                        pitches[i].append(results.slices[s].psegs[voice][i].p)
+                else:
+                    pitches[i].append(numpy.nan)
+
     draw = matplotlib.pyplot.figure(figsize=size)
     axes = draw.add_subplot(111)
     for i in range(len(pitches)):
@@ -156,13 +186,14 @@ def chart_pitch_onset_time(results, title="Pitch Onset Graph", size=(8, 6), path
         matplotlib.pyplot.close()
 
 
-def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), path=None):
+def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), path=None, voice=None):
     """
     Makes a pitch duration bar chart
     :param results: A Results object
     :param title: The title of the chart
     :param size: The size of the plot
     :param path: A path to save the chart
+    :param voice: The number of the voice (if None, charts all voices)
     :return: None
     """
     matplotlib.pyplot.clf()
@@ -170,10 +201,16 @@ def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), pat
     x = [i for i in range(results.pitch_lowest, results.pitch_highest + 1)]
     y = []
     for p in x:
-        if str(p) in results.pitch_duration:
-            y.append(float(results.pitch_duration[str(p)]))
+        if voice is None:
+            if str(p) in results.pitch_duration:
+                y.append(float(results.pitch_duration[str(p)]))
+            else:
+                y.append(0)
         else:
-            y.append(0)
+            if str(p) in results.pitch_durations[voice]:
+                y.append(float(results.pitch_durations[voice][str(p)]))
+            else:
+                y.append(0)
     draw = matplotlib.pyplot.figure(figsize=size)
     axes = draw.add_subplot(111)
     axes.bar(x, y)
@@ -195,13 +232,14 @@ def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), pat
         matplotlib.pyplot.close()
 
 
-def chart_pc_duration(results, title="Pitch-Class Duration Graph", size=(8, 6), path=None):
+def chart_pc_duration(results, title="Pitch-Class Duration Graph", size=(8, 6), path=None, voice=None):
     """
     Makes a pitch-class duration bar chart
     :param results: A Results object
     :param title: The title of the chart
     :param size: The size of the plot
     :param path: A path to save the chart
+    :param voice: The number of the voice (if None, charts all voices)
     :return: None
     """
     matplotlib.pyplot.clf()
@@ -209,10 +247,16 @@ def chart_pc_duration(results, title="Pitch-Class Duration Graph", size=(8, 6), 
     x = [i for i in range(12)]
     y = []
     for pc in x:
-        if str(pc) in results.pc_duration:
-            y.append(float(results.pc_duration[str(pc)]))
+        if voice is None:
+            if str(pc) in results.pc_duration:
+                y.append(float(results.pc_duration[str(pc)]))
+            else:
+                y.append(0)
         else:
-            y.append(0)
+            if str(pc) in results.pc_durations[voice]:
+                y.append(float(results.pc_durations[voice][str(pc)]))
+            else:
+                y.append(0)
     draw = matplotlib.pyplot.figure(figsize=size)
     axes = draw.add_subplot(111)
     axes.bar(x, y)

@@ -201,6 +201,14 @@ class Results:
         return self._num_measures
 
     @property
+    def num_voices(self):
+        """
+        The number of voices
+        :return: The number of voices
+        """
+        return self._num_voices
+
+    @property
     def pc_duration(self):
         """
         A dictionary in which the pcs that occur in the analyzed measures are the keys,
@@ -422,7 +430,7 @@ class Results:
                             if len(s.psegs[v]) > 0:
                                 if self._pitch_lowest_voices[v] > s.psegs[v][0].p:
                                     self._pitch_lowest_voices[v] = s.psegs[v][0].p
-                                if self._pitch_highest_voices[v] > s.psegs[v][len(s.psegs[v]) - 1].p:
+                                if self._pitch_highest_voices[v] < s.psegs[v][len(s.psegs[v]) - 1].p:
                                     self._pitch_highest_voices[v] = s.psegs[v][len(s.psegs[v]) - 1].p
                 if s.uns is not None:
                     self._ins_avg += s.ins

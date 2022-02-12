@@ -578,7 +578,7 @@ def read_analysis_from_file(path):
             cslice._uns = dslice["uns"]
             cslice._upper_bound = dslice["upper_bound"]
             slices.append(cslice)
-        result = Results(slices, item["measure_num_first"], item["measure_num_last"])
+        result = Results(slices, item["measure_num_first"], item["measure_num_last"], len(item["pitch_highest_voices"]))
         result._max_p_count = item["max_p_count"]
         result._duration = Fraction(item["duration"][0], item["duration"][1])
         result._ins_avg = item["ins_avg"]
@@ -607,21 +607,33 @@ def read_analysis_from_file(path):
         result._uns_min = item["uns_min"]
         result._upper_bound = item["upper_bound"]
         result._pc_duration = {}
-        result._pc_frequency = item["pc_frequency"]
+        result._pc_frequency = {}
         result._pitch_duration = {}
-        result._pitch_frequency = item["pitch_frequency"]
+        result._pitch_frequency = {}
         for key, val in item["pc_duration"].items():
-            result.pc_duration[key] = Fraction(val[0], val[1])
+            result.pc_duration[int(key)] = Fraction(val[0], val[1])
         for v in range(len(item["pc_duration_voices"])):
             result.pc_duration_voices.append({})
             for key, val in item["pc_duration_voices"][v].items():
-                result.pc_duration_voices[v][key] = Fraction(val[0], val[1])
+                result.pc_duration_voices[v][int(key)] = Fraction(val[0], val[1])
         for key, val in item["pitch_duration"].items():
-            result.pitch_duration[key] = Fraction(val[0], val[1])
+            result.pitch_duration[int(key)] = Fraction(val[0], val[1])
         for v in range(len(item["pitch_duration_voices"])):
             result.pitch_duration_voices.append({})
             for key, val in item["pitch_duration_voices"][v].items():
-                result.pitch_duration_voices[v][key] = Fraction(val[0], val[1])
+                result.pitch_duration_voices[v][int(key)] = Fraction(val[0], val[1])
+        for key, val in item["pc_frequency"].items():
+            result.pc_frequency[int(key)] = val
+        for v in range(len(item["pc_frequency_voices"])):
+            result.pc_frequency_voices.append({})
+            for key, val in item["pc_frequency_voices"][v].items():
+                result.pc_frequency_voices[v][int(key)] = val
+        for key, val in item["pitch_frequency"].items():
+            result.pitch_frequency[int(key)] = val
+        for v in range(len(item["pitch_frequency_voices"])):
+            result.pitch_frequency_voices.append({})
+            for key, val in item["pitch_frequency_voices"][v].items():
+                result.pitch_frequency_voices[v][int(key)] = val
 
         results.append(result)
     return results
@@ -780,6 +792,33 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             else:
                 general.write(",0")
         general.write("\n")
+        for v in range(results.num_voices):
+            general.write(f"{section_name} (Voice {v}),")
+            general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
+            general.write(f"{results.pitch_highest_voices[v]},")
+            general.write(f"{results.pitch_lowest_voices[v]},")
+            general.write(",,,,,,,,,,,,,,")
+            for i in range(0, 12):
+                if i in results.pc_duration_voices[v].keys():
+                    general.write("," + str(float(results.pc_duration_voices[v][i])))
+                else:
+                    general.write(",0")
+            for i in range(0, 12):
+                if i in results.pc_frequency_voices[v].keys():
+                    general.write("," + str(float(results.pc_frequency_voices[v][i])))
+                else:
+                    general.write(",0")
+            for i in range(lowest_pitch, highest_pitch + 1):
+                if i in results.pitch_duration_voices[v].keys():
+                    general.write("," + str(float(results.pitch_duration_voices[v][i])))
+                else:
+                    general.write(",0")
+            for i in range(lowest_pitch, highest_pitch + 1):
+                if i in results.pitch_frequency_voices[v].keys():
+                    general.write("," + str(float(results.pitch_frequency_voices[v][i])))
+                else:
+                    general.write(",0")
+            general.write("\n")
 
 
 def write_report(file, results):

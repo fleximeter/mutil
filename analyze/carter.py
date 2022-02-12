@@ -60,6 +60,7 @@ def c_analyze_with_sections():
         False, False, False, False, False, False, False, False, False, False, False, False,
         True, True, True, True, True, True, True, True, True, True, True, True
     ]
+    voices = ["Violin 1", "Violin 2", "Viola", "Cello"]
 
     # Path names
     google_drive_desktop = "H:\\My Drive"
@@ -98,31 +99,43 @@ def c_analyze_with_sections():
         results = v_analyze.read_analysis_from_file(results_path)
     else:
         results = v_analyze.analyze_with_sections(xml, sections, bound_prefs)
-        v_analyze.write_analysis_to_file(results, results_path)
+    v_analyze.write_analysis_to_file(results, results_path)
 
-        v_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
-                                       results[0].upper_bound)
-        v_analyze.write_report(output, results[0])
-        for i in range(1, len(output_global) + 1):
-            v_analyze.write_general_report("Section " + str(i) + " global", output_general, "a", results[i],
-                                           results[0].lower_bound, results[0].upper_bound)
-            v_analyze.write_report(output_global[i - 1], results[i])
-        for i in range(13, len(output_local) + 13):
-            v_analyze.write_general_report("Section " + str(i - 12) + " local", output_general, "a", results[i],
-                                           results[0].lower_bound, results[0].upper_bound)
-            v_analyze.write_report(output_local[i - 13], results[i])
+    v_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
+                                   results[0].upper_bound)
+    v_analyze.write_report(output, results[0])
+    for i in range(1, len(output_global) + 1):
+        v_analyze.write_general_report("Section " + str(i) + " global", output_general, "a", results[i],
+                                       results[0].lower_bound, results[0].upper_bound)
+        v_analyze.write_report(output_global[i - 1], results[i])
+    for i in range(13, len(output_local) + 13):
+        v_analyze.write_general_report("Section " + str(i - 12) + " local", output_general, "a", results[i],
+                                       results[0].lower_bound, results[0].upper_bound)
+        v_analyze.write_report(output_local[i - 13], results[i])
 
     # Make charts
     chart.chart_cardinality(results[0], "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
                             size=(14, 6), path=path + f"Register Analysis Files\\Graphs\\card")
     chart.chart_pitch_onset_measure(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
                                     path + f"Register Analysis Files\\Graphs\\onset_measure")
+    for i in range(len(voices)):
+        chart.chart_pitch_onset_measure(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+                                        path + f"Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
     chart.chart_pitch_onset_time(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
                                  path + f"Register Analysis Files\\Graphs\\onset_time")
+    for i in range(len(voices)):
+        chart.chart_pitch_onset_time(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+                                     path + f"Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
     chart.chart_pitch_duration(results[0], "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
                                path + f"Register Analysis Files\\Graphs\\pitch_duration")
+    for i in range(len(voices)):
+        chart.chart_pitch_duration(results[0], "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
+                                   path + f"Register Analysis Files\\Graphs\\pitch_duration_{voices[i]}", i)
     chart.chart_pc_duration(results[0], "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (8, 6),
                             path + f"Register Analysis Files\\Graphs\\pc_duration")
+    for i in range(len(voices)):
+        chart.chart_pc_duration(results[0], "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (8, 6),
+                                path + f"Register Analysis Files\\Graphs\\pc_duration_{voices[i]}", i)
 
     for i in range(1, 13):
         cname = section_names[i-1].split(" ")
@@ -144,12 +157,24 @@ def c_analyze_with_sections():
                                 path=c_path)
         chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
                                         path=om_path)
+        for j in range(len(voices)):
+            chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+                                            path=om_path + f"_{voices[j]}", voice=j)
         chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
                                      path=ot_path)
+        for j in range(len(voices)):
+            chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+                                         path=ot_path + f"_{voices[j]}", voice=j)
         chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} – " + section_names[i - 1],
                                    path=dp_path)
+        for j in range(len(voices)):
+            chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} – " + section_names[i - 1],
+                                       path=dp_path + f"_{voices[j]}", voice=j)
         chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} – " + section_names[i - 1],
                                 path=dpc_path)
+        for j in range(len(voices)):
+            chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} – " + section_names[i - 1],
+                                    path=dpc_path + f"_{voices[j]}", voice=j)
 
     # Print elapsed time
     finish = time.time() - start
