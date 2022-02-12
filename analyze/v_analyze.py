@@ -679,13 +679,15 @@ def write_analysis_to_file(results, path):
         for v in range(len(results[i].pc_duration_voices)):
             data[i]["pc_duration_voices"].append({})
             for key, val in results[i].pc_duration_voices[v].items():
-                data[i]["pc_duration_voices"][key] = [val.numerator, val.denominator]
+                data[i]["pc_duration_voices"][len(data[i]["pc_duration_voices"]) - 1][key] = [val.numerator,
+                                                                                              val.denominator]
         for key, val in results[i].pitch_duration.items():
             data[i]["pitch_duration"][key] = [val.numerator, val.denominator]
         for v in range(len(results[i].pitch_duration_voices)):
             data[i]["pitch_duration_voices"].append({})
             for key, val in results[i].pitch_duration_voices[v].items():
-                data[i]["pitch_duration_voices"][key] = [val.numerator, val.denominator]
+                data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = [val.numerator,
+                                                                                                    val.denominator]
         for rslice in results[i].slices:
             cslice = {}
             cslice["core"] = int(rslice.core)

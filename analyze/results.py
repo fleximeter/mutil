@@ -391,15 +391,15 @@ class Results:
             self._mediant_max = self._lower_bound
             self._mediant_min = self._upper_bound
             self._pc_duration = {}  # The total number of seconds that this pitch-class is active
-            self._pc_duration_voices = [{} for v in range(len(self._num_voices))]
+            self._pc_duration_voices = [{} for v in range(self._num_voices)]
             self._pc_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch-class
-            self._pc_frequency_voices = [{} for v in range(len(self._num_voices))]
+            self._pc_frequency_voices = [{} for v in range(self._num_voices)]
             self._pitch_duration = {}  # The total number of seconds that this pitch is active
-            self._pitch_duration_voices = [{} for v in range(len(self._num_voices))]
+            self._pitch_duration_voices = [{} for v in range(self._num_voices)]
             self._pitch_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch
-            self._pitch_frequency_voices = [{} for v in range(len(self._num_voices))]
-            self._pitch_highest_voices = [-numpy.inf for v in range(len(self._num_voices))]
-            self._pitch_lowest_voices = [numpy.inf for v in range(len(self._num_voices))]
+            self._pitch_frequency_voices = [{} for v in range(self._num_voices)]
+            self._pitch_highest_voices = [-numpy.inf for v in range(self._num_voices)]
+            self._pitch_lowest_voices = [numpy.inf for v in range(self._num_voices)]
             self._ps_min = self._lps_card
             self._uns_min = self._lps_card
 
@@ -418,11 +418,12 @@ class Results:
                             self._pitch_lowest = s.pseg[0].p
                         if self._pitch_highest < s.pseg[len(s.pseg) - 1].p:
                             self._pitch_highest = s.pseg[len(s.pseg) - 1].p
-                        for v in range(len(s.psets)):
-                            if self._pitch_lowest_voices[v] > s.psegs[v][0].p:
-                                self._pitch_lowest_voices[v] = s.psegs[v][0].p
-                            if self._pitch_highest_voices[v] > s.psegs[v][len(s.psegs[v]) - 1].p:
-                                self._pitch_highest_voices[v] = s.psegs[v][len(s.psegs[v]) - 1].p
+                        for v in range(len(s.psegs)):
+                            if len(s.psegs[v]) > 0:
+                                if self._pitch_lowest_voices[v] > s.psegs[v][0].p:
+                                    self._pitch_lowest_voices[v] = s.psegs[v][0].p
+                                if self._pitch_highest_voices[v] > s.psegs[v][len(s.psegs[v]) - 1].p:
+                                    self._pitch_highest_voices[v] = s.psegs[v][len(s.psegs[v]) - 1].p
                 if s.uns is not None:
                     self._ins_avg += s.ins
                     self._lns_avg += s.lns
