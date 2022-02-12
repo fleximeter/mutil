@@ -89,17 +89,19 @@ def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), p
                 else:
                     pitches[i].append(numpy.nan)
             else:
-                if i < len(results.slices[s].psegs[voice]):
-                    if s - 1 >= 0:
-                        if results.slices[s].psegs[voice][i] not in results.slices[s - 1].psets[voice]:
-                            pitches[i].append(results.slices[s].psegs[voice][i].p)
+                if voice < len(results.slices[s].psegs):
+                    if i < len(results.slices[s].psegs[voice]):
+                        if s - 1 >= 0 and voice < len(results.slices[s - 1].psets):
+                            if results.slices[s].psegs[voice][i] not in results.slices[s - 1].psets[voice]:
+                                pitches[i].append(results.slices[s].psegs[voice][i].p)
+                            else:
+                                pitches[i].append(numpy.nan)
                         else:
-                            pitches[i].append(numpy.nan)
+                            pitches[i].append(results.slices[s].psegs[voice][i].p)
                     else:
-                        pitches[i].append(results.slices[s].psegs[voice][i].p)
+                        pitches[i].append(numpy.nan)
                 else:
                     pitches[i].append(numpy.nan)
-
     draw = matplotlib.pyplot.figure(figsize=size)
     axes = draw.add_subplot(111)
     for i in range(len(pitches)):
@@ -153,17 +155,19 @@ def chart_pitch_onset_time(results, title="Pitch Onset Graph", size=(8, 6), path
                 else:
                     pitches[i].append(numpy.nan)
             else:
-                if i < len(results.slices[s].psegs[voice]):
-                    if s - 1 >= 0:
-                        if results.slices[s].psegs[voice][i] not in results.slices[s - 1].psets[voice]:
-                            pitches[i].append(results.slices[s].psegs[voice][i].p)
+                if voice < len(results.slices[s].psegs):
+                    if i < len(results.slices[s].psegs[voice]):
+                        if s - 1 >= 0 and voice < len(results.slices[s - 1].psets):
+                            if results.slices[s].psegs[voice][i] not in results.slices[s - 1].psets[voice]:
+                                pitches[i].append(results.slices[s].psegs[voice][i].p)
+                            else:
+                                pitches[i].append(numpy.nan)
                         else:
-                            pitches[i].append(numpy.nan)
+                            pitches[i].append(results.slices[s].psegs[voice][i].p)
                     else:
-                        pitches[i].append(results.slices[s].psegs[voice][i].p)
+                        pitches[i].append(numpy.nan)
                 else:
                     pitches[i].append(numpy.nan)
-
     draw = matplotlib.pyplot.figure(figsize=size)
     axes = draw.add_subplot(111)
     for i in range(len(pitches)):
@@ -202,13 +206,13 @@ def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), pat
     y = []
     for p in x:
         if voice is None:
-            if str(p) in results.pitch_duration:
-                y.append(float(results.pitch_duration[str(p)]))
+            if p in results.pitch_duration:
+                y.append(float(results.pitch_duration[p]))
             else:
                 y.append(0)
         else:
-            if str(p) in results.pitch_durations[voice]:
-                y.append(float(results.pitch_durations[voice][str(p)]))
+            if p in results.pitch_duration_voices[voice]:
+                y.append(float(results.pitch_duration_voices[voice][p]))
             else:
                 y.append(0)
     draw = matplotlib.pyplot.figure(figsize=size)
@@ -248,13 +252,13 @@ def chart_pc_duration(results, title="Pitch-Class Duration Graph", size=(8, 6), 
     y = []
     for pc in x:
         if voice is None:
-            if str(pc) in results.pc_duration:
-                y.append(float(results.pc_duration[str(pc)]))
+            if pc in results.pc_duration:
+                y.append(float(results.pc_duration[pc]))
             else:
                 y.append(0)
         else:
-            if str(pc) in results.pc_durations[voice]:
-                y.append(float(results.pc_durations[voice][str(pc)]))
+            if pc in results.pc_duration_voices[voice]:
+                y.append(float(results.pc_duration_voices[voice][pc]))
             else:
                 y.append(0)
     draw = matplotlib.pyplot.figure(figsize=size)
