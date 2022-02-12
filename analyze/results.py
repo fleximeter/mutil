@@ -19,6 +19,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import numpy
+
 
 class Results:
     def __init__(self, slices, measure_num_first, measure_num_last):
@@ -45,11 +47,17 @@ class Results:
         self._mediant_min = 0
         self._num_measures = measure_num_last - measure_num_first + 1
         self._pc_duration = None
+        self._pc_duration_voices = None
         self._pc_frequency = None
+        self._pc_frequency_voices = None
         self._pitch_duration = None
+        self._pitch_duration_voices = None
         self._pitch_frequency = None
-        self._pitch_highest = 0
-        self._pitch_lowest = 0
+        self._pitch_frequency_voices = None
+        self._pitch_highest = -numpy.inf
+        self._pitch_highest_voices = None
+        self._pitch_lowest = numpy.inf
+        self._pitch_lowest_voices = None
         self._ps_avg = 0  # The PS average
         self._ps_max = 0
         self._ps_min = 0
@@ -228,6 +236,42 @@ class Results:
         return self._pitch_frequency
 
     @property
+    def pc_duration_voices(self):
+        """
+        A dictionary in which the pcs that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._pc_duration_voices
+
+    @property
+    def pc_frequency_voices(self):
+        """
+        A dictionary in which the pcs that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._pc_frequency_voices
+
+    @property
+    def pitch_duration_voices(self):
+        """
+        A dictionary in which the pitches that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._pitch_duration_voices
+
+    @property
+    def pitch_frequency_voices(self):
+        """
+        A dictionary in which the pitches that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._pitch_frequency_voices
+
+    @property
     def pitch_highest(self):
         """
         The highest pitch in the analyzed measures
@@ -242,6 +286,22 @@ class Results:
         :return: The lowest pitch in the analyzed measures
         """
         return self._pitch_lowest
+
+    @property
+    def pitch_highest_voices(self):
+        """
+        The highest pitch in the analyzed measures
+        :return: The highest pitch in the analyzed measures
+        """
+        return self._pitch_highest_voices
+
+    @property
+    def pitch_lowest_voices(self):
+        """
+        The lowest pitch in the analyzed measures
+        :return: The lowest pitch in the analyzed measures
+        """
+        return self._pitch_lowest_voices
 
     @property
     def ps_avg(self):
@@ -330,9 +390,15 @@ class Results:
             self._mediant_max = self._lower_bound
             self._mediant_min = self._upper_bound
             self._pc_duration = {}  # The total number of seconds that this pitch-class is active
+            self._pc_duration_voices = [{} for v in range(len(self._slices[0].psets))]
             self._pc_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch-class
+            self._pc_frequency_voices = [{} for v in range(len(self._slices[0].psets))]
             self._pitch_duration = {}  # The total number of seconds that this pitch is active
+            self._pitch_duration_voices = [{} for v in range(len(self._slices[0].psets))]
             self._pitch_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch
+            self._pitch_frequency_voices = [{} for v in range(len(self._slices[0].psets))]
+            self._pitch_highest_voices = [-numpy.inf for v in range(len(self._slices[0].psets))]
+            self._pitch_lowest_voices = [numpy.inf for v in range(len(self._slices[0].psets))]
             self._ps_min = self._lps_card
             self._uns_min = self._lps_card
 
@@ -351,6 +417,11 @@ class Results:
                             self._pitch_lowest = s.pseg[0].p
                         if self._pitch_highest < s.pseg[len(s.pseg) - 1].p:
                             self._pitch_highest = s.pseg[len(s.pseg) - 1].p
+                        for v in range(len(s.psets)):
+                            if self._pitch_lowest_voices[v] > s.psegs[v][0].p:
+                                self._pitch_lowest_voices[v] = s.psegs[v][0].p
+                            if self._pitch_highest_voices[v] > s.psegs[v][len(s.psegs[v]) - 1].p:
+                                self._pitch_highest_voices[v] = s.psegs[v][len(s.psegs[v]) - 1].p
                 if s.uns is not None:
                     self._ins_avg += s.ins
                     self._lns_avg += s.lns
@@ -377,6 +448,25 @@ class Results:
 
             # Calculate pitch frequency
             for i in range(0, len(self._slices)):
+                for v in range(len(self._slices[i].psets)):
+                    for p in self._slices[i].psets[v]:
+                        if p.p not in self._pitch_duration_voices[v].keys():
+                            self._pitch_duration_voices[v][p.p] = self._slices[i].duration
+                        else:
+                            self._pitch_duration_voices[v][p.p] += self._slices[i].duration
+                        if p.p not in self._pitch_frequency_voices[v].keys():
+                            self._pitch_frequency_voices[v][p.p] = 1
+                        else:
+                            self._pitch_frequency_voices[v][p.p] += 1
+                    for pc in self._slices[i].pcsets[v]:
+                        if pc.pc not in self._pc_duration_voices[v].keys():
+                            self._pc_duration_voices[v][pc.pc] = self._slices[i].duration
+                        else:
+                            self._pc_duration_voices[v][pc.pc] += self._slices[i].duration
+                        if pc.pc not in self._pc_frequency_voices[v].keys():
+                            self._pc_frequency_voices[v][pc.pc] = 1
+                        else:
+                            self._pc_frequency_voices[v][pc.pc] += 1
                 for p in self._slices[i].pset:
                     if p.p not in self._pitch_duration.keys():
                         self._pitch_duration[p.p] = self._slices[i].duration

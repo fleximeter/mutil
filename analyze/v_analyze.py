@@ -594,7 +594,9 @@ def read_analysis_from_file(path):
         result._mediant_min = item["mediant_min"]
         result._num_measures = item["num_measures"]
         result._pitch_highest = item["pitch_highest"]
+        result._pitch_highest_voices = item["pitch_highest_voices"]
         result._pitch_lowest = item["pitch_lowest"]
+        result._pitch_lowest_voices = item["pitch_lowest_voices"]
         result._ps_avg = item["ps_avg"]
         result._ps_max = item["ps_max"]
         result._ps_min = item["ps_min"]
@@ -609,8 +611,17 @@ def read_analysis_from_file(path):
         result._pitch_frequency = item["pitch_frequency"]
         for key, val in item["pc_duration"].items():
             result.pc_duration[key] = Fraction(val[0], val[1])
+        for v in range(len(item["pc_duration_voices"])):
+            result.pc_duration_voices.append({})
+            for key, val in item["pc_duration_voices"][v].items():
+                result.pc_duration_voices[v][key] = Fraction(val[0], val[1])
         for key, val in item["pitch_duration"].items():
             result.pitch_duration[key] = Fraction(val[0], val[1])
+        for v in range(len(item["pitch_duration_voices"])):
+            result.pitch_duration_voices.append({})
+            for key, val in item["pitch_duration_voices"][v].items():
+                result.pitch_duration_voices[v][key] = Fraction(val[0], val[1])
+
         results.append(result)
     return results
 
@@ -642,7 +653,9 @@ def write_analysis_to_file(results, path):
         data[i]["mediant_min"] = results[i].mediant_min
         data[i]["num_measures"] = results[i].num_measures
         data[i]["pitch_highest"] = results[i].pitch_highest
+        data[i]["pitch_highest_voices"] = results[i].pitch_highest_voices
         data[i]["pitch_lowest"] = results[i].pitch_lowest
+        data[i]["pitch_lowest_voices"] = results[i].pitch_lowest_voices
         data[i]["ps_avg"] = results[i].ps_avg
         data[i]["ps_max"] = results[i].ps_max
         data[i]["ps_min"] = results[i].ps_min
@@ -652,50 +665,58 @@ def write_analysis_to_file(results, path):
         data[i]["uns_min"] = results[i].uns_min
         data[i]["upper_bound"] = results[i].upper_bound
         data[i]["pc_duration"] = {}
-        data[i]["pc_frequency"] = {}
+        data[i]["pc_duration_voices"] = []
+        data[i]["pc_frequency"] = results[i].pc_frequency
+        data[i]["pc_frequency_voices"] = results[i].pc_frequency_voices
         data[i]["pitch_duration"] = {}
-        data[i]["pitch_frequency"] = {}
+        data[i]["pitch_duration_voices"] = []
+        data[i]["pitch_frequency"] = results[i].pitch_frequency
+        data[i]["pitch_frequency_voices"] = results[i].pitch_frequency_voices
         data[i]["slices"] = []
         for key, val in results[i].pc_duration.items():
             data[i]["pc_duration"][key] = [val.numerator, val.denominator]
-        for key, val in results[i].pc_frequency.items():
-            data[i]["pc_frequency"][key] = val
+        for v in range(len(results[i].pc_duration_voices)):
+            data[i]["pc_duration_voices"].append({})
+            for key, val in results[i].pc_duration_voices[v].items():
+                data[i]["pc_duration_voices"][key] = [val.numerator, val.denominator]
         for key, val in results[i].pitch_duration.items():
             data[i]["pitch_duration"][key] = [val.numerator, val.denominator]
-        for key, val in results[i].pitch_frequency.items():
-            data[i]["pitch_frequency"][key] = val
-        for slice in results[i].slices:
+        for v in range(len(results[i].pitch_duration_voices)):
+            data[i]["pitch_duration_voices"].append({})
+            for key, val in results[i].pitch_duration_voices[v].items():
+                data[i]["pitch_duration_voices"][key] = [val.numerator, val.denominator]
+        for rslice in results[i].slices:
             cslice = {}
-            cslice["core"] = int(slice.core)
-            cslice["derived_core"] = int(slice.derived_core)
-            cslice["derived_core_associations"] = slice.derived_core_associations
-            cslice["duration"] = [slice.duration.numerator, slice.duration.denominator]
-            cslice["ipseg"] = slice.ipseg
-            cslice["measure"] = slice.measure
-            cslice["p_cardinality"] = slice.p_cardinality
-            cslice["p_count"] = slice.p_count
-            cslice["pc_cardinality"] = slice.pc_cardinality
-            cslice["pcseg"] = [pc.pc for pc in slice.pcseg]
-            cslice["pcsegs"] = [[pc.pc for pc in slice.pcsegs[v]] for v in range(len(slice.pcsegs))]
-            cslice["pitchseg"] = [p for p in slice.pitchseg]
-            cslice["pitchsegs"] = [[p for p in slice.pitchsegs[v]] for v in range(len(slice.pitchsegs))]
-            cslice["pnameseg"] = [pname for pname in slice.pnameseg]
-            cslice["pnamesegs"] = [[pname for pname in slice.pnamesegs[v]] for v in range(len(slice.pnamesegs))]
-            cslice["pseg"] = [p.p for p in slice.pseg]
-            cslice["psegs"] = [[p.p for p in slice.psegs[v]] for v in range(len(slice.psegs))]
-            cslice["quarter_duration"] = [slice.quarter_duration.numerator, slice.quarter_duration.denominator]
-            cslice["sc_name"] = slice.sc_name
-            cslice["sc_name_carter"] = slice.sc_name_carter
-            cslice["ins"] = slice.ins
-            cslice["lns"] = slice.lns
-            cslice["lower_bound"] = slice.lower_bound
-            cslice["mediant"] = slice.mediant
-            cslice["ns"] = slice.ns
-            cslice["ps"] = slice.ps
-            cslice["start_position"] = [slice.start_position.numerator, slice.start_position.denominator]
-            cslice["time_signature"] = slice.time_signature.ratioString
-            cslice["uns"] = slice.uns
-            cslice["upper_bound"] = slice.upper_bound
+            cslice["core"] = int(rslice.core)
+            cslice["derived_core"] = int(rslice.derived_core)
+            cslice["derived_core_associations"] = rslice.derived_core_associations
+            cslice["duration"] = [rslice.duration.numerator, rslice.duration.denominator]
+            cslice["ipseg"] = rslice.ipseg
+            cslice["measure"] = rslice.measure
+            cslice["p_cardinality"] = rslice.p_cardinality
+            cslice["p_count"] = rslice.p_count
+            cslice["pc_cardinality"] = rslice.pc_cardinality
+            cslice["pcseg"] = [pc.pc for pc in rslice.pcseg]
+            cslice["pcsegs"] = [[pc.pc for pc in rslice.pcsegs[v]] for v in range(len(rslice.pcsegs))]
+            cslice["pitchseg"] = [p for p in rslice.pitchseg]
+            cslice["pitchsegs"] = [[p for p in rslice.pitchsegs[v]] for v in range(len(rslice.pitchsegs))]
+            cslice["pnameseg"] = [pname for pname in rslice.pnameseg]
+            cslice["pnamesegs"] = [[pname for pname in rslice.pnamesegs[v]] for v in range(len(rslice.pnamesegs))]
+            cslice["pseg"] = [p.p for p in rslice.pseg]
+            cslice["psegs"] = [[p.p for p in rslice.psegs[v]] for v in range(len(rslice.psegs))]
+            cslice["quarter_duration"] = [rslice.quarter_duration.numerator, rslice.quarter_duration.denominator]
+            cslice["sc_name"] = rslice.sc_name
+            cslice["sc_name_carter"] = rslice.sc_name_carter
+            cslice["ins"] = rslice.ins
+            cslice["lns"] = rslice.lns
+            cslice["lower_bound"] = rslice.lower_bound
+            cslice["mediant"] = rslice.mediant
+            cslice["ns"] = rslice.ns
+            cslice["ps"] = rslice.ps
+            cslice["start_position"] = [rslice.start_position.numerator, rslice.start_position.denominator]
+            cslice["time_signature"] = rslice.time_signature.ratioString
+            cslice["uns"] = rslice.uns
+            cslice["upper_bound"] = rslice.upper_bound
             data[i]["slices"].append(cslice)
 
     with open(path, "w") as out:
