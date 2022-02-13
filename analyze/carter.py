@@ -23,6 +23,7 @@ import v_analyze
 import chart
 import time
 from fractions import Fraction
+from decimal import Decimal
 
 
 def c_analyze():
@@ -89,7 +90,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = False
+    use_cache = True
 
     # Analyze
     print("Analyzing...")
@@ -179,6 +180,16 @@ def c_analyze_with_sections():
         for j in range(len(voices)):
             chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} ({voices[j]}) – " +
                                     section_names[i - 1], path=dpc_path + f"_{voices[j]}", voice=j)
+
+    for i in range(results[0].lower_bound, results[0].upper_bound + 1):
+        total = Decimal(0)
+        parts = Decimal(0)
+        if i in results[0].pitch_duration:
+            total = results[0].pitch_duration[i]
+        for j in range(4):
+            if i in results[0].pitch_duration_voices[j]:
+                parts += results[0].pitch_duration_voices[j][i]
+        print(f"{i}: {total - parts}")
 
     # Print elapsed time
     finish = time.time() - start

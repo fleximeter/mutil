@@ -451,7 +451,6 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
             # Clean up the slices from this measure
             clean_slices(measure_slices, True)
-            clean_slices(measure_slices)
             for item in measure_slices:
                 final_slices.append(item)
 
@@ -486,17 +485,18 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
         for sl in final_slices:
             if section_divisions[i][0] <= sl.measure <= section_divisions[i][1]:
                 section_slices.append(sl)
-        clean_slices(section_slices)
+        clean_slices(section_slices, True)
         bounds = global_bounds
         if use_local[i]:
             bounds = get_bounds(section_slices)
         set_slice_bounds(section_slices, bounds)
         for s in section_slices:
             s.run_calculations(sc)
+        clean_slices(section_slices)
         results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1], len(parts)))
 
     # Create overall results
-    clean_slices(final_slices)
+    clean_slices(final_slices, True)
     bounds = global_bounds
     if len(use_local) == 1:
         if use_local[0]:
@@ -504,6 +504,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     set_slice_bounds(final_slices, bounds)
     for f_slice in final_slices:
         f_slice.run_calculations(sc)
+    clean_slices(final_slices)
     results.insert(0, Results(final_slices, first_measure, last_measure, len(parts)))
     return results
 
