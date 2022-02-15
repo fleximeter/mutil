@@ -23,10 +23,11 @@ import matplotlib.pyplot
 import numpy
 
 
-def chart_cardinality(results, title="Cardinality Chart", size=(8, 6), path=None):
+def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", size=(8, 6), path=None):
     """
     Makes a step plot of cardinality
     :param results: A Results object
+    :param x_axis_time: Whether or not to use time as the x axis (default is measure number)
     :param title: The title of the plot
     :param size: The size of the plot
     :param path: A path to save the chart
@@ -36,9 +37,14 @@ def chart_cardinality(results, title="Cardinality Chart", size=(8, 6), path=None
     matplotlib.pyplot.rcParams["font.family"] = "Academico"
     ps_s = []
     x = []
+    position_time = 0
     for s in results.slices:
-        position = s.measure + float(s.start_position / s.time_signature.barDuration.quarterLength)
-        x.append(position)
+        if x_axis_time:
+            x.append(position_time / 60)
+            position_time += s.duration
+        else:
+            position = s.measure + float(s.start_position / s.time_signature.barDuration.quarterLength)
+            x.append(position)
         if s.ps is not None:
             ps_s.append(s.ps)
         else:
@@ -47,7 +53,10 @@ def chart_cardinality(results, title="Cardinality Chart", size=(8, 6), path=None
     ax = fig.add_subplot(111)
     ax.step(x, ps_s, color="#555555", linewidth=0.5, markersize=1)
     matplotlib.pyplot.title(title, fontsize=18)
-    matplotlib.pyplot.xlabel("Measure No.")
+    if x_axis_time:
+        matplotlib.pyplot.xlabel("Time (minutes)")
+    else:
+        matplotlib.pyplot.xlabel("Measure No.")
     matplotlib.pyplot.ylabel("Pset Cardinality")
     if path is None:
         matplotlib.pyplot.show()
@@ -56,10 +65,11 @@ def chart_cardinality(results, title="Cardinality Chart", size=(8, 6), path=None
         matplotlib.pyplot.close()
 
 
-def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), path=None, voice=None):
+def chart_pitch_onset(results, x_axis_time=False, title="Pitch Onset Graph", size=(8, 6), path=None, voice=None):
     """
     Makes a pitch onset chart
     :param results: A Results object
+    :param x_axis_time: Whether or not to use time as the x axis (default is measure number)
     :param title: The title of the plot
     :param size: The size of the plot
     :param path: A path to save the chart
@@ -70,10 +80,15 @@ def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), p
     matplotlib.pyplot.rcParams["font.family"] = "Academico"
     pitches = [[] for i in range(results.max_p_count)]
     x = []
+    position_time = 0
     for s in range(len(results.slices)):
-        position = results.slices[s].measure
-        position += float(results.slices[s].start_position / results.slices[s].time_signature.barDuration.quarterLength)
-        x.append(position)
+        if x_axis_time:
+            x.append(position_time / 60)
+            position_time += results.slices[s].duration
+        else:
+            position = results.slices[s].measure
+            position += float(results.slices[s].start_position / results.slices[s].time_signature.barDuration.quarterLength)
+            x.append(position)
 
         # Add the pitches in the pseg of the current slice to the plot
         for i in range(len(pitches)):
@@ -114,73 +129,10 @@ def chart_pitch_onset_measure(results, title="Pitch Onset Graph", size=(8, 6), p
             ytick_labels.append(f"C{i // 12 + 4}/{i}")
     matplotlib.pyplot.yticks(ytick_tick, ytick_labels)
     matplotlib.pyplot.title(title, fontsize=18)
-    matplotlib.pyplot.xlabel("Measure No.")
-    matplotlib.pyplot.ylabel("Pitch")
-
-    if path is None:
-        matplotlib.pyplot.show()
+    if x_axis_time:
+        matplotlib.pyplot.xlabel("Time (minutes)")
     else:
-        matplotlib.pyplot.savefig(path)
-        matplotlib.pyplot.close()
-
-
-def chart_pitch_onset_time(results, title="Pitch Onset Graph", size=(8, 6), path=None, voice=None):
-    """
-    Makes a pitch onset chart
-    :param results: A Results object
-    :param title: The title of the plot
-    :param size: The size of the plot
-    :param path: A path to save the chart
-    :param voice: The number of the voice (if None, charts all voices)
-    :return: None
-    """
-    matplotlib.pyplot.clf()
-    matplotlib.pyplot.rcParams["font.family"] = "Academico"
-    pitches = [[] for i in range(results.max_p_count)]
-    x = []
-    position_time = 0
-    for s in range(len(results.slices)):
-        x.append(position_time/60)
-        position_time += results.slices[s].duration
-        for i in range(len(pitches)):
-            if voice is None:
-                if i < len(results.slices[s].pseg):
-                    if s - 1 >= 0:
-                        if results.slices[s].pseg[i] not in results.slices[s - 1].pset:
-                            pitches[i].append(results.slices[s].pseg[i].p)
-                        else:
-                            pitches[i].append(numpy.nan)
-                    else:
-                        pitches[i].append(results.slices[s].pseg[i].p)
-                else:
-                    pitches[i].append(numpy.nan)
-            else:
-                if voice < len(results.slices[s].psegs):
-                    if i < len(results.slices[s].psegs[voice]):
-                        if s - 1 >= 0 and voice < len(results.slices[s - 1].psets):
-                            if results.slices[s].psegs[voice][i] not in results.slices[s - 1].psets[voice]:
-                                pitches[i].append(results.slices[s].psegs[voice][i].p)
-                            else:
-                                pitches[i].append(numpy.nan)
-                        else:
-                            pitches[i].append(results.slices[s].psegs[voice][i].p)
-                    else:
-                        pitches[i].append(numpy.nan)
-                else:
-                    pitches[i].append(numpy.nan)
-    draw = matplotlib.pyplot.figure(figsize=size)
-    axes = draw.add_subplot(111)
-    for i in range(len(pitches)):
-        axes.scatter(x, pitches[i], c='#222222', marker='.')
-    ytick_tick = []
-    ytick_labels = []
-    for i in range(results.lower_bound, results.upper_bound + 1):
-        if i % 12 == 0:
-            ytick_tick.append(i)
-            ytick_labels.append(f"C{i // 12 + 4}/{i}")
-    matplotlib.pyplot.yticks(ytick_tick, ytick_labels)
-    matplotlib.pyplot.title(title, fontsize=18)
-    matplotlib.pyplot.xlabel("Time (minutes)")
+        matplotlib.pyplot.xlabel("Measure No.")
     matplotlib.pyplot.ylabel("Pitch")
 
     if path is None:

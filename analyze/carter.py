@@ -115,20 +115,22 @@ def c_analyze_with_sections():
         v_analyze.write_report(output_local[i - 13], results[i])
 
     # Make charts
-    chart.chart_cardinality(results[0], "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
-                            size=(14, 6), path=path + f"Register Analysis Files\\Graphs\\card")
-    chart.chart_pitch_onset_measure(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
-                                    path + f"Register Analysis Files\\Graphs\\onset_measure")
+    chart.chart_cardinality(results[0], False, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
+                            size=(14, 6), path=path + f"Register Analysis Files\\Graphs\\card_m")
+    chart.chart_cardinality(results[0], True, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
+                            size=(14, 6), path=path + f"Register Analysis Files\\Graphs\\card_t")
+    chart.chart_pitch_onset(results[0], False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+                            path + f"Register Analysis Files\\Graphs\\onset_measure")
     for i in range(len(voices)):
-        chart.chart_pitch_onset_measure(results[0], f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
-                                                    f"({voices[i]})", (14, 6),
-                                        path + f"Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
-    chart.chart_pitch_onset_time(results[0], "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
-                                 path + f"Register Analysis Files\\Graphs\\onset_time")
+        chart.chart_pitch_onset(results[0], False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
+                                                   f"({voices[i]})", (14, 6),
+                                path + f"Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
+    chart.chart_pitch_onset(results[0], False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+                            path + f"Register Analysis Files\\Graphs\\onset_time")
     for i in range(len(voices)):
-        chart.chart_pitch_onset_time(results[0], f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
-                                                 f"({voices[i]})", (14, 6),
-                                     path + f"Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
+        chart.chart_pitch_onset(results[0], False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
+                                                   f"({voices[i]})", (14, 6),
+                                path + f"Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
     chart.chart_pitch_duration(results[0], "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
                                path + f"Register Analysis Files\\Graphs\\pitch_duration")
     for i in range(len(voices)):
@@ -143,33 +145,40 @@ def c_analyze_with_sections():
                                 path + f"Register Analysis Files\\Graphs\\pc_duration_{voices[i]}", i)
 
     for i in range(1, 13):
-        cname = section_names[i-1].split(" ")
-        c_path = path + f"Register Analysis Files\\Graphs\\card_{i}_"
+        cname = section_names[i - 1].split(" ")
+        cm_path = path + f"Register Analysis Files\\Graphs\\card_m_{i}_"
+        ct_path = path + f"Register Analysis Files\\Graphs\\card_t_{i}_"
         om_path = path + f"Register Analysis Files\\Graphs\\onset_m_{i}_"
         ot_path = path + f"Register Analysis Files\\Graphs\\onset_t_{i}_"
         dp_path = path + f"Register Analysis Files\\Graphs\\dur_pitch_{i}_"
         dpc_path = path + f"Register Analysis Files\\Graphs\\dur_pc_{i}_"
         for j in range(len(cname) - 1):
-            c_path += cname[j] + "_"
+            cm_path += cname[j] + "_"
+            ct_path += cname[j] + "_"
             om_path += cname[j] + "_"
             ot_path += cname[j] + "_"
-        c_path += cname[len(cname) - 1]
+            dp_path += cname[j] + "_"
+            dpc_path += cname[j] + "_"
+        cm_path += cname[len(cname) - 1]
+        ct_path += cname[len(cname) - 1]
         om_path += cname[len(cname) - 1]
         ot_path += cname[len(cname) - 1]
         dp_path += cname[len(cname) - 1]
         dpc_path += cname[len(cname) - 1]
-        chart.chart_cardinality(results[i], f"Pset Cardinality Graph for Section {i} – " + section_names[i-1],
-                                path=c_path)
-        chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
-                                        path=om_path)
+        chart.chart_cardinality(results[i], False, f"Pset Cardinality Graph for Section {i} – " + section_names[i - 1],
+                                path=cm_path)
+        chart.chart_cardinality(results[i], True, f"Pset Cardinality Graph for Section {i} – " + section_names[i - 1],
+                                path=ct_path)
+        chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+                                path=om_path)
         for j in range(len(voices)):
-            chart.chart_pitch_onset_measure(results[i], f"Pitch Onsets in Section {i} ({voices[j]}) – " +
-                                            section_names[i - 1], path=om_path + f"_{voices[j]}", voice=j)
-        chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} – " + section_names[i - 1],
-                                     path=ot_path)
+            chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} ({voices[j]}) – " +
+                                    section_names[i - 1], path=om_path + f"_{voices[j]}", voice=j)
+        chart.chart_pitch_onset(results[i], True, f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+                                path=ot_path)
         for j in range(len(voices)):
-            chart.chart_pitch_onset_time(results[i], f"Pitch Onsets in Section {i} ({voices[j]}) – " +
-                                         section_names[i - 1], path=ot_path + f"_{voices[j]}", voice=j)
+            chart.chart_pitch_onset(results[i], True, f"Pitch Onsets in Section {i} ({voices[j]}) – " +
+                                    section_names[i - 1], path=ot_path + f"_{voices[j]}", voice=j)
         chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} – " + section_names[i - 1],
                                    path=dp_path)
         for j in range(len(voices)):
