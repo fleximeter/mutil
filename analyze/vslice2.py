@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from pctheory import pitch
+from pctheory import cseg, pitch
 from decimal import Decimal
 
 
@@ -33,6 +33,7 @@ class VSlice:
         :param aslice: An existing slice if using copy constructor functionality
         """
         self._core = False                      # Whether or not the chord is a core harmony
+        self._cseg = None                       # The contour of the pset
         self._derived_core = False              # Whether or not the chord is a derived core harmony
         self._derived_core_associations = None  # Derived core associations, if any
         self._duration = 0           # The duration of the slice in seconds
@@ -70,6 +71,14 @@ class VSlice:
         self._time_signature = None  # The time signature of the slice
         self._uns = None  # The UNS of the slice
         self._upper_bound = None  # The upper bound of the slice.
+
+    @property
+    def contour(self):
+        """
+        The contour of the pseg
+        :return: The contour
+        """
+        return self._cseg
 
     @property
     def core(self):
@@ -419,6 +428,19 @@ class VSlice:
         """
         v = VSlice(self._tempo, self._quarter_duration, self._measure, self._num_voices)
 
+    def get_cseg_string(self):
+        """
+        Gets the cseg as a string
+        :return: The cseg as a string
+        """
+        cseg = "\"<"
+        for cp in self._cseg:
+            cseg += str(cp) + ", "
+        if cseg[len(cseg) - 1] == " ":
+            cseg = cseg[:-2]
+        cseg += ">\""
+        return cseg
+
     def get_ipseg_string(self):
         """
         Gets the ipseg as a string
@@ -489,6 +511,7 @@ class VSlice:
             self._ipseg.clear()
         for i in range(1, len(self._pseg)):
             self._ipseg.append(self._pseg[i].p - self._pseg[i - 1].p)
+        self._cseg = cseg.simplify([p.p for p in self._pseg])
 
         # Calculate values
         self._p_cardinality = len(self._pset)

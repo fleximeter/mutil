@@ -64,9 +64,8 @@ def c_analyze_with_sections():
     voices = ["Violin 1", "Violin 2", "Viola", "Cello"]
 
     # Path names
-    google_drive_desktop = "H:\\My Drive"
-    google_drive_laptop = "C:\\Users\\Jeffrey Martin\\Google Drive (jmartin8@umbc.edu)"
     path = "D:\\Carter Paper\\"
+    path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
     xml = path + "Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml "
     output = path + "Register Analysis Files\\entire_piece.csv"
     output_general = path + "Register Analysis Files\\statistics.csv"
@@ -90,7 +89,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = True
+    use_cache = False
 
     # Analyze
     print("Analyzing...")

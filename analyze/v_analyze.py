@@ -531,6 +531,7 @@ def read_analysis_from_file(path):
         slices = []
         for dslice in item["slices"]:
             cslice = VSlice()
+            cslice._cseg = dslice["contour"]
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
@@ -690,6 +691,7 @@ def write_analysis_to_file(results, path):
                 data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = str(val)
         for rslice in results[i].slices:
             cslice = {}
+            cslice["contour"] = rslice.contour
             cslice["core"] = int(rslice.core)
             cslice["derived_core"] = int(rslice.derived_core)
             cslice["derived_core_associations"] = rslice.derived_core_associations
@@ -822,7 +824,8 @@ def write_report(file, results):
 
             # Output column headings
             line = "Measure #,Start Time (seconds),Duration (seconds),Quarter duration,Chord cardinality," + \
-                   "PS,Match,NS,UNS,INS,LNS,MT,Morris name,Carter name,Core,Derived core,DC associations,pcset,pset,psc"
+                   "PS,Match,NS,UNS,INS,LNS,MT,Morris name,Carter name,Core,Derived core,DC associations,pcset,pset," \
+                   "psc,cseg"
             for i in range(results.max_p_count):
                 line += ",Pitch " + str(i + 1)
             for i in range(results.ps_max):
@@ -881,6 +884,7 @@ def write_report(file, results):
                 else:
                     line += ",N/A"
                 line += "," + item.get_ipseg_string()
+                line += "," + item.get_cseg_string()
                 for i in range(results.max_p_count):
                     if i < len(item.pitchseg):
                         line += "," + str(item.pnameseg[i])
