@@ -66,6 +66,7 @@ def c_analyze_with_sections():
     # Path names
     path = "D:\\Carter Paper\\"
     path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
+    # path = path_laptop
     xml = path + "Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml "
     output = path + "Register Analysis Files\\entire_piece.csv"
     output_general = path + "Register Analysis Files\\statistics.csv"
