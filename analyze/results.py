@@ -426,8 +426,9 @@ class Results:
                             self._pitch_lowest = s.pseg[0].p
                         if self._pitch_highest < s.pseg[len(s.pseg) - 1].p:
                             self._pitch_highest = s.pseg[len(s.pseg) - 1].p
-                        for v in range(len(s.psegs)):
+                        for v in range(self._num_voices):
                             if len(s.psegs[v]) > 0:
+                                # print(v, len(self._pitch_lowest_voices), len(s.psegs))
                                 if self._pitch_lowest_voices[v] > s.psegs[v][0].p:
                                     self._pitch_lowest_voices[v] = s.psegs[v][0].p
                                 if self._pitch_highest_voices[v] < s.psegs[v][len(s.psegs[v]) - 1].p:

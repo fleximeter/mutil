@@ -24,7 +24,7 @@ from decimal import Decimal
 
 
 class VSlice:
-    def __init__(self, tempo=1, quarter_duration=1, measure=None, aslice=None):
+    def __init__(self, tempo=1, quarter_duration=1, measure=None, num_voices=1):
         """
         Creates a v_slice
         :param duration: The duration of the slice, in seconds
@@ -38,19 +38,20 @@ class VSlice:
         self._duration = 0           # The duration of the slice in seconds
         self._ipseg = []             # The ipseg of the slice
         self._measure = measure      # The measure number in which the slice begins
+        self._num_voices = num_voices   # The number of voices
         self._p_cardinality = 0      # The number of distinct pitches present (excluding duplicates)
         self._p_count = 0            # The number of pitches present (including duplicates)
         self._pc_cardinality = 0     # The number of distinct pitch-classes present (excluding duplicates)
         self._pcseg = None           # The pcseg
-        self._pcsegs = []            # The pcsegs by voice
+        self._pcsegs = [[] for i in range(num_voices)]            # The pcsegs by voice
         self._pcset = None           # The pcset
-        self._pcsets = []            # The pcsets by voice
+        self._pcsets = [set() for i in range(num_voices)]            # The pcsets by voice
         self._pitchseg = []          # The pitch seg (contains duplicates)
-        self._pitchsegs = []         # The pitch segs by voice
+        self._pitchsegs = [[] for i in range(num_voices)]         # The pitch segs by voice
         self._pnameseg = []          # A list of pitch names
-        self._pnamesegs = []         # The pnamesegs by voice
+        self._pnamesegs = [[] for i in range(num_voices)]         # The pnamesegs by voice
         self._pset = None            # The pset
-        self._psets = []             # The psets by voice
+        self._psets = [set() for i in range(num_voices)]             # The psets by voice
         self._pseg = None            # The pseg
         self._psegs = []             # The psegs by voice
         self._quarter_duration = quarter_duration  # The duration in quarters
@@ -403,9 +404,6 @@ class VSlice:
         :param pitch_names: A collection of pitch names (as strings) corresponding to the pitch collection
         :param voice: The voice
         """
-        if voice <= len(self._pitchsegs):
-            self._pitchsegs.append([])
-            self._pnamesegs.append([])
         # Add each pitch to the chord
         for i in range(len(pitches)):
             self._pitchseg.append(pitches[i])
@@ -413,6 +411,13 @@ class VSlice:
             self._pnameseg.append(pitch_names[i])
             self._pnamesegs[voice].append(pitch_names[i])
             self._p_count += 1
+
+    def copy(self):
+        """
+        Copies the VSlice
+        :return: A copy of the VSlice
+        """
+        v = VSlice(self._tempo, self._quarter_duration, self._measure, self._num_voices)
 
     def get_ipseg_string(self):
         """
@@ -460,26 +465,22 @@ class VSlice:
         self._pset = set()
         self._pcseg = []
         self._pcset = set()
-        for v in range(len(self._pitchsegs)):
-            self._pcsets.append(set())
-            self._psets.append(set())
+        for p in self._pitchseg:
+            self._pset.add(pitch.Pitch(p))
+            self._pcset.add(pitch.PitchClass(p))
+        for v in range(self._num_voices):
             for p in self._pitchsegs[v]:
-                p1 = pitch.Pitch(p)
-                pc = pitch.PitchClass(p)
-                self._psets[v].add(p1)
-                self._pcsets[v].add(pc)
-                self._pset.add(p1)
-                self._pcset.add(pc)
+                self._psets[v].add(pitch.Pitch(p))
+                self._pcsets[v].add(pitch.PitchClass(p))
             self._psegs.append(list(self._psets[v]))
             self._psegs[v].sort()
-            self._pcsegs.append([])
             for p in self._psegs[v]:
                 self._pcsegs[v].append(pitch.PitchClass(p.pc))
         self._pseg = list(self._pset)
         self._pseg.sort()
         self._pitchseg.reverse()
         self._pnameseg.reverse()
-        for v in range(len(self._pitchsegs)):
+        for v in range(self._num_voices):
             self._pitchsegs[v].reverse()
             self._pnamesegs[v].reverse()
         for p in self._pseg:
@@ -501,6 +502,31 @@ class VSlice:
         :param sc: A SetClass object
         :return: None
         """
+        # Calculate set theory info
+        sc.pcset = self._pcset
+        self._sc_name = sc.name_morris
+        if 1 < self.pc_cardinality < 11:
+            self._sc_name_carter = sc.name_carter
+        else:
+            self._sc_name_carter = ""
+        if (self._sc_name_carter == "18" or self._sc_name_carter == "23") and self._pc_cardinality == 4:
+            self._core = True
+        if self._sc_name_carter == "35" and self._pc_cardinality == 6:
+            self._core = True
+        self._derived_core_associations = sc.derived_core
+        if self._derived_core_associations is not None:
+            self._derived_core = True
+
+        self._duration = (Decimal(60) / Decimal(self._tempo)) * (Decimal(self._quarter_duration.numerator) /
+                                                                 Decimal(self._quarter_duration.denominator))
+
+    def run_calculations_burt(self):
+        """
+        Calculates information about the v_slice. You must set the lower and upper bounds before running this
+        method. You should also combine any v_slices that you want to combine before running this method,
+        to avoid making unnecessary computations.
+        :return: None
+        """
         # Calculate ps and ins
         self._ps = len(self._pset)
         if self._ps > 0:
@@ -520,20 +546,3 @@ class VSlice:
                 self._uns = self._upper_bound - self._pseg[len(self._pseg) - 1].p
                 self._mediant = (self._lns - self._uns) / 2
 
-        # Calculate set theory info
-        sc.pcset = self._pcset
-        self._sc_name = sc.name_morris
-        if 1 < self.pc_cardinality < 11:
-            self._sc_name_carter = sc.name_carter
-        else:
-            self._sc_name_carter = ""
-        if (self._sc_name_carter == "18" or self._sc_name_carter == "23") and self._pc_cardinality == 4:
-            self._core = True
-        if self._sc_name_carter == "35" and self._pc_cardinality == 6:
-            self._core = True
-        self._derived_core_associations = sc.derived_core
-        if self._derived_core_associations is not None:
-            self._derived_core = True
-
-        self._duration = (Decimal(60) / Decimal(self._tempo)) * (Decimal(self._quarter_duration.numerator) /
-                                                                 Decimal(self._quarter_duration.denominator))

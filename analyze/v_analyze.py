@@ -43,7 +43,7 @@ def analyze(input_xml, first=-1, last=-1, use_local=False):
         if type(item) == music21.stream.Part:
             parts.append(item)
     results = slice_parts(parts, get_slice_num(parts), [], [use_local], first, last)
-    return results[0]
+    return results
 
 
 def analyze_corpus(name, first=-1, last=-1, use_local=False):
@@ -82,26 +82,32 @@ def analyze_with_sections(input_xml, section_divisions, use_local):
     return slice_parts(parts, get_slice_num(parts), section_divisions, use_local, -1, -1)
 
 
-#done
-def clean_slices(slices, match_tempo=False):
+def clean_slices(slices, match_tempo=False, sections=None):
     """
     Cleans up a list of v_slices
     :param slices: A list of v_slices
     :param match_tempo: Whether or not to force tempo match
+    :param sections: A list of section divisions
     """
     # Remove duplicate slices, and update durations
-    if len(slices) > 0:
-        i = 1
-        while i < len(slices):
-            if slice_compare(slices[i - 1], slices[i], match_tempo):
-                slices[i - 1].duration += slices[i].duration
-                slices[i - 1].quarter_duration += slices[i].quarter_duration
-                del slices[i]
-            else:
-                i += 1
+    i = 1
+    while i < len(slices):
+        equal = True
+        if match_tempo and slices[i]._tempo != slices[i - 1]._tempo:
+            equal = False
+        elif slices[i].pitchseg != slices[i - 1].pitchseg:
+            equal = False
+        elif sections is not None:
+            if slices[i].measure in sections and slices[i - 1].measure < slices[i].measure:
+                equal = False
+        if equal:
+            slices[i - 1].duration += slices[i].duration
+            slices[i - 1].quarter_duration += slices[i].quarter_duration
+            del slices[i]
+        else:
+            i += 1
 
 
-#done
 def factor(n):
     """
     Factors a positive integer
@@ -396,8 +402,8 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                                 for j in range(num_slices):
                                     if num_slices_taken >= len(measure_slices):
                                         measure_slices.append(
-                                            VSlice(tempo,
-                                                   Fraction(1, n.numerator), parts[a][next_indices[a]].number))
+                                            VSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
+                                                   len(parts)))
                                     measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                                     measure_slices[num_slices_taken].time_signature = time_signature
                                     measure_slices[num_slices_taken].start_position = Fraction(num_slices_taken,
@@ -441,8 +447,8 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                         for j in range(num_slices):
                             if num_slices_taken >= len(measure_slices):
                                 measure_slices.append(
-                                    VSlice(tempo,
-                                           Fraction(1, n.numerator), parts[a][next_indices[a]].number))
+                                    VSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
+                                           len(parts)))
                             measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                             measure_slices[num_slices_taken].time_signature = time_signature
                             measure_slices[num_slices_taken].start_position = Fraction(num_slices_taken,
@@ -479,56 +485,36 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     for sl in final_slices:
         sl.make_sets()
 
+    clean_slices(final_slices, True, [section_divisions[i][0] for i in range(len(section_divisions))])
+    for s in final_slices:
+        s.run_calculations(sc)
+    clean_slices(final_slices, False, [section_divisions[i][0] for i in range(len(section_divisions))])
+
     # Create sectional results
     for i in range(len(section_divisions)):
         section_slices = []
         for sl in final_slices:
             if section_divisions[i][0] <= sl.measure <= section_divisions[i][1]:
                 section_slices.append(sl)
-        clean_slices(section_slices, True)
         bounds = global_bounds
         if use_local[i]:
             bounds = get_bounds(section_slices)
         set_slice_bounds(section_slices, bounds)
         for s in section_slices:
-            s.run_calculations(sc)
-        clean_slices(section_slices)
+            s.run_calculations_burt()
         results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1], len(parts)))
 
     # Create overall results
-    clean_slices(final_slices, True)
+    clean_slices(final_slices)
     bounds = global_bounds
     if len(use_local) == 1:
         if use_local[0]:
             bounds = get_bounds(final_slices)
     set_slice_bounds(final_slices, bounds)
     for f_slice in final_slices:
-        f_slice.run_calculations(sc)
-    clean_slices(final_slices)
+        f_slice.run_calculations_burt()
     results.insert(0, Results(final_slices, first_measure, last_measure, len(parts)))
     return results
-
-
-#done
-def slice_compare(slice1, slice2, match_tempo=False):
-    """
-    Compares two v_slices for equality
-    :param slice1: A v_slice
-    :param slice2: A v_slice
-    :param match_tempo: Whether or not to match tempo
-    :return: True if equal, False if not equal
-    """
-    equal = True
-    if slice1.p_count != slice2.p_count:
-        equal = False
-    elif match_tempo and slice1._tempo != slice2._tempo:
-        equal = False
-    else:
-        for p in slice1.pitchseg:
-            if p not in slice2.pitchseg:
-                equal = False
-                break
-    return equal
 
 
 def read_analysis_from_file(path):
