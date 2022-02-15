@@ -511,7 +511,7 @@ class VSlice:
             self._ipseg.clear()
         for i in range(1, len(self._pseg)):
             self._ipseg.append(self._pseg[i].p - self._pseg[i - 1].p)
-        self._cseg = cseg.simplify([p.p for p in self._pseg])
+        self._cseg = cseg.simplify([ip for ip in self._ipseg])
 
         # Calculate values
         self._p_cardinality = len(self._pset)
