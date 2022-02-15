@@ -90,7 +90,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = False
+    use_cache = True
 
     # Analyze
     print("Analyzing...")
@@ -125,10 +125,10 @@ def c_analyze_with_sections():
         chart.chart_pitch_onset(results[0], False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
                                                    f"({voices[i]})", (14, 6),
                                 path + f"Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
-    chart.chart_pitch_onset(results[0], False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+    chart.chart_pitch_onset(results[0], True, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
                             path + f"Register Analysis Files\\Graphs\\onset_time")
     for i in range(len(voices)):
-        chart.chart_pitch_onset(results[0], False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
+        chart.chart_pitch_onset(results[0], True, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
                                                    f"({voices[i]})", (14, 6),
                                 path + f"Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
     chart.chart_pitch_duration(results[0], "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
