@@ -483,7 +483,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
     # Make pctheory objects
     for sl in final_slices:
-        sl.make_sets()
+        sl.prepare_for_clean()
 
     clean_slices(final_slices, True, [section_divisions[i][0] for i in range(len(section_divisions))])
     for s in final_slices:
@@ -531,7 +531,7 @@ def read_analysis_from_file(path):
         slices = []
         for dslice in item["slices"]:
             cslice = VSlice()
-            cslice._cseg = dslice["contour"]
+            cslice._cseg = dslice["cseg"]
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
@@ -691,7 +691,7 @@ def write_analysis_to_file(results, path):
                 data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = str(val)
         for rslice in results[i].slices:
             cslice = {}
-            cslice["contour"] = rslice.contour
+            cslice["cseg"] = rslice.cseg
             cslice["core"] = int(rslice.core)
             cslice["derived_core"] = int(rslice.derived_core)
             cslice["derived_core_associations"] = rslice.derived_core_associations

@@ -407,14 +407,14 @@ class SetClass:
                 self._name_forte = self._tables["setToForteNameTableLeftPacking"][self._name_prime]
             else:
                 self._name_forte = self._tables["setToForteNameTable"][self._name_prime]
+        else:
+            self._name_forte = "0-1"
         self._name_carter = ""
         if self._name_forte in self._tables["forteToCarterNameTable"]:
             self._name_carter = self._tables["forteToCarterNameTable"][self._name_forte]
         self._name_morris = "(" + self._name_forte + ")" + self._name_prime
-        forte_num = 0
-        if '-' in self.name_forte:
-            forte_num = self.name_forte.split('-')[1]
-            forte_num = forte_num.strip('Z')
+        forte_num = self.name_forte.split('-')[1]
+        forte_num = forte_num.strip('Z')
         self._num_forte = int(forte_num)
         self._ic_vector = [0, 0, 0, 0, 0, 0, 0]
         for pc in self._pcset:
