@@ -841,7 +841,7 @@ def write_report(file, results):
                 line += ",\'" + str(item.quarter_duration)
                 line += "," + str(item.p_count)
                 line += "," + str(item.ps)
-                if item.p_cardinality == item.ps:
+                if item.p_count == item.ps:
                     line += ",TRUE"
                 else:
                     line += ",FALSE"
