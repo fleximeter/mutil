@@ -473,7 +473,7 @@ class VSlice:
         ipseg += ">\""
         return ipseg
 
-    def get_pcset_str(self):
+    def get_pcset_string(self):
         """
         The pcset
         :return: The pcset
@@ -486,7 +486,7 @@ class VSlice:
         pcset_str += "}"
         return pcset_str
 
-    def get_pset_str(self):
+    def get_pset_string(self):
         """
         The pset
         :return: The pset

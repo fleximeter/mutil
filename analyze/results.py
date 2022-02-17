@@ -565,24 +565,27 @@ class Results:
 
             # Calculate cseg frequency
             for s in self._slices:
-                if s.cseg not in self._cseg_frequency:
-                    self._cseg_frequency[s.cseg] = 1
-                    self._cseg_duration[s.cseg] = s.duration
+                cseg = s.get_cseg_string()
+                pset = s.get_pset_string()
+                psc = str(s.ipseg)
+                if cseg not in self._cseg_frequency:
+                    self._cseg_frequency[cseg] = 1
+                    self._cseg_duration[cseg] = s.duration
                 else:
-                    self._cseg_frequency[s.cseg] += 1
-                    self._cseg_duration[s.cseg] += s.duration
-                if s.pset not in self._pset_frequency:
-                    self._pset_frequency[s.pset] = 1
-                    self._pset_duration[s.pset] = s.duration
+                    self._cseg_frequency[cseg] += 1
+                    self._cseg_duration[cseg] += s.duration
+                if pset not in self._pset_frequency:
+                    self._pset_frequency[pset] = 1
+                    self._pset_duration[pset] = s.duration
                 else:
-                    self._pset_frequency[s.pset] += 1
-                    self._pset_duration[s.pset] += s.duration
-                if s.ipseg not in self._psc_frequency:
-                    self._psc_frequency[s.ipseg] = 1
-                    self._psc_duration[s.ipseg] = s.duration
+                    self._pset_frequency[pset] += 1
+                    self._pset_duration[pset] += s.duration
+                if psc not in self._psc_frequency:
+                    self._psc_frequency[psc] = 1
+                    self._psc_duration[psc] = s.duration
                 else:
-                    self._psc_frequency[s.ipseg] += 1
-                    self._psc_duration[s.ipseg] += s.duration
+                    self._psc_frequency[psc] += 1
+                    self._psc_duration[psc] += s.duration
 
         # Finalize average calculation
         non_null = self._get_non_null()

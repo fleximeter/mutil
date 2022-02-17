@@ -105,6 +105,12 @@ def c_analyze_with_sections():
     v_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
     v_analyze.write_report(output, results[0])
+    v_analyze.write_statistics(path + "\\Register Analysis Files\\csegs.csv", "Cseg,Frequency,Duration\n",
+                               [results[0].cseg_frequency, results[0].cseg_duration])
+    v_analyze.write_statistics(path + "\\Register Analysis Files\\psets.csv", "Pset,Frequency,Duration\n",
+                               [results[0].pset_frequency, results[0].pset_duration])
+    v_analyze.write_statistics(path + "\\Register Analysis Files\\pscs.csv", "PSC,Frequency,Duration\n",
+                               [results[0].psc_frequency, results[0].psc_duration])
     for i in range(1, len(output_global) + 1):
         v_analyze.write_general_report("Section " + str(i) + " global", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)

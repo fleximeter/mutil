@@ -571,7 +571,7 @@ def read_analysis_from_file(path):
             slices.append(cslice)
         result = Results(slices, item["measure_num_first"], item["measure_num_last"], len(item["pitch_highest_voices"]))
         result._max_p_count = item["max_p_count"]
-        result._cseg_duration = item["cseg_duration"]
+        result._cseg_duration = {}
         result._cseg_frequency = item["cseg_frequency"]
         result._duration = Decimal(item["duration"])
         result._ins_avg = item["ins_avg"]
@@ -591,9 +591,9 @@ def read_analysis_from_file(path):
         result._pitch_highest_voices = item["pitch_highest_voices"]
         result._pitch_lowest = item["pitch_lowest"]
         result._pitch_lowest_voices = item["pitch_lowest_voices"]
-        result._pset_duration = item["pset_duration"]
+        result._pset_duration = {}
         result._pset_frequency = item["pset_frequency"]
-        result._psc_duration = item["psc_duration"]
+        result._psc_duration = {}
         result._psc_frequency = item["psc_frequency"]
         result._ps_avg = item["ps_avg"]
         result._ps_max = item["ps_max"]
@@ -607,6 +607,8 @@ def read_analysis_from_file(path):
         result._pc_frequency = {}
         result._pitch_duration = {}
         result._pitch_frequency = {}
+        for key, val in item["cseg_duration"].items():
+            result.cseg_duration[key] = Decimal(val)
         for key, val in item["pc_duration"].items():
             result.pc_duration[int(key)] = Decimal(val[0])
         for v in range(len(item["pc_duration_voices"])):
@@ -631,7 +633,10 @@ def read_analysis_from_file(path):
             result.pitch_frequency_voices.append({})
             for key, val in item["pitch_frequency_voices"][v].items():
                 result.pitch_frequency_voices[v][int(key)] = val
-
+        for key, val in item["pset_duration"].items():
+            result.pset_duration[key] = Decimal(val)
+        for key, val in item["psc_duration"].items():
+            result.pset_duration[key] = Decimal(val)
         results.append(result)
     return results
 
@@ -647,7 +652,7 @@ def write_analysis_to_file(results, path):
     for i in range(len(results)):
         data.append({})
         data[i]["max_p_count"] = results[i].max_p_count
-        data[i]["cseg_duration"] = results[i].cseg_duration
+        data[i]["cseg_duration"] = {}
         data[i]["cseg_frequency"] = results[i].cseg_frequency
         data[i]["duration"] = str(results[i].duration)
         data[i]["ins_avg"] = results[i].ins_avg
@@ -668,9 +673,9 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_highest_voices"] = results[i].pitch_highest_voices
         data[i]["pitch_lowest"] = results[i].pitch_lowest
         data[i]["pitch_lowest_voices"] = results[i].pitch_lowest_voices
-        data[i]["pset_duration"] = results[i].pset_duration
+        data[i]["pset_duration"] = {}
         data[i]["pset_frequency"] = results[i].pset_frequency
-        data[i]["psc_duration"] = results[i].psc_duration
+        data[i]["psc_duration"] = {}
         data[i]["psc_frequency"] = results[i].psc_frequency
         data[i]["ps_avg"] = results[i].ps_avg
         data[i]["ps_max"] = results[i].ps_max
@@ -689,6 +694,8 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_frequency"] = results[i].pitch_frequency
         data[i]["pitch_frequency_voices"] = results[i].pitch_frequency_voices
         data[i]["slices"] = []
+        for key, val in results[i].cseg_duration.items():
+            data[i]["cseg_duration"][key] = str(val)
         for key, val in results[i].pc_duration.items():
             data[i]["pc_duration"][key] = str(val)
         for v in range(len(results[i].pc_duration_voices)):
@@ -701,6 +708,10 @@ def write_analysis_to_file(results, path):
             data[i]["pitch_duration_voices"].append({})
             for key, val in results[i].pitch_duration_voices[v].items():
                 data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = str(val)
+        for key, val in results[i].pset_duration.items():
+            data[i]["pset_duration"][key] = str(val)
+        for key, val in results[i].psc_duration.items():
+            data[i]["psc_duration"][key] = str(val)
         for rslice in results[i].slices:
             cslice = {}
             cslice["cseg"] = rslice.cseg
@@ -823,6 +834,32 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             general.write("\n")
 
 
+def write_statistics(file, headings, dictionaries):
+    """
+    Writes a dictionary to file
+    :param file: A file name
+    :param headings: A headings row for the file
+    :param dictionaries: Dictionaries with common keys to write to file
+    :return: None
+    """
+    stat_list = []
+    for key, value in dictionaries[0].items():
+        stat_list.append([key, value])
+    for i in range(1, len(dictionaries)):
+        for j in range(len(stat_list)):
+            stat_list[j].append(dictionaries[i][stat_list[j][0]])
+    stat_list = sorted(stat_list, key=lambda x: x[0])
+    stat_list = sorted(stat_list, key=lambda x: len(x[0]))
+    with open(file, "w") as output:
+        output.write(headings)
+        for line in stat_list:
+            for i in range(len(line)-1):
+                output.write(f"{line[i]},")
+            if len(line) > 0:
+                output.write(f"{line[len(line)-1]}")
+            output.write("\n")
+
+
 def write_report(file, results):
     """
     Writes a report to CSV
@@ -888,11 +925,11 @@ def write_report(file, results):
                 else:
                     line += ",N/A"
                 if item.pcset is not None:
-                    line += ",\"" + item.get_pcset_str() + "\""
+                    line += ",\"" + item.get_pcset_string() + "\""
                 else:
                     line += ",N/A"
                 if item.pset is not None:
-                    line += f",\"{item.get_pset_str()}\""
+                    line += f",\"{item.get_pset_string()}\""
                 else:
                     line += ",N/A"
                 line += "," + item.get_ipseg_string()
