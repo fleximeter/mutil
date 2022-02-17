@@ -23,6 +23,25 @@ from pctheory import cseg, pitch
 from decimal import Decimal
 
 
+def sort_pnameseg(pnameseg):
+    """
+    Sorts a pnameseg
+    :param pnameseg: A pnameseg
+    :return: None
+    """
+    lmap = {'C': 1, 'D': 4, 'E': 7, 'F': 10, 'G': 13, 'A': 16, 'B': 19}
+    pnameseg2 = []
+    for p in pnameseg:
+        p1 = int(p[len(p)-1]) * 21 + lmap[p[0]]
+        if len(p) > 2:
+            if p[1] == '#':
+                p1 += 1
+            elif p[1] == '-':
+                p1 -= 1
+        pnameseg2.append((p, p1))
+    return [p[0] for p in sorted(pnameseg2, key=lambda x: x[1])]
+
+
 class VSlice:
     def __init__(self, tempo=1, quarter_duration=1, measure=None, num_voices=1):
         """
@@ -73,7 +92,7 @@ class VSlice:
         self._upper_bound = None  # The upper bound of the slice.
 
     @property
-    def contour(self):
+    def cseg(self):
         """
         The contour of the pseg
         :return: The contour
@@ -454,7 +473,7 @@ class VSlice:
         ipseg += ">\""
         return ipseg
 
-    def get_pcset_str(self):
+    def get_pcset_string(self):
         """
         The pcset
         :return: The pcset
@@ -467,7 +486,7 @@ class VSlice:
         pcset_str += "}"
         return pcset_str
 
-    def get_pset_str(self):
+    def get_pset_string(self):
         """
         The pset
         :return: The pset
@@ -479,10 +498,19 @@ class VSlice:
         pset_str += "}"
         return pset_str
 
-    def make_sets(self):
+    def prepare_for_clean(self):
         """
-        Makes the pctheory objects. Run this function before calculating lower and upper bounds for the piece.
+        Sorts the pitchseg in preparation for slice cleaning
         :return:
+        """
+        self._pitchseg.sort()
+
+    def run_calculations(self, sc):
+        """
+        Calculates information about the v_slice. You should combine any v_slices that you want to combine before
+        running this method, to avoid making unnecessary computations.
+        :param sc: A SetClass object
+        :return: None
         """
         self._pset = set()
         self._pcseg = []
@@ -500,11 +528,10 @@ class VSlice:
                 self._pcsegs[v].append(pitch.PitchClass(p.pc))
         self._pseg = list(self._pset)
         self._pseg.sort()
-        self._pitchseg.reverse()
-        self._pnameseg.reverse()
+        self._pnameseg = sort_pnameseg(self._pnameseg)
         for v in range(self._num_voices):
-            self._pitchsegs[v].reverse()
-            self._pnamesegs[v].reverse()
+            self._pitchsegs[v].sort()
+            self._pnamesegs[v] = sort_pnameseg(self._pnamesegs[v])
         for p in self._pseg:
             self._pcseg.append(pitch.PitchClass(p.pc))
         if len(self._ipseg) > 0:
@@ -516,15 +543,9 @@ class VSlice:
         # Calculate values
         self._p_cardinality = len(self._pset)
         self._pc_cardinality = len(self._pcset)
+        self._duration = (Decimal(60) / Decimal(self._tempo)) * (Decimal(self._quarter_duration.numerator) /
+                                                                 Decimal(self._quarter_duration.denominator))
 
-    def run_calculations(self, sc):
-        """
-        Calculates information about the v_slice. You must set the lower and upper bounds before running this
-        method. You should also combine any v_slices that you want to combine before running this method,
-        to avoid making unnecessary computations.
-        :param sc: A SetClass object
-        :return: None
-        """
         # Calculate set theory info
         sc.pcset = self._pcset
         self._sc_name = sc.name_morris
@@ -539,9 +560,6 @@ class VSlice:
         self._derived_core_associations = sc.derived_core
         if self._derived_core_associations is not None:
             self._derived_core = True
-
-        self._duration = (Decimal(60) / Decimal(self._tempo)) * (Decimal(self._quarter_duration.numerator) /
-                                                                 Decimal(self._quarter_duration.denominator))
 
     def run_calculations_burt(self):
         """
@@ -568,4 +586,3 @@ class VSlice:
                 self._lns = self._pseg[0].p - self._lower_bound
                 self._uns = self._upper_bound - self._pseg[len(self._pseg) - 1].p
                 self._mediant = (self._lns - self._uns) / 2
-
