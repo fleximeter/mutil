@@ -571,6 +571,8 @@ def read_analysis_from_file(path):
             slices.append(cslice)
         result = Results(slices, item["measure_num_first"], item["measure_num_last"], len(item["pitch_highest_voices"]))
         result._max_p_count = item["max_p_count"]
+        result._cseg_duration = item["cseg_duration"]
+        result._cseg_frequency = item["cseg_frequency"]
         result._duration = Decimal(item["duration"])
         result._ins_avg = item["ins_avg"]
         result._ins_max = item["ins_max"]
@@ -589,6 +591,10 @@ def read_analysis_from_file(path):
         result._pitch_highest_voices = item["pitch_highest_voices"]
         result._pitch_lowest = item["pitch_lowest"]
         result._pitch_lowest_voices = item["pitch_lowest_voices"]
+        result._pset_duration = item["pset_duration"]
+        result._pset_frequency = item["pset_frequency"]
+        result._psc_duration = item["psc_duration"]
+        result._psc_frequency = item["psc_frequency"]
         result._ps_avg = item["ps_avg"]
         result._ps_max = item["ps_max"]
         result._ps_min = item["ps_min"]
@@ -641,6 +647,8 @@ def write_analysis_to_file(results, path):
     for i in range(len(results)):
         data.append({})
         data[i]["max_p_count"] = results[i].max_p_count
+        data[i]["cseg_duration"] = results[i].cseg_duration
+        data[i]["cseg_frequency"] = results[i].cseg_frequency
         data[i]["duration"] = str(results[i].duration)
         data[i]["ins_avg"] = results[i].ins_avg
         data[i]["ins_max"] = results[i].ins_max
@@ -660,6 +668,10 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_highest_voices"] = results[i].pitch_highest_voices
         data[i]["pitch_lowest"] = results[i].pitch_lowest
         data[i]["pitch_lowest_voices"] = results[i].pitch_lowest_voices
+        data[i]["pset_duration"] = results[i].pset_duration
+        data[i]["pset_frequency"] = results[i].pset_frequency
+        data[i]["psc_duration"] = results[i].psc_duration
+        data[i]["psc_frequency"] = results[i].psc_frequency
         data[i]["ps_avg"] = results[i].ps_avg
         data[i]["ps_max"] = results[i].ps_max
         data[i]["ps_min"] = results[i].ps_min

@@ -31,6 +31,8 @@ class Results:
         :param measure_num_last: The last measure number analyzed
         """
         self._max_p_count = 0  # The maximum number of pitches in a chord (may be greater than PS)
+        self._cseg_duration = None
+        self._cseg_frequency = None
         self._duration = 0
         self._ins_avg = 0  # The INS average
         self._ins_max = 0
@@ -59,6 +61,10 @@ class Results:
         self._pitch_highest_voices = None
         self._pitch_lowest = numpy.inf
         self._pitch_lowest_voices = None
+        self._pset_duration = None
+        self._pset_frequency = None
+        self._psc_duration = None
+        self._psc_frequency = None
         self._ps_avg = 0  # The PS average
         self._ps_max = 0
         self._ps_min = 0
@@ -79,6 +85,24 @@ class Results:
         :return: The maximum cardinality of the analyzed VSlices
         """
         return self._max_p_count
+
+    @property
+    def cseg_duration(self):
+        """
+        A dictionary in which the csegs that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._cseg_duration
+
+    @property
+    def cseg_frequency(self):
+        """
+        A dictionary in which the csegs that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._cseg_frequency
 
     @property
     def duration(self):
@@ -313,6 +337,42 @@ class Results:
         return self._pitch_lowest_voices
 
     @property
+    def pset_duration(self):
+        """
+        A dictionary in which the psets that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._pset_duration
+
+    @property
+    def pset_frequency(self):
+        """
+        A dictionary in which the psets that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._pset_frequency
+
+    @property
+    def psc_duration(self):
+        """
+        A dictionary in which the pscs that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._psc_duration
+
+    @property
+    def psc_frequency(self):
+        """
+        A dictionary in which the pscs that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._psc_frequency
+
+    @property
     def ps_avg(self):
         """
         The average positive space (PS)
@@ -398,6 +458,8 @@ class Results:
             self._lns_min = self._lps_card
             self._mediant_max = self._lower_bound
             self._mediant_min = self._upper_bound
+            self._cseg_duration = {}  # The duration of each cseg
+            self._cseg_frequency = {}  # The number of occurrences of each cseg
             self._pc_duration = {}  # The total number of seconds that this pitch-class is active
             self._pc_duration_voices = [{} for v in range(self._num_voices)]
             self._pc_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch-class
@@ -408,6 +470,10 @@ class Results:
             self._pitch_frequency_voices = [{} for v in range(self._num_voices)]
             self._pitch_highest_voices = [-numpy.inf for v in range(self._num_voices)]
             self._pitch_lowest_voices = [numpy.inf for v in range(self._num_voices)]
+            self._pset_duration = {}
+            self._pset_frequency = {}
+            self._psc_duration = {}
+            self._psc_frequency = {}
             self._ps_min = self._lps_card
             self._uns_min = self._lps_card
 
@@ -496,6 +562,27 @@ class Results:
                         self._pc_frequency[pc.pc] = 1
                     elif pc not in self._slices[i-1].pcset:
                         self._pc_frequency[pc.pc] += 1
+
+            # Calculate cseg frequency
+            for s in self._slices:
+                if s.cseg not in self._cseg_frequency:
+                    self._cseg_frequency[s.cseg] = 1
+                    self._cseg_duration[s.cseg] = s.duration
+                else:
+                    self._cseg_frequency[s.cseg] += 1
+                    self._cseg_duration[s.cseg] += s.duration
+                if s.pset not in self._pset_frequency:
+                    self._pset_frequency[s.pset] = 1
+                    self._pset_duration[s.pset] = s.duration
+                else:
+                    self._pset_frequency[s.pset] += 1
+                    self._pset_duration[s.pset] += s.duration
+                if s.ipseg not in self._psc_frequency:
+                    self._psc_frequency[s.ipseg] = 1
+                    self._psc_duration[s.ipseg] = s.duration
+                else:
+                    self._psc_frequency[s.ipseg] += 1
+                    self._psc_duration[s.ipseg] += s.duration
 
         # Finalize average calculation
         non_null = self._get_non_null()
