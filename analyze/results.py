@@ -20,10 +20,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import numpy
+from decimal import Decimal
 
 
 class Results:
-    def __init__(self, slices, measure_num_first, measure_num_last, voices):
+    def __init__(self, slices, measure_num_first, measure_num_last, voices, start_time=0):
         """
         Creates a Results object
         :param slices: A list of slices
@@ -70,6 +71,7 @@ class Results:
         self._ps_min = 0
         self._quarter_duration = 0
         self._slices = slices
+        self._start_time = Decimal(start_time)
         self._uns_avg = 0  # The UNS average
         self._uns_max = 0
         self._uns_min = 0
@@ -411,6 +413,14 @@ class Results:
         :return: The VSlices
         """
         return self._slices
+
+    @property
+    def start_time(self):
+        """
+        The start time of the Results object
+        :return: The start time
+        """
+        return self._start_time
 
     @property
     def uns_avg(self):

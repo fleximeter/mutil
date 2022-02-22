@@ -490,19 +490,22 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
         s.run_calculations(sc)
     clean_slices(final_slices, False, [section_divisions[i][0] for i in range(len(section_divisions))])
 
+    start_time = 0
     # Create sectional results
     for i in range(len(section_divisions)):
         section_slices = []
         for sl in final_slices:
             if section_divisions[i][0] <= sl.measure <= section_divisions[i][1]:
                 section_slices.append(sl)
+                start_time += sl.duration
         bounds = global_bounds
         if use_local[i]:
             bounds = get_bounds(section_slices)
         set_slice_bounds(section_slices, bounds)
         for s in section_slices:
             s.run_calculations_burt()
-        results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1], len(parts)))
+        results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1],
+                               len(parts), start_time))
 
     # Create overall results
     clean_slices(final_slices)
@@ -599,6 +602,7 @@ def read_analysis_from_file(path):
         result._ps_max = item["ps_max"]
         result._ps_min = item["ps_min"]
         result._quarter_duration = Fraction(item["quarter_duration"][0], item["quarter_duration"][1])
+        result._start_time = Decimal(item["start_time"])
         result._uns_avg = item["uns_avg"]
         result._uns_max = item["uns_max"]
         result._uns_min = item["uns_min"]
@@ -681,6 +685,7 @@ def write_analysis_to_file(results, path):
         data[i]["ps_max"] = results[i].ps_max
         data[i]["ps_min"] = results[i].ps_min
         data[i]["quarter_duration"] = [results[i].quarter_duration.numerator, results[i].quarter_duration.denominator]
+        data[i]["start_time"] = str(results[i].start_time)
         data[i]["uns_avg"] = results[i].uns_avg
         data[i]["uns_max"] = results[i].uns_max
         data[i]["uns_min"] = results[i].uns_min
@@ -776,7 +781,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             for i in range(lowest_pitch, highest_pitch + 1):
                 general.write(",p" + str(i) + " freq")
             general.write("\n")
-        general.write(f"{section_name},{results.duration}" +
+        general.write(f"{section_name},{results.duration},{results.start_time}," +
                       f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
                       f",{results.ps_avg},{results.ps_min},{results.ps_max}," +
                       f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
