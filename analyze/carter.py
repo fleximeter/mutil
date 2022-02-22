@@ -66,7 +66,7 @@ def c_analyze_with_sections():
     # Path names
     path = "D:\\Carter Paper\\"
     path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
-    path = path_laptop
+    # path = path_laptop
     xml = path + "Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml "
     output = path + "Register Analysis Files\\entire_piece.csv"
     output_general = path + "Register Analysis Files\\statistics.csv"
@@ -90,7 +90,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = True
+    use_cache = False
 
     # Analyze
     print("Analyzing...")
@@ -100,7 +100,7 @@ def c_analyze_with_sections():
         results = v_analyze.read_analysis_from_file(results_path)
     else:
         results = v_analyze.analyze_with_sections(xml, sections, bound_prefs)
-    v_analyze.write_analysis_to_file(results, results_path)
+        v_analyze.write_analysis_to_file(results, results_path)
 
     v_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
