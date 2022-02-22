@@ -452,12 +452,12 @@ class VSlice:
         Gets the cseg as a string
         :return: The cseg as a string
         """
-        cseg = "\"<"
+        cseg = "<"
         for cp in self._cseg:
             cseg += str(cp) + ", "
         if cseg[len(cseg) - 1] == " ":
             cseg = cseg[:-2]
-        cseg += ">\""
+        cseg += ">"
         return cseg
 
     def get_ipseg_string(self):

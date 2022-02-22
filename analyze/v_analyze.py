@@ -854,7 +854,7 @@ def write_statistics(file, headings, dictionaries):
         output.write(headings)
         for line in stat_list:
             if len(line) > 0:
-                output.write(f"{line[0]}")
+                output.write(f"\"{line[0]}\"")
             for i in range(1, len(line)):
                 output.write(f",{line[i]}")
             output.write("\n")
