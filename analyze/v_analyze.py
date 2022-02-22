@@ -765,7 +765,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
     with open(file, file_command) as general:
         if file_command == "w":
             # Write column headings
-            general.write("Section,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," + \
+            general.write("Section,Starting Time,Duration,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," + \
                           "LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
             for i in range(0, 12):
                 general.write(",pc" + str(i) + " dur")
@@ -776,32 +776,32 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             for i in range(lowest_pitch, highest_pitch + 1):
                 general.write(",p" + str(i) + " freq")
             general.write("\n")
-        general.write(section_name + ",")
-        general.write(str(results.lps_card) + "," + str(results.pitch_highest) + "," + str(results.pitch_lowest) +
-                      "," + str(results.ps_avg) + "," + str(results.ps_min) + "," + str(results.ps_max) +
-                      "," + str(results.uns_avg) + "," + str(results.uns_min) + "," + str(results.uns_max) +
-                      "," + str(results.lns_avg) + "," + str(results.lns_min) + "," + str(results.lns_max) +
-                      "," + str(results.ins_avg) + "," + str(results.ins_min) + "," + str(results.ins_max) +
-                      "," + str(results.mediant_avg) + "," + str(results.mediant_min) + "," +
-                      str(results.mediant_max))
+        general.write(f"{section_name},{results.duration}" +
+                      f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
+                      f",{results.ps_avg},{results.ps_min},{results.ps_max}," +
+                      f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
+                      f"{results.lns_avg},{results.lns_min},{results.lns_max}," +
+                      f"{results.ins_avg},{results.ins_min},{results.ins_max}," +
+                      f"{results.mediant_avg},{results.mediant_min}," +
+                      f"{results.mediant_max}")
         for i in range(0, 12):
             if i in results.pc_duration.keys():
-                general.write("," + str(float(results.pc_duration[i])))
+                general.write(f",{results.pc_duration[i]}")
             else:
                 general.write(",0")
         for i in range(0, 12):
             if i in results.pc_frequency.keys():
-                general.write("," + str(float(results.pc_frequency[i])))
+                general.write(f",{results.pc_frequency[i]}")
             else:
                 general.write(",0")
         for i in range(lowest_pitch, highest_pitch + 1):
             if i in results.pitch_duration.keys():
-                general.write("," + str(float(results.pitch_duration[i])))
+                general.write(f",{results.pitch_duration[i]}")
             else:
                 general.write(",0")
         for i in range(lowest_pitch, highest_pitch + 1):
             if i in results.pitch_frequency.keys():
-                general.write("," + str(float(results.pitch_frequency[i])))
+                general.write(f",{results.pitch_frequency[i]}")
             else:
                 general.write(",0")
         general.write("\n")
@@ -813,22 +813,22 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             general.write(",,,,,,,,,,,,,,")
             for i in range(0, 12):
                 if i in results.pc_duration_voices[v].keys():
-                    general.write("," + str(float(results.pc_duration_voices[v][i])))
+                    general.write(f",{results.pc_duration_voices[v][i]}")
                 else:
                     general.write(",0")
             for i in range(0, 12):
                 if i in results.pc_frequency_voices[v].keys():
-                    general.write("," + str(float(results.pc_frequency_voices[v][i])))
+                    general.write(f",{results.pc_frequency_voices[v][i]}")
                 else:
                     general.write(",0")
             for i in range(lowest_pitch, highest_pitch + 1):
                 if i in results.pitch_duration_voices[v].keys():
-                    general.write("," + str(float(results.pitch_duration_voices[v][i])))
+                    general.write(f",{results.pitch_duration_voices[v][i]}")
                 else:
                     general.write(",0")
             for i in range(lowest_pitch, highest_pitch + 1):
                 if i in results.pitch_frequency_voices[v].keys():
-                    general.write("," + str(float(results.pitch_frequency_voices[v][i])))
+                    general.write(f",{results.pitch_frequency_voices[v][i]}")
                 else:
                     general.write(",0")
             general.write("\n")
