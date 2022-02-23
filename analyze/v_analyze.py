@@ -490,14 +490,15 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
         s.run_calculations(sc)
     clean_slices(final_slices, False, [section_divisions[i][0] for i in range(len(section_divisions))])
 
-    start_time = 0
     # Create sectional results
     for i in range(len(section_divisions)):
+        start_time = 0
         section_slices = []
         for sl in final_slices:
-            if section_divisions[i][0] <= sl.measure <= section_divisions[i][1]:
-                section_slices.append(sl)
+            if section_divisions[i][0] < sl.measure:
                 start_time += sl.duration
+            elif sl.measure <= section_divisions[i][1]:
+                section_slices.append(sl)
         bounds = global_bounds
         if use_local[i]:
             bounds = get_bounds(section_slices)
@@ -781,9 +782,9 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             for i in range(lowest_pitch, highest_pitch + 1):
                 general.write(",p" + str(i) + " freq")
             general.write("\n")
-        general.write(f"{section_name},{results.duration},{results.start_time}," +
+        general.write(f"{section_name},{results.start_time},{results.duration}," +
                       f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
-                      f",{results.ps_avg},{results.ps_min},{results.ps_max}," +
+                      f"{results.ps_avg},{results.ps_min},{results.ps_max}," +
                       f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
                       f"{results.lns_avg},{results.lns_min},{results.lns_max}," +
                       f"{results.ins_avg},{results.ins_min},{results.ins_max}," +
@@ -811,7 +812,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
                 general.write(",0")
         general.write("\n")
         for v in range(results.num_voices):
-            general.write(f"{section_name} (Voice {v}),")
+            general.write(f"{section_name} (Voice {v}),,,")
             general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
             general.write(f"{results.pitch_highest_voices[v]},")
             general.write(f"{results.pitch_lowest_voices[v]},")
