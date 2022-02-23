@@ -1,6 +1,6 @@
 """
 File: pierrot_arrays.py
-10uthor: Jeff Martin
+Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 Date: 2/4/22
 
