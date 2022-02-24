@@ -493,6 +493,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
     # Create sectional results
     for i in range(len(section_divisions)):
+        start_time = 0
         section_slices = []
         start_time = 0
         for sl in final_slices:
@@ -785,7 +786,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             general.write("\n")
         general.write(f"{section_name},{results.start_time},{results.duration}," +
                       f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
-                      f",{results.ps_avg},{results.ps_min},{results.ps_max}," +
+                      f"{results.ps_avg},{results.ps_min},{results.ps_max}," +
                       f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
                       f"{results.lns_avg},{results.lns_min},{results.lns_max}," +
                       f"{results.ins_avg},{results.ins_min},{results.ins_max}," +
@@ -813,7 +814,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
                 general.write(",0")
         general.write("\n")
         for v in range(results.num_voices):
-            general.write(f"{section_name} (Voice {v}),")
+            general.write(f"{section_name} (Voice {v}),,,")
             general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
             general.write(f"{results.pitch_highest_voices[v]},")
             general.write(f"{results.pitch_lowest_voices[v]},")

@@ -37,7 +37,7 @@ def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", siz
     matplotlib.pyplot.rcParams["font.family"] = "Academico"
     ps_s = []
     x = []
-    position_time = results.start_time
+    position_time = results.start_time / 60
     for s in results.slices:
         if x_axis_time:
             x.append(position_time / 60)
@@ -80,7 +80,7 @@ def chart_pitch_onset(results, x_axis_time=False, title="Pitch Onset Graph", siz
     matplotlib.pyplot.rcParams["font.family"] = "Academico"
     pitches = [[] for i in range(results.max_p_count)]
     x = []
-    position_time = results.start_time
+    position_time = results.start_time / 60
     for s in range(len(results.slices)):
         if x_axis_time:
             x.append(position_time / 60)
