@@ -488,16 +488,18 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     clean_slices(final_slices, True, [section_divisions[i][0] for i in range(len(section_divisions))])
     for s in final_slices:
         s.run_calculations(sc)
+
     clean_slices(final_slices, False, [section_divisions[i][0] for i in range(len(section_divisions))])
 
-    start_time = 0
     # Create sectional results
     for i in range(len(section_divisions)):
         section_slices = []
+        start_time = 0
         for sl in final_slices:
-            if section_divisions[i][0] <= sl.measure <= section_divisions[i][1]:
-                section_slices.append(sl)
+            if section_divisions[i][0] < sl.measure:
                 start_time += sl.duration
+            elif sl.measure <= section_divisions[i][1]:
+                section_slices.append(sl)
         bounds = global_bounds
         if use_local[i]:
             bounds = get_bounds(section_slices)
@@ -770,7 +772,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
     with open(file, file_command) as general:
         if file_command == "w":
             # Write column headings
-            general.write("Section,Starting Time,Duration,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," + \
+            general.write("Section,Starting Time,Duration,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," +
                           "LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
             for i in range(0, 12):
                 general.write(",pc" + str(i) + " dur")
@@ -781,7 +783,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             for i in range(lowest_pitch, highest_pitch + 1):
                 general.write(",p" + str(i) + " freq")
             general.write("\n")
-        general.write(f"{section_name},{results.duration},{results.start_time}," +
+        general.write(f"{section_name},{results.start_time},{results.duration}," +
                       f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
                       f",{results.ps_avg},{results.ps_min},{results.ps_max}," +
                       f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
@@ -815,7 +817,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
             general.write(f"{results.pitch_highest_voices[v]},")
             general.write(f"{results.pitch_lowest_voices[v]},")
-            general.write(",,,,,,,,,,,,,,")
+            general.write(",,,,,,,,,,,,,,,,")
             for i in range(0, 12):
                 if i in results.pc_duration_voices[v].keys():
                     general.write(f",{results.pc_duration_voices[v][i]}")
