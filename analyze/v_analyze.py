@@ -223,6 +223,7 @@ def get_slice_num(parts):
     # Get the LCM and return it. This is the number of slices per quarter note that we need.
     for item in denominators:
         denominators_list.append(item)
+    print(lcm(denominators_list))
     return lcm(denominators_list)
 
 
