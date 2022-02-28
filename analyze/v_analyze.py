@@ -223,6 +223,7 @@ def get_slice_num(parts):
     # Get the LCM and return it. This is the number of slices per quarter note that we need.
     for item in denominators:
         denominators_list.append(item)
+    # print(lcm(denominators_list))
     return lcm(denominators_list)
 
 
@@ -488,12 +489,14 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     clean_slices(final_slices, True, [section_divisions[i][0] for i in range(len(section_divisions))])
     for s in final_slices:
         s.run_calculations(sc)
+
     clean_slices(final_slices, False, [section_divisions[i][0] for i in range(len(section_divisions))])
 
     # Create sectional results
     for i in range(len(section_divisions)):
         start_time = 0
         section_slices = []
+        start_time = 0
         for sl in final_slices:
             if section_divisions[i][0] < sl.measure:
                 start_time += sl.duration
@@ -771,7 +774,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
     with open(file, file_command) as general:
         if file_command == "w":
             # Write column headings
-            general.write("Section,Starting Time,Duration,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," + \
+            general.write("Section,Starting Time,Duration,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," +
                           "LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
             for i in range(0, 12):
                 general.write(",pc" + str(i) + " dur")

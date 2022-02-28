@@ -7,7 +7,7 @@ Date: 2/4/22
 This file contains functionality for working with arrays.
 """
 
-from pctheory import array, pcset, pitch
+from pctheory import array, pcset, pitch, transformations
 
 arrays = [
     [
@@ -303,6 +303,7 @@ arrays = [
     ]
 ]
 
-m = array.make_array_chain(arrays[0][2], 3, False)
+t = array.transform_row_content(arrays[2][0], transformations.RO(3, 0, 1))
+m = array.make_array_chain(t, 2, False)
 for i in range(len(m)):
     print(m[i])
