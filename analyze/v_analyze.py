@@ -223,7 +223,7 @@ def get_slice_num(parts):
     # Get the LCM and return it. This is the number of slices per quarter note that we need.
     for item in denominators:
         denominators_list.append(item)
-    print(lcm(denominators_list))
+    # print(lcm(denominators_list))
     return lcm(denominators_list)
 
 
@@ -819,7 +819,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
             general.write(f"{results.pitch_highest_voices[v]},")
             general.write(f"{results.pitch_lowest_voices[v]},")
-            general.write(",,,,,,,,,,,,,,,,")
+            general.write(",,,,,,,,,,,,,,")
             for i in range(0, 12):
                 if i in results.pc_duration_voices[v].keys():
                     general.write(f",{results.pc_duration_voices[v][i]}")
