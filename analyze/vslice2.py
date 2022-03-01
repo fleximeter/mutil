@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from pctheory import cseg, pitch
 from decimal import Decimal
+import numpy
 
 
 def sort_pnameseg(pnameseg):
@@ -557,7 +558,7 @@ class VSlice:
 
         # Calculate c_spread
         if len(self._pseg) == 0:
-            self._chord_spread = 0
+            self._chord_spread = numpy.nan
         elif self._pseg[0] == self._pseg[len(self._pseg) - 1]:
             self._chord_spread = 0.5
         else:
