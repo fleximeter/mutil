@@ -617,7 +617,7 @@ def read_analysis_from_file(path):
         for key, val in item["cseg_duration"].items():
             result.cseg_duration[key] = Decimal(val)
         for key, val in item["pc_duration"].items():
-            result.pc_duration[int(key)] = Decimal(val[0])
+            result.pc_duration[int(key)] = Decimal(val)
         for v in range(len(item["pc_duration_voices"])):
             result.pc_duration_voices.append({})
             for key, val in item["pc_duration_voices"][v].items():
