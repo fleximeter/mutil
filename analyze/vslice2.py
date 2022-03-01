@@ -53,6 +53,7 @@ class VSlice:
         """
         self._core = False                      # Whether or not the chord is a core harmony
         self._cseg = None                       # The contour of the pset
+        self._chord_spread = 0                      # The spread measure of the chord
         self._derived_core = False              # Whether or not the chord is a derived core harmony
         self._derived_core_associations = None  # Derived core associations, if any
         self._duration = 0           # The duration of the slice in seconds
@@ -98,6 +99,14 @@ class VSlice:
         :return: The contour
         """
         return self._cseg
+
+    @property
+    def chord_spread(self):
+        """
+        The chord spread of the VSlice
+        :return: Chord spread
+        """
+        return self._chord_spread
 
     @property
     def core(self):
@@ -545,6 +554,18 @@ class VSlice:
         self._pc_cardinality = len(self._pcset)
         self._duration = (Decimal(60) / Decimal(self._tempo)) * (Decimal(self._quarter_duration.numerator) /
                                                                  Decimal(self._quarter_duration.denominator))
+
+        # Calculate c_spread
+        if len(self._pseg) == 0:
+            self._chord_spread = 0
+        elif self._pseg[0] == self._pseg[len(self._pseg) - 1]:
+            self._chord_spread = 0.5
+        else:
+            avg = 0
+            for p in self._pset:
+                avg += p.p
+            avg /= self._p_cardinality
+            self._chord_spread = (avg - self._pseg[0].p) / (self._pseg[len(self._pseg) - 1].p - self._pseg[0].p)
 
         # Calculate set theory info
         sc.pcset = self._pcset

@@ -538,6 +538,7 @@ def read_analysis_from_file(path):
         for dslice in item["slices"]:
             cslice = VSlice()
             cslice._cseg = dslice["cseg"]
+            cslice._chord_spread = float(dslice["chord_spread"])
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
@@ -723,6 +724,7 @@ def write_analysis_to_file(results, path):
         for rslice in results[i].slices:
             cslice = {}
             cslice["cseg"] = rslice.cseg
+            cslice["chord_spread"] = rslice.chord_spread
             cslice["core"] = int(rslice.core)
             cslice["derived_core"] = int(rslice.derived_core)
             cslice["derived_core_associations"] = rslice.derived_core_associations
@@ -776,13 +778,13 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             general.write("Section,Starting Time,Duration,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," +
                           "LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
             for i in range(0, 12):
-                general.write(",pc" + str(i) + " dur")
+                general.write(f",pc{i} dur")
             for i in range(0, 12):
-                general.write(",pc" + str(i) + " freq")
+                general.write(f",pc{i} freq")
             for i in range(lowest_pitch, highest_pitch + 1):
-                general.write(",p" + str(i) + " dur")
+                general.write(f",p{i} dur")
             for i in range(lowest_pitch, highest_pitch + 1):
-                general.write(",p" + str(i) + " freq")
+                general.write(f",p{i} freq")
             general.write("\n")
         general.write(f"{section_name},{results.start_time},{results.duration}," +
                       f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
@@ -882,58 +884,58 @@ def write_report(file, results):
             # Output column headings
             line = "Measure #,Start Time (seconds),Duration (seconds),Quarter duration,Chord cardinality," + \
                    "PS,Match,NS,UNS,INS,LNS,MT,Morris name,Carter name,Core,Derived core,DC associations,pcset,pset," \
-                   "psc,cseg"
+                   "psc,cseg,Chord Spread"
             for i in range(results.max_p_count):
-                line += ",Pitch " + str(i + 1)
+                line += f",Pitch {i + 1}"
             for i in range(results.ps_max):
-                line += ",Pn_" + str(i + 1)
+                line += f",Pn_{i + 1}"
             line += "\n"
             output.write(line)
 
             # Output each slice
             for item in results.slices:
-                line = str(item.measure)
-                line += "," + str(float(position))
-                line += "," + str(float(item.duration))
-                line += ",\'" + str(item.quarter_duration)
-                line += "," + str(item.p_count)
-                line += "," + str(item.ps)
+                line = f"{item.measure}"
+                line += f",{float(position)}"
+                line += f",{float(item.duration)}"
+                line += f",\'{item.quarter_duration}"
+                line += f",{item.p_count}"
+                line += f",{item.ps}"
                 if item.p_count == item.ps:
                     line += ",TRUE"
                 else:
                     line += ",FALSE"
                 if item.ns is not None:
-                    line += "," + str(item.ns)
+                    line += f",{item.ns}"
                 else:
                     line += ",N/A"
                 if item.uns is not None:
-                    line += "," + str(item.uns)
+                    line += f",{item.uns}"
                 else:
                     line += ",N/A"
-                line += "," + str(item.ins)
+                line += f",{item.ins}"
                 if item.lns is not None:
-                    line += "," + str(item.lns)
+                    line += f",{item.lns}"
                 else:
                     line += ",N/A"
                 if item.mediant is not None:
-                    line += "," + str(item.mediant)
+                    line += f",{item.mediant}"
                 else:
                     line += ",N/A"
                 if item.sc_name is not None:
-                    line += "," + str(item.sc_name)
+                    line += f",{item.sc_name}"
                 else:
                     line += ",N/A"
                 if item.sc_name_carter is not None:
-                    line += ",\"" + str(item.sc_name_carter) + "\""
+                    line += f",\"{item.sc_name_carter}\""
                 else:
                     line += ",N/A"
-                line += "," + str(item.core) + "," + str(item.derived_core)
+                line += f",{item.core},{item.derived_core}"
                 if item.derived_core:
-                    line += ",\"" + str(item.derived_core_associations) + "\""
+                    line += f",\"{item.derived_core_associations}\""
                 else:
                     line += ",N/A"
                 if item.pcset is not None:
-                    line += ",\"" + item.get_pcset_string() + "\""
+                    line += f",\"{item.get_pcset_string()}\""
                 else:
                     line += ",N/A"
                 if item.pset is not None:
@@ -942,14 +944,15 @@ def write_report(file, results):
                     line += ",N/A"
                 line += f",\"{item.get_ipseg_string()}\""
                 line += f",\"{item.get_cseg_string()}\""
+                line += f",{item.chord_spread}"
                 for i in range(results.max_p_count):
                     if i < len(item.pitchseg):
-                        line += "," + str(item.pnameseg[i])
+                        line += f",{item.pnameseg[i]}"
                     else:
                         line += ","
                 for i in range(results.ps_max):
                     if i < len(item.pseg):
-                        line += "," + str(item.pseg[i])
+                        line += f",{item.pseg[i]}"
                     else:
                         line += ","
                 line += "\n"
