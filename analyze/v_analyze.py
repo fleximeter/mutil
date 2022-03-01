@@ -494,11 +494,10 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
     # Create sectional results
     for i in range(len(section_divisions)):
-        start_time = 0
         section_slices = []
         start_time = 0
         for sl in final_slices:
-            if section_divisions[i][0] < sl.measure:
+            if sl.measure < section_divisions[i][0]:
                 start_time += sl.duration
             elif sl.measure <= section_divisions[i][1]:
                 section_slices.append(sl)
@@ -644,7 +643,7 @@ def read_analysis_from_file(path):
         for key, val in item["pset_duration"].items():
             result.pset_duration[key] = Decimal(val)
         for key, val in item["psc_duration"].items():
-            result.pset_duration[key] = Decimal(val)
+            result.psc_duration[key] = Decimal(val)
         results.append(result)
     return results
 
@@ -941,8 +940,8 @@ def write_report(file, results):
                     line += f",\"{item.get_pset_string()}\""
                 else:
                     line += ",N/A"
-                line += "," + item.get_ipseg_string()
-                line += "," + item.get_cseg_string()
+                line += f",\"{item.get_ipseg_string()}\""
+                line += f",\"{item.get_cseg_string()}\""
                 for i in range(results.max_p_count):
                     if i < len(item.pitchseg):
                         line += "," + str(item.pnameseg[i])

@@ -465,12 +465,12 @@ class VSlice:
         Gets the ipseg as a string
         :return: The ipseg as a string
         """
-        ipseg = "\"<"
+        ipseg = "<"
         for ip in self._ipseg:
             ipseg += str(ip) + ", "
         if ipseg[len(ipseg) - 1] == " ":
             ipseg = ipseg[:-2]
-        ipseg += ">\""
+        ipseg += ">"
         return ipseg
 
     def get_pcset_string(self):
