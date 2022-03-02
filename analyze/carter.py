@@ -67,25 +67,25 @@ def c_analyze_with_sections():
     path = "D:\\Carter Paper\\"
     path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
     # path = path_laptop
-    xml = path + "Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml "
-    output = path + "Register Analysis Files\\entire_piece.csv"
-    output_general = path + "Register Analysis Files\\statistics.csv"
-    results_path = path + "Register Analysis Files\\data.json"
+    xml = f"{path}Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml "
+    output = f"{path}Register Analysis Files\\entire_piece.csv"
+    output_general = f"{path}Register Analysis Files\\statistics.csv"
+    results_path = f"{path}Register Analysis Files\\data.json"
     output_global = []
     for i in range(12):
         cname = section_names[i].split(" ")
-        c_path = path + f"Register Analysis Files\\{i + 1}_"
+        c_path = f"{path}Register Analysis Files\\{i + 1}_"
         for j in range(len(cname) - 1):
-            c_path += cname[j] + "_"
-        c_path += cname[len(cname) - 1] + "_broad.csv"
+            c_path += f"{cname[j]}_"
+        c_path += f"{cname[len(cname) - 1]}_broad.csv"
         output_global.append(c_path)
     output_local = []
     for i in range(12):
         cname = section_names[i].split(" ")
-        c_path = path + f"Register Analysis Files\\{i + 1}_"
+        c_path = f"{path}Register Analysis Files\\{i + 1}_"
         for j in range(len(cname) - 1):
-            c_path += cname[j] + "_"
-        c_path += cname[len(cname) - 1] + "_local.csv"
+            c_path += f"{cname[j]}_"
+        c_path += f"{cname[len(cname) - 1]}_local.csv"
         output_local.append(c_path)
 
     # Record starting time
@@ -105,25 +105,25 @@ def c_analyze_with_sections():
     v_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
     v_analyze.write_report(output, results[0])
-    v_analyze.write_statistics(path + "\\Register Analysis Files\\csegs.csv", "Cseg,Frequency,Duration\n",
+    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs.csv", "Cseg,Frequency,Duration\n",
                                [results[0].cseg_frequency, results[0].cseg_duration])
-    v_analyze.write_statistics(path + "\\Register Analysis Files\\psets.csv", "Pset,Frequency,Duration\n",
+    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets.csv", "Pset,Frequency,Duration\n",
                                [results[0].pset_frequency, results[0].pset_duration])
-    v_analyze.write_statistics(path + "\\Register Analysis Files\\pscs.csv", "PSC,Frequency,Duration\n",
+    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs.csv", "PSC,Frequency,Duration\n",
                                [results[0].psc_frequency, results[0].psc_duration])
     for i in range(1, len(output_global) + 1):
-        v_analyze.write_general_report("Section " + str(i) + " global", output_general, "a", results[i],
+        v_analyze.write_general_report(f"Section {i} global", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)
         v_analyze.write_report(output_global[i - 1], results[i])
-        v_analyze.write_statistics(path + f"\\Register Analysis Files\\csegs_{i}.csv", "Cseg,Frequency,Duration\n",
+        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs_{i}.csv", "Cseg,Frequency,Duration\n",
                                    [results[i].cseg_frequency, results[i].cseg_duration])
-        v_analyze.write_statistics(path + f"\\Register Analysis Files\\psets_{i}.csv", "Pset,Frequency,Duration\n",
+        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets_{i}.csv", "Pset,Frequency,Duration\n",
                                    [results[i].pset_frequency, results[i].pset_duration])
-        v_analyze.write_statistics(path + f"\\Register Analysis Files\\pscs_{i}.csv", "PSC,Frequency,Duration\n",
+        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs_{i}.csv", "PSC,Frequency,Duration\n",
                                    [results[i].psc_frequency, results[i].psc_duration])
 
     for i in range(13, len(output_local) + 13):
-        v_analyze.write_general_report("Section " + str(i - 12) + " local", output_general, "a", results[i],
+        v_analyze.write_general_report(f"Section {i - 12} local", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)
         v_analyze.write_report(output_local[i - 13], results[i])
 
@@ -145,7 +145,7 @@ def c_analyze_with_sections():
 
     # Print elapsed time
     finish = time.time() - start
-    print("\nTotal elapsed time:", int(finish / 60), "minutes,", round(finish % 60, 3), "seconds")
+    print(f"\nTotal elapsed time: {int(finish / 60)} minutes, {round(finish % 60, 3)} seconds")
 
 
 def make_charts_general(results, path, voices):
@@ -157,33 +157,33 @@ def make_charts_general(results, path, voices):
     :return:
     """
     chart.chart_cardinality(results, False, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
-                            size=(14, 6), path=path + f"Register Analysis Files\\Graphs\\card_m")
+                            size=(14, 6), path=f"{path}Register Analysis Files\\Graphs\\card_m")
     chart.chart_cardinality(results, True, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
-                            size=(14, 6), path=path + f"Register Analysis Files\\Graphs\\card_t")
+                            size=(14, 6), path=f"{path}Register Analysis Files\\Graphs\\card_t")
     chart.chart_pitch_onset(results, False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
-                            path + f"Register Analysis Files\\Graphs\\onset_measure")
+                            f"{path}Register Analysis Files\\Graphs\\onset_measure")
     for i in range(len(voices)):
         chart.chart_pitch_onset(results, False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
                                                    f"({voices[i]})", (14, 6),
-                                path + f"Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
+                                f"{path}Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
     chart.chart_pitch_onset(results, True, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
-                            path + f"Register Analysis Files\\Graphs\\onset_time")
+                            f"{path}Register Analysis Files\\Graphs\\onset_time")
     for i in range(len(voices)):
         chart.chart_pitch_onset(results, True, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
                                                   f"({voices[i]})", (14, 6),
-                                path + f"Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
+                                f"{path}Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
     chart.chart_pitch_duration(results, "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
-                               path + f"Register Analysis Files\\Graphs\\pitch_duration")
+                               f"{path}Register Analysis Files\\Graphs\\pitch_duration")
     for i in range(len(voices)):
         chart.chart_pitch_duration(results, f"Pitch Duration in Elliott Carter’s Fifth String Quartet "
                                                f"({voices[i]})", (14, 6),
-                                   path + f"Register Analysis Files\\Graphs\\pitch_duration_{voices[i]}", i)
+                                   f"{path}Register Analysis Files\\Graphs\\pitch_duration_{voices[i]}", i)
     chart.chart_pc_duration(results, "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (8, 6),
-                            path + f"Register Analysis Files\\Graphs\\pc_duration")
+                            f"{path}Register Analysis Files\\Graphs\\pc_duration")
     for i in range(len(voices)):
         chart.chart_pc_duration(results, f"Pitch-Class Duration in Elliott Carter’s Fifth String Quartet "
                                             f"({voices[i]})", (8, 6),
-                                path + f"Register Analysis Files\\Graphs\\pc_duration_{voices[i]}", i)
+                                f"{path}Register Analysis Files\\Graphs\\pc_duration_{voices[i]}", i)
 
 
 def make_charts_sections(results, i, path, voices, section_names):
@@ -198,19 +198,19 @@ def make_charts_sections(results, i, path, voices, section_names):
     """
     # Create file names
     cname = section_names[i - 1].split(" ")
-    cm_path = path + f"Register Analysis Files\\Graphs\\card_m_{i}_"
-    ct_path = path + f"Register Analysis Files\\Graphs\\card_t_{i}_"
-    om_path = path + f"Register Analysis Files\\Graphs\\onset_m_{i}_"
-    ot_path = path + f"Register Analysis Files\\Graphs\\onset_t_{i}_"
-    dp_path = path + f"Register Analysis Files\\Graphs\\dur_pitch_{i}_"
-    dpc_path = path + f"Register Analysis Files\\Graphs\\dur_pc_{i}_"
+    cm_path = f"{path}Register Analysis Files\\Graphs\\card_m_{i}_"
+    ct_path = f"{path}Register Analysis Files\\Graphs\\card_t_{i}_"
+    om_path = f"{path}Register Analysis Files\\Graphs\\onset_m_{i}_"
+    ot_path = f"{path}Register Analysis Files\\Graphs\\onset_t_{i}_"
+    dp_path = f"{path}Register Analysis Files\\Graphs\\dur_pitch_{i}_"
+    dpc_path = f"{path}Register Analysis Files\\Graphs\\dur_pc_{i}_"
     for j in range(len(cname) - 1):
-        cm_path += cname[j] + "_"
-        ct_path += cname[j] + "_"
-        om_path += cname[j] + "_"
-        ot_path += cname[j] + "_"
-        dp_path += cname[j] + "_"
-        dpc_path += cname[j] + "_"
+        cm_path += f"{cname[j]}_"
+        ct_path += f"{cname[j]}_"
+        om_path += f"{cname[j]}_"
+        ot_path += f"{cname[j]}_"
+        dp_path += f"{cname[j]}_"
+        dpc_path += f"{cname[j]}_"
     cm_path += cname[len(cname) - 1]
     ct_path += cname[len(cname) - 1]
     om_path += cname[len(cname) - 1]
@@ -219,30 +219,30 @@ def make_charts_sections(results, i, path, voices, section_names):
     dpc_path += cname[len(cname) - 1]
 
     # Create charts
-    chart.chart_cardinality(results[i], False, f"Pset Cardinality Graph for Section {i} – " + section_names[i - 1],
+    chart.chart_cardinality(results[i], False, f"Pset Cardinality Graph for Section {i} – {section_names[i - 1]}",
                             path=cm_path)
-    chart.chart_cardinality(results[i], True, f"Pset Cardinality Graph for Section {i} – " + section_names[i - 1],
+    chart.chart_cardinality(results[i], True, f"Pset Cardinality Graph for Section {i} – {section_names[i - 1]}",
                             path=ct_path)
-    chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+    chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} – {section_names[i - 1]}",
                             path=om_path)
     for j in range(len(voices)):
-        chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} ({voices[j]}) – " +
-                                section_names[i - 1], path=om_path + f"_{voices[j]}", voice=j)
-    chart.chart_pitch_onset(results[i], True, f"Pitch Onsets in Section {i} – " + section_names[i - 1],
+        chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} ({voices[j]}) – "
+                                                   f"{section_names[i - 1]}", path=f"{om_path}_{voices[j]}", voice=j)
+    chart.chart_pitch_onset(results[i], True, f"Pitch Onsets in Section {i} – {section_names[i - 1]}",
                             path=ot_path)
     for j in range(len(voices)):
-        chart.chart_pitch_onset(results[i], True, f"Pitch Onsets in Section {i} ({voices[j]}) – " +
-                                section_names[i - 1], path=ot_path + f"_{voices[j]}", voice=j)
-    chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} – " + section_names[i - 1],
+        chart.chart_pitch_onset(results[i], True, f"Pitch Onsets in Section {i} ({voices[j]}) – {section_names[i - 1]}",
+                                path=f"{ot_path}_{voices[j]}", voice=j)
+    chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} – {section_names[i - 1]}",
                                path=dp_path)
     for j in range(len(voices)):
-        chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} ({voices[j]}) – " +
-                                   section_names[i - 1], path=dp_path + f"_{voices[j]}", voice=j)
-    chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} – " + section_names[i - 1],
+        chart.chart_pitch_duration(results[i], f"Pitch Durations in Section {i} ({voices[j]}) – {section_names[i - 1]}",
+                                   path=f"{dp_path}_{voices[j]}", voice=j)
+    chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} – {section_names[i - 1]}",
                             path=dpc_path)
     for j in range(len(voices)):
-        chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} ({voices[j]}) – " +
-                                section_names[i - 1], path=dpc_path + f"_{voices[j]}", voice=j)
+        chart.chart_pc_duration(results[i], f"Pitch-Class Durations in Section {i} ({voices[j]}) – "
+                                            f"{section_names[i - 1]}", path=f"{dpc_path}_{voices[j]}", voice=j)
 
 
 def metric_modulation():
