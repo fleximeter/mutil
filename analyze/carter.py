@@ -93,7 +93,7 @@ def c_analyze_with_sections():
     use_cache = False
 
     # Analyze
-    print("Analyzing...")
+    print("Analyzing entire piece...")
     results = None
 
     if use_cache:
@@ -142,6 +142,48 @@ def c_analyze_with_sections():
     #         if i in results[0].pitch_duration_voices[j]:
     #             parts += results[0].pitch_duration_voices[j][i]
     #     print(f"{i}: {total - parts}")
+
+    # Print elapsed time
+    finish = time.time() - start
+    print(f"\nTotal elapsed time: {int(finish / 60)} minutes, {round(finish % 60, 3)} seconds")
+
+
+def c_analyze_reduction():
+    """
+    Analyzes a separate reduction for Section 12
+    :return: None
+    """
+    path = "D:\\Carter Paper\\"
+    path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
+    path = path_laptop
+    xml = f"{path}Flows from String Quartet No. 5\\Section 12 Reduction - Full score - 01 12. Capriccioso.xml"
+    output = f"{path}Register Analysis Files\\Reduction Section 12\\sec12_reduction.csv"
+    output_general = f"{path}Register Analysis Files\\Reduction Section 12\\sec12_reduction_statistics.csv"
+    results_path = f"{path}Register Analysis Files\\data12.json"
+
+    # Record starting time
+    start = time.time()
+    use_cache = False
+
+    # Analyze
+    print("Analyzing section 12 reduction...")
+    results = None
+
+    if use_cache:
+        results = v_analyze.read_analysis_from_file(results_path)
+    else:
+        results = v_analyze.analyze(xml)
+        v_analyze.write_analysis_to_file(results, results_path)
+
+    v_analyze.write_general_report("Section 12", output_general, "w", results[0], results[0].lower_bound,
+                                   results[0].upper_bound)
+    v_analyze.write_report(output, results[0])
+    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\csegs.csv",
+                               "Cseg,Frequency,Duration\n", [results[0].cseg_frequency, results[0].cseg_duration])
+    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\psets.csv",
+                               "Pset,Frequency,Duration\n", [results[0].pset_frequency, results[0].pset_duration])
+    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\pscs.csv",
+                               "PSC,Frequency,Duration\n", [results[0].psc_frequency, results[0].psc_duration])
 
     # Print elapsed time
     finish = time.time() - start
@@ -273,5 +315,6 @@ if __name__ == "__main__":
     print("################### Vertical Analyzer ####################\n" + \
           "Copyright (c) 2022 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
     # c_analyze()
-    c_analyze_with_sections()
+#    c_analyze_with_sections()
+    c_analyze_reduction()
     # metric_modulation()
