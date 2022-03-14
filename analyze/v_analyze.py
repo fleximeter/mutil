@@ -40,7 +40,7 @@ def analyze(input_xml, first=-1, last=-1, use_local=False):
     stream = music21.converter.parse(input_xml)
     parts = []
     for item in stream:
-        if type(item) == music21.stream.Part:
+        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
             parts.append(item)
     results = slice_parts(parts, get_slice_num(parts), [], [use_local], first, last)
     return results

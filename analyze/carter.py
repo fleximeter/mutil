@@ -67,7 +67,7 @@ def c_analyze_with_sections():
     path = "D:\\Carter Paper\\"
     path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
     # path = path_laptop
-    xml = f"{path}Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml "
+    xml = f"{path}Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml"
     output = f"{path}Register Analysis Files\\entire_piece.csv"
     output_general = f"{path}Register Analysis Files\\statistics.csv"
     results_path = f"{path}Register Analysis Files\\data.json"
@@ -155,7 +155,7 @@ def c_analyze_reduction():
     """
     path = "D:\\Carter Paper\\"
     path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
-    path = path_laptop
+    # path = path_laptop
     xml = f"{path}Flows from String Quartet No. 5\\Section 12 Reduction - Full score - 01 12. Capriccioso.xml"
     output = f"{path}Register Analysis Files\\Reduction Section 12\\sec12_reduction.csv"
     output_general = f"{path}Register Analysis Files\\Reduction Section 12\\sec12_reduction_statistics.csv"
