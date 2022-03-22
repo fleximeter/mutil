@@ -511,6 +511,8 @@ class Results:
             self._pitch_lowest_voices = [numpy.inf for v in range(self._num_voices)]
             self._pset_duration = {}
             self._pset_frequency = {}
+            self._pcsc_duration = {}
+            self._pcsc_frequency = {}
             self._psc_duration = {}
             self._psc_frequency = {}
             self._ps_min = self._lps_card
