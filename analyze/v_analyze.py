@@ -598,9 +598,11 @@ def read_analysis_from_file(path):
         result._pitch_highest_voices = item["pitch_highest_voices"]
         result._pitch_lowest = item["pitch_lowest"]
         result._pitch_lowest_voices = item["pitch_lowest_voices"]
+        result._pset_card_avg = item["pset_card_avg"]
         result._pset_duration = {}
         result._pset_frequency = item["pset_frequency"]
         result._psc_duration = {}
+        result._pcsc_frequency = item["pcsc_frequency"]
         result._psc_frequency = item["psc_frequency"]
         result._ps_avg = item["ps_avg"]
         result._ps_max = item["ps_max"]
@@ -643,6 +645,8 @@ def read_analysis_from_file(path):
                 result.pitch_frequency_voices[v][int(key)] = val
         for key, val in item["pset_duration"].items():
             result.pset_duration[key] = Decimal(val)
+        for key, val in item["pcsc_duration"].items():
+            result.pcsc_duration[key] = Decimal(val)
         for key, val in item["psc_duration"].items():
             result.psc_duration[key] = Decimal(val)
         results.append(result)
@@ -681,9 +685,11 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_highest_voices"] = results[i].pitch_highest_voices
         data[i]["pitch_lowest"] = results[i].pitch_lowest
         data[i]["pitch_lowest_voices"] = results[i].pitch_lowest_voices
+        data[i]["pset_card_avg"] = results[i].pset_card_avg
         data[i]["pset_duration"] = {}
         data[i]["pset_frequency"] = results[i].pset_frequency
         data[i]["psc_duration"] = {}
+        data[i]["pcsc_frequency"] = results[i].pcsc_frequency
         data[i]["psc_frequency"] = results[i].psc_frequency
         data[i]["ps_avg"] = results[i].ps_avg
         data[i]["ps_max"] = results[i].ps_max
@@ -719,6 +725,8 @@ def write_analysis_to_file(results, path):
                 data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = str(val)
         for key, val in results[i].pset_duration.items():
             data[i]["pset_duration"][key] = str(val)
+        for key, val in results[i].pcsc_duration.items():
+            data[i]["pcsc_duration"][key] = str(val)
         for key, val in results[i].psc_duration.items():
             data[i]["psc_duration"][key] = str(val)
         for rslice in results[i].slices:
@@ -775,8 +783,8 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
     with open(file, file_command) as general:
         if file_command == "w":
             # Write column headings
-            general.write("Section,Starting Time,Duration,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," +
-                          "LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
+            general.write("Section,Starting Time,Duration,Pset card avg,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,"
+                          "UNS min,UNS max,LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
             for i in range(0, 12):
                 general.write(f",pc{i} dur")
             for i in range(0, 12):
@@ -786,14 +794,13 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
             for i in range(lowest_pitch, highest_pitch + 1):
                 general.write(f",p{i} freq")
             general.write("\n")
-        general.write(f"{section_name},{results.start_time},{results.duration}," +
+        general.write(f"{section_name},{results.start_time},{results.duration},{results.pset_card_avg}," +
                       f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
                       f"{results.ps_avg},{results.ps_min},{results.ps_max}," +
                       f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
                       f"{results.lns_avg},{results.lns_min},{results.lns_max}," +
                       f"{results.ins_avg},{results.ins_min},{results.ins_max}," +
-                      f"{results.mediant_avg},{results.mediant_min}," +
-                      f"{results.mediant_max}")
+                      f"{results.mediant_avg},{results.mediant_min},{results.mediant_max}")
         for i in range(0, 12):
             if i in results.pc_duration.keys():
                 general.write(f",{results.pc_duration[i]}")
@@ -816,7 +823,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
                 general.write(",0")
         general.write("\n")
         for v in range(results.num_voices):
-            general.write(f"{section_name} (Voice {v}),,,")
+            general.write(f"{section_name} (Voice {v}),,,,")
             general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
             general.write(f"{results.pitch_highest_voices[v]},")
             general.write(f"{results.pitch_lowest_voices[v]},")

@@ -62,8 +62,11 @@ class Results:
         self._pitch_highest_voices = None
         self._pitch_lowest = numpy.inf
         self._pitch_lowest_voices = None
+        self._pset_card_avg = 0
         self._pset_duration = None
         self._pset_frequency = None
+        self._pcsc_duration = None
+        self._pcsc_frequency = None
         self._psc_duration = None
         self._psc_frequency = None
         self._ps_avg = 0  # The PS average
@@ -339,6 +342,14 @@ class Results:
         return self._pitch_lowest_voices
 
     @property
+    def pset_card_avg(self):
+        """
+        The average pset cardinality of the analyzed measures (by duration)
+        :return: The average pset cardinality
+        """
+        return self._pset_card_avg
+
+    @property
     def pset_duration(self):
         """
         A dictionary in which the psets that occur in the analyzed measures are the keys,
@@ -355,6 +366,24 @@ class Results:
         :return: A dictionary
         """
         return self._pset_frequency
+
+    @property
+    def pcsc_duration(self):
+        """
+        A dictionary in which the pscs that occur in the analyzed measures are the keys,
+        and their cumulative durations in the analyzed measures (in seconds) are the values
+        :return: A dictionary
+        """
+        return self._pcsc_duration
+
+    @property
+    def pcsc_frequency(self):
+        """
+        A dictionary in which the pscs that occur in the analyzed measures are the keys,
+        and the number of nonconsecutive occurrences in the analyzed measures are the values
+        :return: A dictionary
+        """
+        return self._pcsc_frequency
 
     @property
     def psc_duration(self):
@@ -492,6 +521,7 @@ class Results:
                 self._duration += s.duration
                 self._quarter_duration += s.quarter_duration
                 if s.ps is not None:
+                    self._pset_card_avg += len(s.pset) * s.duration
                     self._ps_avg += s.ps
                     if self._ps_max < s.ps:
                         self._ps_max = s.ps
@@ -596,6 +626,12 @@ class Results:
                 else:
                     self._psc_frequency[psc] += 1
                     self._psc_duration[psc] += s.duration
+                if s.sc_name not in self._pcsc_frequency:
+                    self._pcsc_frequency[s.sc_name] = 1
+                    self._pcsc_duration[s.sc_name] = s.duration
+                else:
+                    self._pcsc_frequency[s.sc_name] += 1
+                    self._pcsc_duration[s.sc_name] += s.duration
 
         # Finalize average calculation
         non_null = self._get_non_null()
@@ -603,6 +639,7 @@ class Results:
         self._lns_avg /= non_null
         self._mediant_avg /= non_null
         self._ps_avg /= len(self._slices)
+        self._pset_card_avg = float(self._pset_card_avg / self._duration)
         self._uns_avg /= non_null
 
     def _get_non_null(self):

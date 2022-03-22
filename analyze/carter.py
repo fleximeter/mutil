@@ -111,6 +111,8 @@ def c_analyze_with_sections():
                                [results[0].pset_frequency, results[0].pset_duration])
     v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs.csv", "PSC,Frequency,Duration\n",
                                [results[0].psc_frequency, results[0].psc_duration])
+    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs.csv", "SC,Frequency,Duration\n",
+                               [results[0].pcsc_frequency, results[0].pcsc_duration])
     for i in range(1, len(output_global) + 1):
         v_analyze.write_general_report(f"Section {i} global", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)
@@ -121,6 +123,8 @@ def c_analyze_with_sections():
                                    [results[i].pset_frequency, results[i].pset_duration])
         v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs_{i}.csv", "PSC,Frequency,Duration\n",
                                    [results[i].psc_frequency, results[i].psc_duration])
+        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs_{i}.csv", "SC,Frequency,Duration\n",
+                                   [results[i].pcsc_frequency, results[i].pcsc_duration])
 
     for i in range(13, len(output_local) + 13):
         v_analyze.write_general_report(f"Section {i - 12} local", output_general, "a", results[i],
@@ -315,6 +319,6 @@ if __name__ == "__main__":
     print("################### Vertical Analyzer ####################\n" + \
           "Copyright (c) 2022 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
     # c_analyze()
-#    c_analyze_with_sections()
-    c_analyze_reduction()
+    c_analyze_with_sections()
+    # c_analyze_reduction()
     # metric_modulation()
