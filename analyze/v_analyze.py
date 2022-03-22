@@ -688,6 +688,7 @@ def write_analysis_to_file(results, path):
         data[i]["pset_card_avg"] = results[i].pset_card_avg
         data[i]["pset_duration"] = {}
         data[i]["pset_frequency"] = results[i].pset_frequency
+        data[i]["pcsc_duration"] = {}
         data[i]["psc_duration"] = {}
         data[i]["pcsc_frequency"] = results[i].pcsc_frequency
         data[i]["psc_frequency"] = results[i].psc_frequency
