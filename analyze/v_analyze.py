@@ -538,7 +538,7 @@ def read_analysis_from_file(path):
         for dslice in item["slices"]:
             cslice = VSlice()
             cslice._cseg = dslice["cseg"]
-            cslice._chord_spread = float(dslice["chord_spread"])
+            cslice._pset_spacing_index = float(dslice["chord_spread"])
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
@@ -599,6 +599,7 @@ def read_analysis_from_file(path):
         result._pitch_lowest = item["pitch_lowest"]
         result._pitch_lowest_voices = item["pitch_lowest_voices"]
         result._pset_card_avg = item["pset_card_avg"]
+        result._pset_spacing_index_avg = item["pset_spacing_index_avg"]
         result._pset_duration = {}
         result._pset_frequency = item["pset_frequency"]
         result._psc_duration = {}
@@ -686,6 +687,7 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_lowest"] = results[i].pitch_lowest
         data[i]["pitch_lowest_voices"] = results[i].pitch_lowest_voices
         data[i]["pset_card_avg"] = results[i].pset_card_avg
+        data[i]["pset_spacing_index_avg"] = results[i].pset_spacing_index_avg
         data[i]["pset_duration"] = {}
         data[i]["pset_frequency"] = results[i].pset_frequency
         data[i]["pcsc_duration"] = {}
@@ -733,7 +735,7 @@ def write_analysis_to_file(results, path):
         for rslice in results[i].slices:
             cslice = {}
             cslice["cseg"] = rslice.cseg
-            cslice["chord_spread"] = rslice.chord_spread
+            cslice["chord_spread"] = rslice.pset_spacing_index
             cslice["core"] = int(rslice.core)
             cslice["derived_core"] = int(rslice.derived_core)
             cslice["derived_core_associations"] = rslice.derived_core_associations
@@ -784,8 +786,9 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
     with open(file, file_command) as general:
         if file_command == "w":
             # Write column headings
-            general.write("Section,Starting Time,Duration,Pset card avg,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,"
-                          "UNS min,UNS max,LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
+            general.write("Section,Starting Time,Duration,Pset card avg,PSI avg,LPS,P_U,P_L,PS avg,PS min,PS max," +
+                          "UNS avg,UNS min,UNS max,LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min," +
+                          "MT max")
             for i in range(0, 12):
                 general.write(f",pc{i} dur")
             for i in range(0, 12):
@@ -796,8 +799,8 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
                 general.write(f",p{i} freq")
             general.write("\n")
         general.write(f"{section_name},{results.start_time},{results.duration},{results.pset_card_avg}," +
-                      f"{results.lps_card},{results.pitch_highest},{results.pitch_lowest}," +
-                      f"{results.ps_avg},{results.ps_min},{results.ps_max}," +
+                      f"{results.pset_spacing_index_avg},{results.lps_card},{results.pitch_highest}," +
+                      f"{results.pitch_lowest},{results.ps_avg},{results.ps_min},{results.ps_max}," +
                       f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
                       f"{results.lns_avg},{results.lns_min},{results.lns_max}," +
                       f"{results.ins_avg},{results.ins_min},{results.ins_max}," +
@@ -824,7 +827,7 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
                 general.write(",0")
         general.write("\n")
         for v in range(results.num_voices):
-            general.write(f"{section_name} (Voice {v}),,,,")
+            general.write(f"{section_name} (Voice {v}),,,,,")
             general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
             general.write(f"{results.pitch_highest_voices[v]},")
             general.write(f"{results.pitch_lowest_voices[v]},")
@@ -952,7 +955,7 @@ def write_report(file, results):
                     line += ",N/A"
                 line += f",\"{item.get_ipseg_string()}\""
                 line += f",\"{item.get_cseg_string()}\""
-                line += f",{item.chord_spread}"
+                line += f",{item.pset_spacing_index}"
                 for i in range(results.max_p_count):
                     if i < len(item.pitchseg):
                         line += f",{item.pnameseg[i]}"

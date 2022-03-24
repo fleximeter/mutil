@@ -208,6 +208,10 @@ def make_charts_general(results, path, voices):
                             size=(14, 6), path=f"{path}Register Analysis Files\\Graphs\\card_t")
     chart.chart_pitch_onset(results, False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
                             f"{path}Register Analysis Files\\Graphs\\onset_measure")
+    chart.chart_pset_spacing_index(results, False, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
+                                   (14, 6), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_m")
+    chart.chart_pset_spacing_index(results, True, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
+                                   (14, 6), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_t")
     for i in range(len(voices)):
         chart.chart_pitch_onset(results, False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
                                                    f"({voices[i]})", (14, 6),
@@ -246,6 +250,8 @@ def make_charts_sections(results, i, path, voices, section_names):
     cname = section_names[i - 1].split(" ")
     cm_path = f"{path}Register Analysis Files\\Graphs\\card_m_{i}_"
     ct_path = f"{path}Register Analysis Files\\Graphs\\card_t_{i}_"
+    psim_path = f"{path}Register Analysis Files\\Graphs\\psi_m_{i}_"
+    psit_path = f"{path}Register Analysis Files\\Graphs\\psi_t_{i}_"
     om_path = f"{path}Register Analysis Files\\Graphs\\onset_m_{i}_"
     ot_path = f"{path}Register Analysis Files\\Graphs\\onset_t_{i}_"
     dp_path = f"{path}Register Analysis Files\\Graphs\\dur_pitch_{i}_"
@@ -269,6 +275,10 @@ def make_charts_sections(results, i, path, voices, section_names):
                             path=cm_path)
     chart.chart_cardinality(results[i], True, f"Pset Cardinality Graph for Section {i} – {section_names[i - 1]}",
                             path=ct_path)
+    chart.chart_pset_spacing_index(results[i], False, f"Pset Spacing Indices in Section {i} – {section_names[i - 1]}",
+                                   path=psim_path)
+    chart.chart_pset_spacing_index(results[i], True, f"Pset Spacing Indices in Section {i} – {section_names[i - 1]}",
+                                   path=psit_path)
     chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} – {section_names[i - 1]}",
                             path=om_path)
     for j in range(len(voices)):

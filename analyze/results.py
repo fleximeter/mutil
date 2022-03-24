@@ -65,6 +65,7 @@ class Results:
         self._pset_card_avg = 0
         self._pset_duration = None
         self._pset_frequency = None
+        self._pset_spacing_index_avg = 0
         self._pcsc_duration = None
         self._pcsc_frequency = None
         self._psc_duration = None
@@ -350,6 +351,14 @@ class Results:
         return self._pset_card_avg
 
     @property
+    def pset_spacing_index_avg(self):
+        """
+        The average pset spacing index of the analyzed measures (by duration)
+        :return: The average pset spacing index
+        """
+        return self._pset_spacing_index_avg
+
+    @property
     def pset_duration(self):
         """
         A dictionary in which the psets that occur in the analyzed measures are the keys,
@@ -488,6 +497,7 @@ class Results:
         Calculates values for the results object
         :return: None
         """
+        valid_durations_for_spacing = 0
         if len(self._slices) > 0:
             # Establish basic information
             self._lower_bound = self._slices[0].lower_bound
@@ -517,30 +527,32 @@ class Results:
             self._psc_frequency = {}
             self._ps_min = self._lps_card
             self._uns_min = self._lps_card
+            valid_durations_for_spacing = 0
 
             # Sum values for averages and establish maxes and mins
             for s in self._slices:
                 self._duration += s.duration
                 self._quarter_duration += s.quarter_duration
-                if s.ps is not None:
+                if s.p_cardinality > 0:
                     self._pset_card_avg += len(s.pset) * s.duration
+                    self._pset_spacing_index_avg += s.pset_spacing_index * s.duration
+                    valid_durations_for_spacing += s.duration
                     self._ps_avg += s.ps
                     if self._ps_max < s.ps:
                         self._ps_max = s.ps
                     if self._ps_min > s.ps:
                         self._ps_min = s.ps
-                    if s.p_cardinality > 0:
-                        if self._pitch_lowest > s.pseg[0].p:
-                            self._pitch_lowest = s.pseg[0].p
-                        if self._pitch_highest < s.pseg[len(s.pseg) - 1].p:
-                            self._pitch_highest = s.pseg[len(s.pseg) - 1].p
-                        for v in range(self._num_voices):
-                            if len(s.psegs[v]) > 0:
-                                # print(v, len(self._pitch_lowest_voices), len(s.psegs))
-                                if self._pitch_lowest_voices[v] > s.psegs[v][0].p:
-                                    self._pitch_lowest_voices[v] = s.psegs[v][0].p
-                                if self._pitch_highest_voices[v] < s.psegs[v][len(s.psegs[v]) - 1].p:
-                                    self._pitch_highest_voices[v] = s.psegs[v][len(s.psegs[v]) - 1].p
+                    if self._pitch_lowest > s.pseg[0].p:
+                        self._pitch_lowest = s.pseg[0].p
+                    if self._pitch_highest < s.pseg[len(s.pseg) - 1].p:
+                        self._pitch_highest = s.pseg[len(s.pseg) - 1].p
+                    for v in range(self._num_voices):
+                        if len(s.psegs[v]) > 0:
+                            # print(v, len(self._pitch_lowest_voices), len(s.psegs))
+                            if self._pitch_lowest_voices[v] > s.psegs[v][0].p:
+                                self._pitch_lowest_voices[v] = s.psegs[v][0].p
+                            if self._pitch_highest_voices[v] < s.psegs[v][len(s.psegs[v]) - 1].p:
+                                self._pitch_highest_voices[v] = s.psegs[v][len(s.psegs[v]) - 1].p
                 if s.uns is not None:
                     self._ins_avg += s.ins
                     self._lns_avg += s.lns
@@ -642,6 +654,7 @@ class Results:
         self._mediant_avg /= non_null
         self._ps_avg /= len(self._slices)
         self._pset_card_avg = float(self._pset_card_avg / self._duration)
+        self._pset_spacing_index_avg = float(self._pset_spacing_index_avg / valid_durations_for_spacing)
         self._uns_avg /= non_null
 
     def _get_non_null(self):

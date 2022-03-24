@@ -45,8 +45,8 @@ def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", siz
         else:
             position = s.measure + float(s.start_position / s.time_signature.barDuration.quarterLength)
             x.append(position)
-        if s.ps is not None:
-            ps_s.append(s.ps)
+        if s.p_cardinality > 0:
+            ps_s.append(s.p_cardinality)
         else:
             ps_s.append(0)
     fig = matplotlib.pyplot.figure(figsize=size)
@@ -58,6 +58,48 @@ def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", siz
     else:
         matplotlib.pyplot.xlabel("Measure No.")
     matplotlib.pyplot.ylabel("Pset Cardinality")
+    if path is None:
+        matplotlib.pyplot.show()
+    else:
+        matplotlib.pyplot.savefig(path)
+        matplotlib.pyplot.close()
+
+
+def chart_pset_spacing_index(results, x_axis_time=False, title="Pset Spacing Index Chart", size=(8, 6), path=None):
+    """
+    Makes a step plot of pset spacing index
+    :param results: A Results object
+    :param x_axis_time: Whether or not to use time as the x axis (default is measure number)
+    :param title: The title of the plot
+    :param size: The size of the plot
+    :param path: A path to save the chart
+    :return: None
+    """
+    matplotlib.pyplot.clf()
+    matplotlib.pyplot.rcParams["font.family"] = "Academico"
+    ps_s = []
+    x = []
+    position_time = results.start_time
+    for s in results.slices:
+        if x_axis_time:
+            x.append(position_time / 60)
+            position_time += s.duration
+        else:
+            position = s.measure + float(s.start_position / s.time_signature.barDuration.quarterLength)
+            x.append(position)
+        if s.p_cardinality > 0:
+            ps_s.append(s.pset_spacing_index)
+        else:
+            ps_s.append(numpy.nan)
+    fig = matplotlib.pyplot.figure(figsize=size)
+    ax = fig.add_subplot(111)
+    ax.step(x, ps_s, color="#555555", linewidth=0.5, markersize=1)
+    matplotlib.pyplot.title(title, fontsize=18)
+    if x_axis_time:
+        matplotlib.pyplot.xlabel("Time (minutes)")
+    else:
+        matplotlib.pyplot.xlabel("Measure No.")
+    matplotlib.pyplot.ylabel("Pset Spacing Index")
     if path is None:
         matplotlib.pyplot.show()
     else:
