@@ -54,7 +54,7 @@ class VSlice:
         """
         self._core = False                      # Whether or not the chord is a core harmony
         self._cseg = None                       # The contour of the pset
-        self._pset_spacing_index = 0                      # The spread measure of the chord
+        self._pset_spacing_index = 0            # The spread measure of the chord
         self._derived_core = False              # Whether or not the chord is a derived core harmony
         self._derived_core_associations = None  # Derived core associations, if any
         self._duration = 0           # The duration of the slice in seconds
