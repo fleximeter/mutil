@@ -535,8 +535,9 @@ class Results:
                 self._quarter_duration += s.quarter_duration
                 if s.p_cardinality > 0:
                     self._pset_card_avg += len(s.pset) * s.duration
-                    self._pset_spacing_index_avg += Decimal(s.pset_spacing_index) * s.duration
-                    valid_durations_for_spacing += s.duration
+                    if s.pset_spacing_index is not numpy.nan:
+                        self._pset_spacing_index_avg += Decimal(s.pset_spacing_index) * s.duration
+                        valid_durations_for_spacing += s.duration
                     self._ps_avg += s.ps
                     if self._ps_max < s.ps:
                         self._ps_max = s.ps

@@ -329,6 +329,6 @@ if __name__ == "__main__":
     print("################### Vertical Analyzer ####################\n" + \
           "Copyright (c) 2022 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
     # c_analyze()
-    c_analyze_with_sections()
-    # c_analyze_reduction()
+    # c_analyze_with_sections()
+    c_analyze_reduction()
     # metric_modulation()

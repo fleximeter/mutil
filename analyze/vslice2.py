@@ -557,10 +557,8 @@ class VSlice:
                                                                  Decimal(self._quarter_duration.denominator))
 
         # Calculate pset spacing index
-        if len(self._pseg) == 0:
+        if len(self._pseg) < 3:
             self._pset_spacing_index = numpy.nan
-        elif self._pseg[0] == self._pseg[len(self._pseg) - 1]:
-            self._pset_spacing_index = 0.5
         else:
             avg = 0
             for p in self._pset:

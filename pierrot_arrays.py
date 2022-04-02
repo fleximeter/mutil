@@ -303,7 +303,7 @@ arrays = [
     ]
 ]
 
-t = array.transform_row_content(arrays[0][2], transformations.RO(5, 0, 1))
-m = array.make_array_chain(t, 1, False)
+t = array.transform_row_content(arrays[0][2], transformations.RO(11, 0, 1))
+m = array.make_array_chain(t, 2, False)
 for i in range(len(m)):
     print(m[i])
