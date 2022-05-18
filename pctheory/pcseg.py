@@ -621,6 +621,26 @@ class TwelveToneMatrix:
         if row is not None:
             self.import_row(row)
 
+    def __str__(self):
+        """
+        Generates a string representation of the TwelveToneMatrix that can be printed
+        :return: A string representation of the TwelveToneMatrix
+        """
+        lines = "     "
+        for i in range(12):
+            lines += f"{self._labels_top[i]: <5} "
+        lines += "\n"
+        for i in range(12):
+            lines += f"{self._labels_left[i]: <4}"
+            for j in range(12):
+                lines += f"  {str(self._mx[i][j])}   "
+            lines += f"{self._labels_right[i]: >4}"
+            lines += "\n"
+        lines += "     "
+        for i in range(12):
+            lines += f"{self._labels_bottom[i]: <5} "
+        return lines
+
     @property
     def labels_bottom(self):
         """
@@ -715,7 +735,7 @@ class TwelveToneMatrix:
             i_lbl = self._mx[0][i] - self._mx[0][0]
             r_lbl = self._mx[i][len(self._row) - 1] - self._mx[0][len(self._row) - 1]
             ri_lbl = self._mx[len(self._row) - 1][i] - self._mx[len(self._row) - 1][0]
-            self._labels_bottom.append(ri_lbl.pc)
-            self._labels_left.append(p_lbl.pc)
-            self._labels_right.append(r_lbl.pc)
-            self._labels_top.append(i_lbl.pc)
+            self._labels_bottom.append(f"T{ri_lbl.pc}RI")
+            self._labels_left.append(f"T{p_lbl.pc}")
+            self._labels_right.append(f"T{r_lbl.pc}R")
+            self._labels_top.append(f"T{i_lbl.pc}I")

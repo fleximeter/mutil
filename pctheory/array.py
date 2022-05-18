@@ -24,6 +24,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from pctheory import pcset, pcset, poset, pitch, tables, transformations
 
 
+def str_array(array: list):
+    """
+    Converts an array of pcs to string
+    :param array: The array to convert
+    :return: The string
+    """
+    str_temp = ""
+    for l in array:
+        for pc in l:
+            str_temp += f"{pc} "
+        str_temp += "\n"
+    return str_temp
+
+
 def transform_row_content(array: list, ro: transformations.RO):
     """
     Transforms a 2D array with no nestings
