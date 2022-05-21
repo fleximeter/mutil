@@ -49,7 +49,7 @@ def create_ormap(row: list):
     """
     omap = {}
     for i in range(len(row)):
-        omap[pitch.PitchClass(row[i].pc)] = i
+        omap[pitch.PitchClass12(row[i].pc)] = i
     return omap
 
 
@@ -62,14 +62,14 @@ def generate_pcseg_from_interval_list(interval_list: list, starting_pc=None):
     """
     if starting_pc is None:
         random.seed()
-        pcseg = [pitch.PitchClass(random.randrange(12))]
+        pcseg = [pitch.PitchClass12(random.randrange(12))]
         for i in range(len(interval_list)):
-            pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i]))
+            pcseg.append(pitch.PitchClass12(pcseg[i].pc + interval_list[i]))
         return pcseg
     else:
-        pcseg = [pitch.PitchClass(starting_pc)]
+        pcseg = [pitch.PitchClass12(starting_pc)]
         for i in range(len(interval_list)):
-            pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i]))
+            pcseg.append(pitch.PitchClass12(pcseg[i].pc + interval_list[i]))
         return pcseg
 
 
@@ -83,9 +83,9 @@ def generate_random_all_interval_row(name_tables=None, starting_pc=None):
     _tables = name_tables if name_tables is not None else tables.create_tables()
     random.seed()
     generator = _tables["allIntervalRowGenerators"][random.randrange(len(_tables["allIntervalRowGenerators"]))]
-    row = [pitch.PitchClass(random.randrange(12) if starting_pc is None else starting_pc)]
+    row = [pitch.PitchClass12(random.randrange(12) if starting_pc is None else starting_pc)]
     for i in range(1, 12):
-        row.append(pitch.PitchClass(row[i - 1].pc + generator[i - 1]))
+        row.append(pitch.PitchClass12(row[i - 1].pc + generator[i - 1]))
     return row
 
 
@@ -98,17 +98,17 @@ def generate_random_pcseg(length: int, non_duplicative=False, starting_pc=None):
     :return: A random pcseg
     """
     random.seed()
-    pcseg = [pitch.PitchClass(random.randrange(12) if starting_pc is None else starting_pc)]
+    pcseg = [pitch.PitchClass12(random.randrange(12) if starting_pc is None else starting_pc)]
     if non_duplicative and 0 < length < 12:
         pcs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
             j = random.randrange(len(pcs))
-            pcseg.append(pitch.PitchClass(pcs[j]))
+            pcseg.append(pitch.PitchClass12(pcs[j]))
             del pcs[j]
     elif not non_duplicative and 0 < length:
         for i in range(length - 1):
-            pcseg.append(pitch.PitchClass(random.randrange(12)))
+            pcseg.append(pitch.PitchClass12(random.randrange(12)))
     else:
         raise ValueError("Invalid length")
     return pcseg
@@ -125,7 +125,7 @@ def generate_random_pcseg_from_pcset(pcset: set):
     setseg = list(pcset)
     for i in range(len(setseg)):
         j = random.randrange(len(setseg))
-        pcseg.append(pitch.PitchClass(setseg[j].pc))
+        pcseg.append(pitch.PitchClass12(setseg[j].pc))
         del setseg[j]
     return pcseg
 
@@ -191,7 +191,7 @@ def invert(pcseg: list):
     """
     pcseg2 = []
     for pc in pcseg:
-        pcseg2.append(pitch.PitchClass(pc.pc * 11))
+        pcseg2.append(pitch.PitchClass12(pc.pc * 11))
     return pcseg2
 
 
@@ -210,7 +210,7 @@ def imb_n(pcseg: list, n: int, name_tables=None):
     for i in range(len(pcseg) + 1 - n):
         for j in range(i, i + n):
             imb.add(pcseg[j])
-        scs.append(pcset.SetClass(name_tables, imb))
+        scs.append(pcset.SetClass12(name_tables, imb))
         imb.clear()
     return scs
 
@@ -250,7 +250,7 @@ def make_pcseg(*args):
     :param *args: Pcs
     :return: A pcseg
     """
-    return [pitch.PitchClass(pc) for pc in args]
+    return [pitch.PitchClass12(pc) for pc in args]
 
 
 def multiply(pcseg: list, n: int):
@@ -262,7 +262,7 @@ def multiply(pcseg: list, n: int):
     """
     pcseg2 = []
     for pc in pcseg:
-        pcseg2.append(pitch.PitchClass(pc.pc * n))
+        pcseg2.append(pitch.PitchClass12(pc.pc * n))
     return pcseg2
 
 
@@ -275,7 +275,7 @@ def multiply_order(pcseg: list, n: int):
     """
     pcseg2 = []
     for i in range(len(pcseg)):
-        pcseg2.append(pitch.PitchClass(pcseg[(i * n) % len(pcseg)].pc))
+        pcseg2.append(pitch.PitchClass12(pcseg[(i * n) % len(pcseg)].pc))
     return pcseg2
 
 
@@ -313,7 +313,7 @@ def retrograde(pcseg: list):
     """
     pcseg2 = []
     for i in range(len(pcseg) - 1, -1, -1):
-        pcseg2.append(pitch.PitchClass(pcseg[i].pc))
+        pcseg2.append(pitch.PitchClass12(pcseg[i].pc))
     return pcseg2
 
 
@@ -326,7 +326,7 @@ def rotate(pcseg: list, n: int):
     """
     pcseg2 = []
     for i in range(len(pcseg)):
-        pcseg2.append(pitch.PitchClass(pcseg[(i - n) % len(pcseg)].pc))
+        pcseg2.append(pitch.PitchClass12(pcseg[(i - n) % len(pcseg)].pc))
     return pcseg2
 
 
@@ -339,7 +339,7 @@ def transpose(pcseg: list, n: int):
     """
     pcseg2 = []
     for pc in pcseg:
-        pcseg2.append(pitch.PitchClass(pc.pc + n))
+        pcseg2.append(pitch.PitchClass12(pc.pc + n))
     return pcseg2
 
 
@@ -441,7 +441,7 @@ class InvarianceMatrix:
         """
         pcseg = []
         for i in range(len(self._mx)):
-            pcseg.append(pitch.PitchClass(self._mx[i][j].pc))
+            pcseg.append(pitch.PitchClass12(self._mx[i][j].pc))
         return pcseg
 
     def get_row(self, i):
@@ -472,7 +472,7 @@ class InvarianceMatrix:
         for i in range(len(c)):
             mx_row = []
             for j in range(len(a)):
-                mx_row.append(pitch.PitchClass(b[i].pc + a[j].pc))
+                mx_row.append(pitch.PitchClass12(b[i].pc + a[j].pc))
             self._mx.append(mx_row)
         self._a = a.copy()
         self._b = b
@@ -580,7 +580,7 @@ class RotationalArray:
         """
         pcseg = []
         for i in range(len(self._array)):
-            pcseg.append(pitch.PitchClass(self._array[i][j].pc))
+            pcseg.append(pitch.PitchClass12(self._array[i][j].pc))
         return pcseg
 
     def get_row(self, i):
@@ -706,7 +706,7 @@ class TwelveToneMatrix:
         """
         pcseg = []
         for i in range(len(self._mx)):
-            pcseg.append(pitch.PitchClass(self._mx[i][j].pc))
+            pcseg.append(pitch.PitchClass12(self._mx[i][j].pc))
         return pcseg
 
     def get_row(self, i):

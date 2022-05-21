@@ -25,7 +25,7 @@ from typing import Set
 from pctheory import pitch, tables, transformations
 
 
-class SetClass:
+class SetClass12:
     """
     Represents a pc-set-class
     """
@@ -167,7 +167,7 @@ class SetClass:
         :param value: The new pcset
         :return:
         """
-        self._pcset = SetClass.calculate_prime_form(value, self._weight_right)
+        self._pcset = SetClass12.calculate_prime_form(value, self._weight_right)
         self._make_names()
 
     @property
@@ -186,7 +186,7 @@ class SetClass:
         :return:
         """
         self._weight_right = value
-        self._pcset = SetClass.calculate_prime_form(self._pcset, self._weight_right)
+        self._pcset = SetClass12.calculate_prime_form(self._pcset, self._weight_right)
 
     @staticmethod
     def calculate_prime_form(pcset: set, weight_from_right: bool = True):
@@ -199,9 +199,9 @@ class SetClass:
         prime_set = set()
         if len(pcset) > 0:
             lists_to_weight = []
-            int_set = SetClass._make_int_set(pcset)
+            int_set = SetClass12._make_int_set(pcset)
             pclist = list(int_set)
-            inverted = list(SetClass._make_int_set(set(SetClass._invert(pclist))))
+            inverted = list(SetClass12._make_int_set(set(SetClass12._invert(pclist))))
             prime_list = None
 
             # Add regular forms
@@ -234,13 +234,13 @@ class SetClass:
 
             # Weight lists
             if weight_from_right:
-                prime_list = SetClass._weight_from_right(lists_to_weight)
+                prime_list = SetClass12._weight_from_right(lists_to_weight)
             else:
-                prime_list = SetClass._weight_left(lists_to_weight)
+                prime_list = SetClass12._weight_left(lists_to_weight)
 
             # Create pcset
             for pc in prime_list:
-                prime_set.add(pitch.PitchClass(pc))
+                prime_set.add(pitch.PitchClass12(pc))
 
         return prime_set
 
@@ -265,7 +265,7 @@ class SetClass:
         Gets the abstract complement of the SetClass
         :return: The abstract complement SetClass
         """
-        csc = SetClass(self._tables)
+        csc = SetClass12(self._tables)
         csc.pcset = get_complement(self._pcset)
         return csc
 
@@ -276,35 +276,15 @@ class SetClass:
         """
         iv = [0, 0, 0, 0, 0, 0, 0, 0]
         c = get_complement(self._pcset)
-        tn = transformations.get_ttos(transformations.OperatorType.Tn)
-        tni = transformations.get_ttos(transformations.OperatorType.TnI)
-        tnm5 = transformations.get_ttos(transformations.OperatorType.TnM5)
-        tnm7 = transformations.get_ttos(transformations.OperatorType.TnM7)
-
-        for k in tn:
-            h = k.transform(self._pcset)
-            if h == self._pcset:
-                iv[0] += 1
-            if h.issubset(c):
-                iv[4] += 1
-        for k in tni:
-            h = k.transform(self._pcset)
-            if h == self._pcset:
-                iv[1] += 1
-            if h.issubset(c):
-                iv[5] += 1
-        for k in tnm5:
-            h = k.transform(self._pcset)
-            if h == self._pcset:
-                iv[2] += 1
-            if h.issubset(c):
-                iv[6] += 1
-        for k in tnm7:
-            h = k.transform(self._pcset)
-            if h == self._pcset:
-                iv[3] += 1
-            if h.issubset(c):
-                iv[7] += 1
+        ttos = transformations.get_ttos12()
+        for i in range(12):
+            h = [ttos[f"T{i}"].transform(self._pcset), ttos[f"T{i}I"].transform(self._pcset),
+                 ttos[f"T{i}M"].transform(self._pcset), ttos[f"T{i}MI"].transform(self._pcset)]
+            for j in range(4):
+                if h[j] == self._pcset:
+                    iv[j] += 1
+                if h[j].issubset(c):
+                    iv[4 + j] += 1
         return iv
 
     def get_subset_classes(self):
@@ -315,7 +295,7 @@ class SetClass:
         sub = subsets(self._pcset)
         subset_classes = set()
         for s in sub:
-            subset_classes.add(SetClass(self._tables, s))
+            subset_classes.add(SetClass12(self._tables, s))
         return subset_classes
 
     def get_z_relation(self):
@@ -323,7 +303,7 @@ class SetClass:
         Gets the Z-relation of the SetClass
         :return: The Z-relation of the SetClass
         """
-        zset = SetClass(self._tables)
+        zset = SetClass12(self._tables)
         f = self.name_forte
         if "Z" in f:
             zset.load_from_name(self._tables["zNameTable"][f])
@@ -367,7 +347,7 @@ class SetClass:
         pname = pname.replace("[", "")
         pname = pname.replace("]", "")
         pname = [c for c in pname]
-        pcset = set([pitch.PitchClass(self._tables["hexToInt"][pn]) for pn in pname])
+        pcset = set([pitch.PitchClass12(self._tables["hexToInt"][pn]) for pn in pname])
         self.pcset = pcset
 
     @staticmethod
@@ -379,7 +359,7 @@ class SetClass:
         """
         pcseg2 = []
         for pc in pcseg:
-            pcseg2.append(pitch.PitchClass((pc * 11) % 12))
+            pcseg2.append(pitch.PitchClass12((pc * 11) % 12))
         return pcseg2
 
     @staticmethod
@@ -510,8 +490,14 @@ def get_complement(pcset: set):
     :return: The complement pcset
     """
     universal = set()
-    for i in range(12):
-        universal.add(pitch.PitchClass(i))
+    if len(pcset) > 0:
+        t = type(next(iter(pcset)))
+        if t == pitch.PitchClass12:
+            for i in range(12):
+                universal.add(pitch.PitchClass12(i))
+        else:
+            for i in range(24):
+                universal.add(pitch.PitchClass24(i))
     return universal - pcset
 
 
@@ -521,10 +507,16 @@ def get_corpus(pcset: set):
     :param pcset: A pcset
     :return: A set of all transformations of the pcset
     """
-    ttos = transformations.get_ttos(transformations.OperatorType.Tn, transformations.OperatorType.TnI)
+    tto = transformations.get_ttos12()
     pcsets = set()
-    for tto in ttos:
-        pcsets.add(frozenset(tto.transform(pcset)))
+    if len(pcset) > 0:
+        n = 12
+        t = type(next(iter(pcset)))
+        if t == pitch.PitchClass24:
+            n = 24
+        for i in range(n):
+            pcsets.add(frozenset(tto[f"T{i}"].transform(pcset)))
+            pcsets.add(frozenset(tto[f"T{i}I"].transform(pcset)))
     return pcsets
 
 
@@ -536,20 +528,20 @@ def get_tto(original_pcset: set, transformed_pcset: set):
     :param transformed_pcset: The new pcset
     :return: A list of TTOs
     """
-    ttos = []
-    for i in range(12):
-        if transformed_pcset.issubset(transpose(original_pcset, i)):
-            ttos.append(transformations.TTO(i, 1))
-    for i in range(12):
-        if transformed_pcset.issubset(transpose(invert(original_pcset), i)):
-            ttos.append(transformations.TTO(i, 11))
-    for i in range(12):
-        if transformed_pcset.issubset(transpose(multiply(original_pcset, 5), i)):
-            ttos.append(transformations.TTO(i, 5))
-    for i in range(12):
-        if transformed_pcset.issubset(transpose(multiply(original_pcset, 7), i)):
-            ttos.append(transformations.TTO(i, 7))
-    return ttos
+    ttos = None
+    ttos_final = {}
+    if len(original_pcset) == len(transformed_pcset) == 0:
+        return ttos
+    else:
+        t = type(next(iter(original_pcset)))
+        if t == pitch.PitchClass12:
+            ttos = transformations.get_ttos12()
+        else:
+            ttos = transformations.get_ttos24()
+        for u in ttos:
+            if transformed_pcset.issubset(ttos[u].transform(original_pcset)):
+                ttos_final[u] = ttos[u]
+        return ttos_final
 
 
 def invert(pcset: set):
@@ -559,12 +551,18 @@ def invert(pcset: set):
     :return: The inverted pcset
     """
     pcset2 = set()
-    for pc in pcset:
-        pcset2.add(pitch.PitchClass(pc.pc * 11))
+    if len(pcset) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcset)))
+        n = 11
+        if t == pitch.PitchClass24:
+            n = 23
+        for pc in pcset:
+            pcset2.add(t(pc.pc * n))
     return pcset2
 
 
-def make_pcset(*args):
+def make_pcset12(*args):
     """
     Makes a pcset
     :param *args: Pcs
@@ -572,7 +570,19 @@ def make_pcset(*args):
     """
     pcset = set()
     for pc in args:
-        pcset.add(pitch.PitchClass(pc))
+        pcset.add(pitch.PitchClass12(pc))
+    return pcset
+
+
+def make_pcset24(*args):
+    """
+    Makes a pcset
+    :param *args: Pcs
+    :return: A pcset
+    """
+    pcset = set()
+    for pc in args:
+        pcset.add(pitch.PitchClass24(pc))
     return pcset
 
 
@@ -584,12 +594,15 @@ def multiply(pcset: set, n: int):
     :return: The multiplied pcset
     """
     pcset2 = set()
-    for pc in pcset:
-        pcset2.add(pitch.PitchClass(pc.pc * n))
+    if len(pcset) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcset)))
+        for pc in pcset:
+            pcset2.add(t(pc.pc * n))
     return pcset2
 
 
-def set_class_filter(name: str, sets: list):
+def set_class_filter12(name: str, sets: list):
     """
     Filters a list of pcsets
     :param name: The name to find
@@ -597,7 +610,7 @@ def set_class_filter(name: str, sets: list):
     :return: A filtered list
     """
     newlist = []
-    sc = SetClass()
+    sc = SetClass12()
     for s in sets:
         sc.pcset = s
         if sc.name_prime == name or sc.name_forte == name or sc.name_morris == name:
@@ -614,14 +627,17 @@ def subsets(pcset: set):
     """
     total = 2 ** len(pcset)
     sub = []
-    pcseg = list(pcset)
-    pcseg.sort()
-    for index in range(total):
-        sub.append([])
-        for i in range(len(pcset)):
-            if index & (1 << i):
-                sub[index].append(pitch.PitchClass(pcseg[i].pc))
-    sub.sort()
+    if total > 1:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcset)))
+        pcseg = list(pcset)
+        pcseg.sort()
+        for index in range(total):
+            sub.append([])
+            for i in range(len(pcset)):
+                if index & (1 << i):
+                    sub[index].append(t(pcseg[i].pc))
+        sub.sort()
     return sub
 
 
@@ -633,8 +649,11 @@ def transpose(pcset: set, n: int):
     :return: The transposed pcset
     """
     pcset2 = set()
-    for pc in pcset:
-        pcset2.add(pitch.PitchClass(pc.pc + n))
+    if len(pcset) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcset)))
+        for pc in pcset:
+            pcset2.add(t(pc.pc + n))
     return pcset2
 
 
@@ -645,9 +664,14 @@ def visualize(pcset: set):
     :return: A visualization
     """
     line = ""
-    for i in range(12):
-        if pitch.PitchClass(i) in pcset:
-            line += "X"
-        else:
-            line += " "
+    if len(pcset) > 0:
+        t = type(next(iter(pcset)))
+        n = 12
+        if t == pitch.PitchClass24:
+            n = 24
+        for i in range(n):
+            if t(i) in pcset:
+                line += "X"
+            else:
+                line += " "
     return line

@@ -99,7 +99,7 @@ class OperatorGroup:
         for i in range(12):
             orbit = set()
             for j in range(n):
-                orbit.add(pitch.PitchClass(int(operator_table[j][i])))
+                orbit.add(pitch.PitchClass12(int(operator_table[j][i])))
             if orbit not in orbits:
                 orbits.append(orbit)
         return orbits

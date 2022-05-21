@@ -54,10 +54,10 @@ def transform_row_content(array: list, ro: transformations.RO):
             elif type(array[i][j]) == set:
                 cell = set()
                 for item in array[i][j]:
-                    cell.add(pitch.PitchClass(item.pc * ro[2] + ro[0]))
+                    cell.add(pitch.PitchClass12(item.pc * ro[2] + ro[0]))
                 row.append(cell)
-            elif type(array[i][j]) == pitch.PitchClass:
-                row.append(pitch.PitchClass(array[i][j].pc * ro[2] + ro[0]))
+            elif type(array[i][j]) == pitch.PitchClass12:
+                row.append(pitch.PitchClass12(array[i][j].pc * ro[2] + ro[0]))
         array1.append(row)
     return array1
 

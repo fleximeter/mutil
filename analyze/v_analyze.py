@@ -297,7 +297,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     :return: A list of v_slices
     """
 
-    sc = pcset.SetClass()  # A set-class for calculating names, etc.
+    sc = pcset.SetClass12()  # A set-class for calculating names, etc.
     final_slices = []      # Holds the finalized slices to return
     first_measure = -1     # We assume that the first measure is -1
     last_measure = -1      # We assume that the last measure is -1
@@ -548,9 +548,9 @@ def read_analysis_from_file(path):
             cslice._p_cardinality = dslice["p_cardinality"]
             cslice._p_count = dslice["p_count"]
             cslice._pc_cardinality = dslice["pc_cardinality"]
-            cslice._pcseg = [pitch.PitchClass(pc) for pc in dslice["pcseg"]]
+            cslice._pcseg = [pitch.PitchClass12(pc) for pc in dslice["pcseg"]]
             cslice._pcset = set(cslice.pcseg)
-            cslice._pcsegs = [[pitch.PitchClass(pc) for pc in dslice["pcsegs"][v]]
+            cslice._pcsegs = [[pitch.PitchClass12(pc) for pc in dslice["pcsegs"][v]]
                               for v in range(len(dslice["pcsegs"]))]
             cslice._pcset = set(cslice.pcseg)
             cslice._pcsets = [set(cslice.pcsegs[v]) for v in range(len(cslice.pcsegs))]
@@ -558,8 +558,8 @@ def read_analysis_from_file(path):
             cslice._pitchsegs = dslice["pitchsegs"]
             cslice._pnameseg = dslice["pnameseg"]
             cslice._pnamesegs = dslice["pnamesegs"]
-            cslice._pseg = [pitch.Pitch(p) for p in dslice["pseg"]]
-            cslice._psegs = [[pitch.Pitch(p) for p in dslice["psegs"][v]] for v in range(len(dslice["psegs"]))]
+            cslice._pseg = [pitch.Pitch12(p) for p in dslice["pseg"]]
+            cslice._psegs = [[pitch.Pitch12(p) for p in dslice["psegs"][v]] for v in range(len(dslice["psegs"]))]
             cslice._pset = set(cslice.pseg)
             cslice._psets = [set(cslice.psegs[v]) for v in range(len(cslice.psegs))]
             cslice._quarter_duration = Fraction(dslice["quarter_duration"][0], dslice["quarter_duration"][1])

@@ -50,7 +50,7 @@ def invert(pset: set):
     """
     pset2 = set()
     for p in pset:
-        pset2.add(pitch.Pitch(p.p * -1))
+        pset2.add(pitch.Pitch12(p.p * -1))
     return pset2
 
 
@@ -62,12 +62,12 @@ def m21_make_pset(item):
     """
     pset2 = set()
     if type(item) == music21.note.Note:
-        pset2.add(pitch.Pitch(item.pitch.midi - 60))
+        pset2.add(pitch.Pitch12(item.pitch.midi - 60))
     elif type(item) == music21.pitch.Pitch:
-        pset2.add(pitch.Pitch(item.pitch.midi - 60))
+        pset2.add(pitch.Pitch12(item.pitch.midi - 60))
     elif type(item) == music21.chord.Chord:
         for p in item.pitches:
-            pset2.add(pitch.Pitch(p.midi - 60))
+            pset2.add(pitch.Pitch12(p.midi - 60))
     else:
         raise TypeError("Unsupported music21 type")
     return pset2
@@ -174,7 +174,7 @@ def subsets(pset: set):
         sub.append([])
         for i in range(len(pset)):
             if index & (1 << i):
-                sub[index].append(pitch.Pitch(pseg[i].p))
+                sub[index].append(pitch.Pitch12(pseg[i].p))
     sub.sort()
     return sub
 
@@ -188,7 +188,7 @@ def transform(pset: set, transformation: transformations.TTO):
     """
     pset2 = set()
     for p in pset:
-        pset2.add(pitch.Pitch(p.p * transformation[1] + transformation[0]))
+        pset2.add(pitch.Pitch12(p.p * transformation[1] + transformation[0]))
     return pset2
 
 
@@ -201,5 +201,5 @@ def transpose(pset: set, n: int):
     """
     pset2 = set()
     for p in pset:
-        pset2.add(pitch.Pitch(p.p + n))
+        pset2.add(pitch.Pitch12(p.p + n))
     return pset2

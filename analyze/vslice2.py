@@ -526,16 +526,16 @@ class VSlice:
         self._pcseg = []
         self._pcset = set()
         for p in self._pitchseg:
-            self._pset.add(pitch.Pitch(p))
-            self._pcset.add(pitch.PitchClass(p))
+            self._pset.add(pitch.Pitch12(p))
+            self._pcset.add(pitch.PitchClass12(p))
         for v in range(self._num_voices):
             for p in self._pitchsegs[v]:
-                self._psets[v].add(pitch.Pitch(p))
-                self._pcsets[v].add(pitch.PitchClass(p))
+                self._psets[v].add(pitch.Pitch12(p))
+                self._pcsets[v].add(pitch.PitchClass12(p))
             self._psegs.append(list(self._psets[v]))
             self._psegs[v].sort()
             for p in self._psegs[v]:
-                self._pcsegs[v].append(pitch.PitchClass(p.pc))
+                self._pcsegs[v].append(pitch.PitchClass12(p.pc))
         self._pseg = list(self._pset)
         self._pseg.sort()
         self._pnameseg = sort_pnameseg(self._pnameseg)
@@ -543,7 +543,7 @@ class VSlice:
             self._pitchsegs[v].sort()
             self._pnamesegs[v] = sort_pnameseg(self._pnamesegs[v])
         for p in self._pseg:
-            self._pcseg.append(pitch.PitchClass(p.pc))
+            self._pcseg.append(pitch.PitchClass12(p.pc))
         if len(self._ipseg) > 0:
             self._ipseg.clear()
         for i in range(1, len(self._pseg)):

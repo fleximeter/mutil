@@ -45,7 +45,7 @@ def invert(pseg: list):
     """
     pseg2 = []
     for p in pseg:
-        pseg2.append(pitch.Pitch(p.p * -1))
+        pseg2.append(pitch.Pitch12(p.p * -1))
     return pseg2
 
 
@@ -57,12 +57,12 @@ def m21_make_pseg(item):
     """
     pseg2 = []
     if type(item) == music21.note.Note:
-        pseg2.append(pitch.Pitch(item.pitch.midi - 60))
+        pseg2.append(pitch.Pitch12(item.pitch.midi - 60))
     elif type(item) == music21.pitch.Pitch:
-        pseg2.append(pitch.Pitch(item.pitch.midi - 60))
+        pseg2.append(pitch.Pitch12(item.pitch.midi - 60))
     elif type(item) == music21.chord.Chord:
         for p in item.pitches:
-            pseg2.append(pitch.Pitch(p.midi - 60))
+            pseg2.append(pitch.Pitch12(p.midi - 60))
     else:
         raise TypeError("Unsupported music21 type")
     return pseg2
@@ -77,7 +77,7 @@ def multiply_order(pseg: list, n: int):
     """
     pseg2 = []
     for i in range(len(pseg)):
-        pseg2.append(pitch.Pitch(pseg[(i * n) % len(pseg)].p))
+        pseg2.append(pitch.Pitch12(pseg[(i * n) % len(pseg)].p))
     return pseg2
 
 
@@ -89,7 +89,7 @@ def retrograde(pseg: list):
     """
     pseg2 = []
     for i in range(len(pseg) - 1, -1, -1):
-        pseg2.append(pitch.Pitch(pseg[i].pc))
+        pseg2.append(pitch.Pitch12(pseg[i].pc))
     return pseg2
 
 
@@ -102,7 +102,7 @@ def rotate(pseg: list, n: int):
     """
     pseg2 = []
     for i in range(len(pseg)):
-        pseg2.append(pitch.Pitch(pseg[(i - n) % len(pseg)].p))
+        pseg2.append(pitch.Pitch12(pseg[(i - n) % len(pseg)].p))
     return pseg2
 
 
@@ -115,5 +115,5 @@ def transpose(pseg: list, n: int):
     """
     pseg2 = []
     for p in pseg:
-        pseg2.append(pitch.Pitch(p.p + n))
+        pseg2.append(pitch.Pitch12(p.p + n))
     return pseg2

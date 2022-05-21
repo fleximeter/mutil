@@ -10,7 +10,7 @@ This file contains functionality for generating chains.
 from pctheory import pcset, poset, pitch
 
 # Create all pcs
-pc = [pitch.PitchClass(i) for i in range(12)]
+pc = [pitch.PitchClass12(i) for i in range(12)]
 
 # Set-class name lists for use in chain generation
 # abcd

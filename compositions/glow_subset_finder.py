@@ -101,7 +101,7 @@ k = 0
 
 pcsets2 = []
 for pc in pcsets[k]:
-    pcsets2.append([pitch.PitchClass(p) for p in pc])
+    pcsets2.append([pitch.PitchClass12(p) for p in pc])
 #s = pcset.make_pcset(1, 2, 5, 9, 10, 11)
 #s = pcset.make_pcset(1, 3, 4, 5, 7, 8, 11)
 
@@ -109,12 +109,12 @@ for i in range(len(pcsets2)):
     sub = pcset.subsets(pcsets2[i])
 
     print(pcsets[k][i], "\n")
-    filter = pcset.set_class_filter("[026]", sub)
+    filter = pcset.set_class_filter12("[026]", sub)
     print("[026]")
     for i in filter:
         print(i)
 
-    filter = pcset.set_class_filter("[015]", sub)
+    filter = pcset.set_class_filter12("[015]", sub)
     print("\n[015]")
     for i in filter:
         print(i)

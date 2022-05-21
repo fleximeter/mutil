@@ -18,9 +18,9 @@ sets = {
     "v": [pcset.make_pcset(0, 3, 7)]  # (3-11)[037]
 }
 
-t = transformations.get_ttos()
+t = transformations.get_ttos12()
 x = tables.create_tables()
-sc = pcset.SetClass(x)
+sc = pcset.SetClass12(x)
 
 # Holds unions
 unions = {
@@ -50,7 +50,7 @@ for u in unions:
             for s in sets[u[0]]:
                 for t in sets[u[1]]:
                     tempset = s.union(t)
-                    sc1 = pcset.SetClass(x, tempset)
+                    sc1 = pcset.SetClass12(x, tempset)
                     unions[u].add(sc1)
         case 3:
             for s in sets[u[0]]:
@@ -58,7 +58,7 @@ for u in unions:
                     tempset = s.union(t)
                     for v in sets[u[2]]:
                         tempset2 = tempset.union(v)
-                        sc1 = pcset.SetClass(x, tempset2)
+                        sc1 = pcset.SetClass12(x, tempset2)
                         unions[u].add(sc1)
         case 4:
             for s in sets[u[0]]:
@@ -68,7 +68,7 @@ for u in unions:
                         tempset2 = tempset.union(v)
                         for w in sets[u[3]]:
                             tempset3 = tempset2.union(w)
-                            sc1 = pcset.SetClass(x, tempset3)
+                            sc1 = pcset.SetClass12(x, tempset3)
                             unions[u].add(sc1)
 
 
@@ -94,7 +94,7 @@ def make_score():
     for s in sets:
         ps = []
         for pc in sets[s][0]:
-            ps.append(pitch.Pitch(pc.pc + 4))
+            ps.append(pitch.Pitch12(pc.pc + 4))
         s_list.append(ps)
     for i in range(4, 13):
         for u in unions:
@@ -102,7 +102,7 @@ def make_score():
                 if len(s) == i:
                     ps = []
                     for pc in s.pcset:
-                        ps.append(pitch.Pitch(pc.pc + 4))
+                        ps.append(pitch.Pitch12(pc.pc + 4))
                     if s.name_forte not in used_sc:
                         s_list.append(ps)
                         used_sc.add(s.name_forte)
