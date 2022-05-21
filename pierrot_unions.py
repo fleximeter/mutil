@@ -18,8 +18,7 @@ sets = {
     "v": [pcset.make_pcset(0, 3, 7)]  # (3-11)[037]
 }
 
-tn = transformations.get_ttos(transformations.OperatorType.Tn)
-tni = transformations.get_ttos(transformations.OperatorType.TnI)
+t = transformations.get_ttos()
 x = tables.create_tables()
 sc = pcset.SetClass(x)
 
@@ -41,9 +40,9 @@ unions = {
 # Generate all transformations
 for s in sets:
     for i in range(1, 12):
-        sets[s].append(tn[i].transform(sets[s][0]))
+        sets[s].append(t[f"T{i}"].transform(sets[s][0]))
     for i in range(0, 12):
-        sets[s].append(tni[i].transform(sets[s][0]))
+        sets[s].append(t[f"T{i}I"].transform(sets[s][0]))
 
 for u in unions:
     match(len(u)):

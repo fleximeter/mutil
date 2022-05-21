@@ -299,61 +299,36 @@ def find_ttos(pcset1: set, pcset2: set):
     return ttos_final
 
 
-def get_ros(*args):
+def get_ros():
     """
     Gets ROs
-    :param args: One or more RO categories (OperatorType)
     :return: A list of ROs
     """
-    arg_set = set(args)
-    ros = []
-    if OperatorType.Tn in arg_set:
-        for i in range(12):
-            ros.append(RO(i))
-    if OperatorType.TnI in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 0, 11))
-    if OperatorType.TnM5 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 0, 5))
-    if OperatorType.TnM7 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 0, 7))
-    if OperatorType.RTn in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1))
-    if OperatorType.RTnI in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1, 11))
-    if OperatorType.RTnM5 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1, 5))
-    if OperatorType.RTnM7 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1, 7))
+    ros = {}
+    for i in range(12):
+        ros[f"T{i}"] = RO(i)
+        ros[f"T{i}R"] = RO(i, 1)
+        ros[f"T{i}I"] = RO(i, 0, 11)
+        ros[f"T{i}RI"] = RO(i, 1, 11)
+        ros[f"T{i}M"] = RO(i, 0, 5)
+        ros[f"T{i}RM"] = RO(i, 1, 5)
+        ros[f"T{i}MI"] = RO(i, 0, 7)
+        ros[f"T{i}RMI"] = RO(i, 1, 7)
     return ros
 
 
-def get_ttos(*args):
+def get_ttos():
     """
     Gets TTOs
     :param args: One or more TTO categories (OperatorType)
     :return: A list of TTOs
     """
-    arg_set = set(args)
-    ttos = []
-    if OperatorType.Tn in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i))
-    if OperatorType.TnI in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i, 11))
-    if OperatorType.TnM5 in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i, 5))
-    if OperatorType.TnM7 in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i, 7))
+    ttos = {}
+    for i in range(12):
+        ttos[f"T{i}"] = TTO(i, 1)
+        ttos[f"T{i}I"] = TTO(i, 11)
+        ttos[f"T{i}M"] = TTO(i, 5)
+        ttos[f"T{i}MI"] = TTO(i, 7)
     return ttos
 
 
