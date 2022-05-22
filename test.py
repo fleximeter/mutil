@@ -15,7 +15,7 @@ print(array.str_array(a1))
 
 r = transformations.get_ros()
 
-p1 = pcseg.make_pcseg(4, 9, 7, 11, 8, 6, 2, 0, 3, 5, 10, 1)
+p1 = pcseg.make_pcseg12(4, 9, 7, 11, 8, 6, 2, 0, 3, 5, 10, 1)
 m1 = pcseg.TwelveToneMatrix(p1)
 # print(m1)
 

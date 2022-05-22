@@ -554,11 +554,8 @@ def invert(pcset: set):
     if len(pcset) > 0:
         # Need to support both PitchClass12 and PitchClass24, so use a type alias
         t = type(next(iter(pcset)))
-        n = 11
-        if t == pitch.PitchClass24:
-            n = 23
         for pc in pcset:
-            pcset2.add(t(pc.pc * n))
+            pcset2.add(t(pc.pc * -1))
     return pcset2
 
 

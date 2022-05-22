@@ -190,8 +190,11 @@ def invert(pcseg: list):
     :return: The inverted pcseg
     """
     pcseg2 = []
-    for pc in pcseg:
-        pcseg2.append(pitch.PitchClass12(pc.pc * 11))
+    if len(pcseg) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcseg)))
+        for pc in pcseg:
+            pcseg2.append(t(pc.pc * -1))
     return pcseg2
 
 
@@ -244,13 +247,22 @@ def is_valid_rgen(rgen: list):
     return True
 
 
-def make_pcseg(*args):
+def make_pcseg12(*args):
     """
     Makes a pcseg
     :param *args: Pcs
     :return: A pcseg
     """
     return [pitch.PitchClass12(pc) for pc in args]
+
+
+def make_pcseg24(*args):
+    """
+    Makes a pcseg
+    :param *args: Pcs
+    :return: A pcseg
+    """
+    return [pitch.PitchClass24(pc) for pc in args]
 
 
 def multiply(pcseg: list, n: int):
@@ -261,8 +273,11 @@ def multiply(pcseg: list, n: int):
     :return: The multiplied pcseg
     """
     pcseg2 = []
-    for pc in pcseg:
-        pcseg2.append(pitch.PitchClass12(pc.pc * n))
+    if len(pcseg) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcseg)))
+        for pc in pcseg:
+            pcseg2.append(t(pc.pc * n))
     return pcseg2
 
 
@@ -312,8 +327,11 @@ def retrograde(pcseg: list):
     :return: The retrograded pcseg
     """
     pcseg2 = []
-    for i in range(len(pcseg) - 1, -1, -1):
-        pcseg2.append(pitch.PitchClass12(pcseg[i].pc))
+    if len(pcseg) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcseg)))
+        for i in range(len(pcseg) - 1, -1, -1):
+            pcseg2.append(t(pcseg[i].pc))
     return pcseg2
 
 
@@ -325,8 +343,11 @@ def rotate(pcseg: list, n: int):
     :return: The rotated pcseg
     """
     pcseg2 = []
-    for i in range(len(pcseg)):
-        pcseg2.append(pitch.PitchClass12(pcseg[(i - n) % len(pcseg)].pc))
+    if len(pcseg) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcseg)))
+        for i in range(len(pcseg)):
+            pcseg2.append(t(pcseg[(i - n) % len(pcseg)].pc))
     return pcseg2
 
 
@@ -338,8 +359,11 @@ def transpose(pcseg: list, n: int):
     :return: The transposed pcseg
     """
     pcseg2 = []
-    for pc in pcseg:
-        pcseg2.append(pitch.PitchClass12(pc.pc + n))
+    if len(pcseg) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcseg)))
+        for pc in pcseg:
+            pcseg2.append(t(pc.pc + n))
     return pcseg2
 
 

@@ -49,15 +49,16 @@ def transform_row_content(array: list, ro: transformations.RO):
     for i in range(len(array)):
         row = []
         for j in range(len(array[i])):
-            if type(array[i][j]) == list:
+            t = type(array[i][j])
+            if t == list:
                 row.append(ro.transform(array[i][j]))
-            elif type(array[i][j]) == set:
+            elif t == set:
                 cell = set()
                 for item in array[i][j]:
-                    cell.add(pitch.PitchClass12(item.pc * ro[2] + ro[0]))
+                    cell.add(ro.transform(item))
                 row.append(cell)
-            elif type(array[i][j]) == pitch.PitchClass12:
-                row.append(pitch.PitchClass12(array[i][j].pc * ro[2] + ro[0]))
+            elif t == pitch.PitchClass12 or t == pitch.PitchClass24:
+                row.append(ro.transform(array[i][j]))
         array1.append(row)
     return array1
 
@@ -103,13 +104,13 @@ def make_array_chain(array: list, length: int, alt_ret=True):
         m = None
         if alt_ret and i % 2:
             transformation = transformations.find_ttos(pcset_end, pcset_end_temp)
-            r.ro = [transformation[0][0], 0, transformation[0][1]]
+            r.ro = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
             m = transform_row_content(array1, r)
             for j in range(len(m)):
                 m[j].reverse()
         else:
             transformation = transformations.find_ttos(pcset_start, pcset_end_temp)
-            r.ro = [transformation[0][0], 0, transformation[0][1]]
+            r.ro = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
             m = transform_row_content(array1, r)
         m.reverse()
 
