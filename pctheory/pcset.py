@@ -488,10 +488,9 @@ class SetClass24:
     Represents a pc-set-class
     """
 
-    def __init__(self, name_tables=None, pcset=None):
+    def __init__(self, pcset=None):
         """
         Creates a SetClass
-        :param name_tables: A list of name tables
         :param pcset: A pcset to initialize the SetClass
         """
         self._ic_vector = [0 for i in range(13)]
