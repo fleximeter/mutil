@@ -66,7 +66,7 @@ class SetClass12:
         return self.pcset != other.pcset
 
     def __repr__(self):
-        return "<pctheory.pcset.SetClass object at " + str(id(self)) + ">: " + repr(self._pcset)
+        return "<pctheory.pcset.SetClass12 object at " + str(id(self)) + ">: " + repr(self._pcset)
 
     def __str__(self):
         return str([str(pc) for pc in self._pcset])
@@ -406,6 +406,312 @@ class SetClass12:
                     interval = interval * -1 + 12
                 self._ic_vector[interval] += 1
         for i in range(1, 7):
+            self._ic_vector[i] //= 2
+
+    @staticmethod
+    def _weight_from_right(pclists: list):
+        """
+        Weights pclists from the right
+        :param pclists: Pclists
+        :return: The most weighted form
+        """
+        for i in range(len(pclists[0]) - 1, -1, -1):
+            if len(pclists) > 1:
+                # The smallest item at the current index
+                smallest_item = 11
+
+                # Identify the smallest item at the current index
+                for j in range(len(pclists)):
+                    if pclists[j][i] < smallest_item:
+                        smallest_item = pclists[j][i]
+
+                # Remove all lists with larger items at the current index
+                j = 0
+                while j < len(pclists):
+                    if pclists[j][i] > smallest_item:
+                        del pclists[j]
+                    else:
+                        j += 1
+
+            else:
+                break
+        return pclists[0]
+
+    @staticmethod
+    def _weight_left(pclists: list):
+        """
+        Weights pclists left
+        :param pclists: Pclists
+        :return: The most weighted form
+        """
+        if len(pclists) > 1:
+            # The smallest item at the current index
+            smallest_item = 11
+
+            # Identify the smallest item at the last index
+            for j in range(0, len(pclists)):
+                if pclists[j][len(pclists[0]) - 1] < smallest_item:
+                    smallest_item = pclists[j][len(pclists[0]) - 1]
+
+            # Remove all lists with larger items at the current index
+            j = 0
+            while j < len(pclists):
+                if pclists[j][len(pclists[0]) - 1] > smallest_item:
+                    del pclists[j]
+                else:
+                    j += 1
+
+            # Continue processing, but now pack from the left
+            for i in range(0, len(pclists[0])):
+                if len(pclists) > 1:
+                    smallest_item = 11
+
+                    # Identify the smallest item at the current index
+                    for j in range(len(pclists)):
+                        if pclists[j][i] < smallest_item:
+                            smallest_item = pclists[j][i]
+
+                    # Remove all lists with larger items at the current index
+                    j = 0
+                    while j < len(pclists):
+                        if pclists[j][i] > smallest_item:
+                            del pclists[j]
+                        else:
+                            j += 1
+                else:
+                    break
+        return pclists[0]
+
+
+class SetClass24:
+    """
+    Represents a pc-set-class
+    """
+
+    def __init__(self, name_tables=None, pcset=None):
+        """
+        Creates a SetClass
+        :param name_tables: A list of name tables
+        :param pcset: A pcset to initialize the SetClass
+        """
+        self._ic_vector = [0 for i in range(13)]
+        self._name_prime = ""
+        self._pcset = set()
+        self._weight_right = True
+        if pcset is not None:
+            self.pcset = pcset
+
+    def __eq__(self, other):
+        return self.pcset == other.pcset
+
+    def __len__(self):
+        return len(self._pcset)
+
+    def __ne__(self, other):
+        return self.pcset != other.pcset
+
+    def __repr__(self):
+        return "<pctheory.pcset.SetClass24 object at " + str(id(self)) + ">: " + repr(self._pcset)
+
+    def __str__(self):
+        return str([str(pc) for pc in self._pcset])
+
+    @property
+    def ic_vector(self):
+        """
+        Gets the IC vector
+        :return: The IC vector
+        """
+        return self._ic_vector
+
+    @property
+    def ic_vector_string(self):
+        """
+        Gets the IC vector
+        :return: The IC vector
+        """
+        s = "["
+        for a in self._ic_vector:
+            s += str(a)
+        s += "]"
+        return s
+
+    @property
+    def name_prime(self):
+        """
+        Generates the prime-form name (Rahn) for a set-class
+        :return: The prime-form name
+        """
+        return self._name_prime
+
+    @property
+    def pcset(self):
+        """
+        Gets the pcset prime form
+        :return: The pcset prime form
+        """
+        return self._pcset
+
+    @pcset.setter
+    def pcset(self, value):
+        """
+        Updates the pcset prime form
+        :param value: The new pcset
+        :return:
+        """
+        self._pcset = SetClass12.calculate_prime_form(value, self._weight_right)
+        self._make_names()
+
+    @property
+    def weight_right(self):
+        """
+        Whether or not to weight from the right
+        :return: A Boolean
+        """
+        return self._weight_right
+
+    @weight_right.setter
+    def weight_right(self, value: bool):
+        """
+        Whether or not to weight from the right
+        :param value: A Boolean
+        :return:
+        """
+        self._weight_right = value
+        self._pcset = SetClass12.calculate_prime_form(self._pcset, self._weight_right)
+
+    @staticmethod
+    def calculate_prime_form(pcset: set, weight_from_right: bool = True):
+        """
+        Calculates the prime form of a pcset
+        :param pcset: The pcset
+        :param weight_from_right: Whether or not to pack from the right
+        :return: The prime form
+        """
+        prime_set = set()
+        if len(pcset) > 0:
+            lists_to_weight = []
+            int_set = SetClass24._make_int_set(pcset)
+            pclist = list(int_set)
+            inverted = list(SetClass24._make_int_set(set(SetClass24._invert(pclist))))
+            prime_list = None
+
+            # Add regular forms
+            for i in range(len(pclist)):
+                lists_to_weight.append([])
+                for i2 in range(i, len(pclist)):
+                    lists_to_weight[i].append(pclist[i2])
+                for i2 in range(0, i):
+                    lists_to_weight[i].append(pclist[i2])
+                initial_pitch = lists_to_weight[i][0]
+                for i2 in range(0, len(lists_to_weight[i])):
+                    lists_to_weight[i][i2] -= initial_pitch
+                    if lists_to_weight[i][i2] < 0:
+                        lists_to_weight[i][i2] += 24
+                lists_to_weight[i].sort()
+
+            # Add inverted forms
+            for i in range(len(pclist)):
+                lists_to_weight.append([])
+                for i2 in range(i, len(pclist)):
+                    lists_to_weight[i + len(pclist)].append(inverted[i2])
+                for i2 in range(0, i):
+                    lists_to_weight[i + len(pclist)].append(inverted[i2])
+                initial_pitch = lists_to_weight[i + len(pclist)][0]
+                for i2 in range(0, len(lists_to_weight[i])):
+                    lists_to_weight[i + len(pclist)][i2] -= initial_pitch
+                    if lists_to_weight[i + len(pclist)][i2] < 0:
+                        lists_to_weight[i + len(pclist)][i2] += 24
+                lists_to_weight[i + len(pclist)].sort()
+
+            # Weight lists
+            if weight_from_right:
+                prime_list = SetClass24._weight_from_right(lists_to_weight)
+            else:
+                prime_list = SetClass24._weight_left(lists_to_weight)
+
+            # Create pcset
+            for pc in prime_list:
+                prime_set.add(pitch.PitchClass24(pc))
+
+        return prime_set
+
+    def contains_abstract_subset(self, sc):
+        """
+        Determines if a set-class is an abstract subset of this set-class
+        :param sc: A set-class
+        :return: A boolean
+        """
+        tr = []
+        inv = invert(sc.pcset)
+        for i in range(24):
+            tr.append(transpose(sc.pcset, i))
+            tr.append(transpose(inv, i))
+        for pcs in tr:
+            if pcs.issubset(self.pcset):
+                return True
+        return False
+
+    def get_abstract_complement(self):
+        """
+        Gets the abstract complement of the SetClass
+        :return: The abstract complement SetClass
+        """
+        csc = SetClass12()
+        csc.pcset = get_complement(self._pcset)
+        return csc
+
+    def get_subset_classes(self):
+        """
+        Gets a set of subset-classes contained in this SetClass
+        :return:
+        """
+        sub = subsets(self._pcset)
+        subset_classes = set()
+        for s in sub:
+            subset_classes.add(SetClass24(s))
+        return subset_classes
+
+    @staticmethod
+    def _invert(pcseg: list):
+        """
+        Inverts a pcseg
+        :param pcset: The pcseg
+        :return: The inverted pcseg
+        """
+        pcseg2 = []
+        for pc in pcseg:
+            pcseg2.append(pitch.PitchClass24((pc * 23) % 24))
+        return pcseg2
+
+    @staticmethod
+    def _make_int_set(pcset: set):
+        """
+        Makes an int set
+        :param pcset: A pcset
+        :return: An int set
+        """
+        pcset2 = set()
+        for pc in pcset:
+            pcset2.add(pc.pc)
+        return pcset2
+
+    def _make_names(self):
+        """
+        Makes the names for the set-class
+        :return:
+        """
+        pcseg = list(self._pcset)
+        pcseg.sort()
+        self._name_prime = str(pcseg)
+        self._ic_vector = [0 for i in range(13)]
+        for pc in self._pcset:
+            for pc2 in self._pcset:
+                interval = (pc2.pc - pc.pc) % 24
+                if interval > 12:
+                    interval = (interval * 11) % 12
+                self._ic_vector[interval] += 1
+        for i in range(1, 13):
             self._ic_vector[i] //= 2
 
     @staticmethod
