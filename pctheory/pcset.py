@@ -558,7 +558,7 @@ class SetClass24:
         :param value: The new pcset
         :return:
         """
-        self._pcset = SetClass12.calculate_prime_form(value, self._weight_right)
+        self._pcset = SetClass24.calculate_prime_form(value, self._weight_right)
         self._make_names()
 
     @property
@@ -577,7 +577,7 @@ class SetClass24:
         :return:
         """
         self._weight_right = value
-        self._pcset = SetClass12.calculate_prime_form(self._pcset, self._weight_right)
+        self._pcset = SetClass24.calculate_prime_form(self._pcset, self._weight_right)
 
     @staticmethod
     def calculate_prime_form(pcset: set, weight_from_right: bool = True):
@@ -656,7 +656,7 @@ class SetClass24:
         Gets the abstract complement of the SetClass
         :return: The abstract complement SetClass
         """
-        csc = SetClass12()
+        csc = SetClass24()
         csc.pcset = get_complement(self._pcset)
         return csc
 
@@ -723,7 +723,7 @@ class SetClass24:
         for i in range(len(pclists[0]) - 1, -1, -1):
             if len(pclists) > 1:
                 # The smallest item at the current index
-                smallest_item = 11
+                smallest_item = 23
 
                 # Identify the smallest item at the current index
                 for j in range(len(pclists)):

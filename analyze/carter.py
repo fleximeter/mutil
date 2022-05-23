@@ -90,7 +90,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = False
+    use_cache = True
 
     # Analyze
     print("Analyzing entire piece...")
@@ -203,36 +203,36 @@ def make_charts_general(results, path, voices):
     :return:
     """
     chart.chart_cardinality(results, False, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
-                            size=(14, 6), path=f"{path}Register Analysis Files\\Graphs\\card_m")
+                            size=(6.5, 3), path=f"{path}Register Analysis Files\\Graphs\\card_m")
     chart.chart_cardinality(results, True, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
-                            size=(14, 6), path=f"{path}Register Analysis Files\\Graphs\\card_t")
-    chart.chart_pitch_onset(results, False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+                            size=(6.5, 3), path=f"{path}Register Analysis Files\\Graphs\\card_t")
+    chart.chart_pitch_onset(results, False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (6.5, 3),
                             f"{path}Register Analysis Files\\Graphs\\onset_measure")
     chart.chart_pset_spacing_index(results, False, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
-                                   (14, 6), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_m")
+                                   (6.5, 3), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_m")
     chart.chart_pset_spacing_index(results, True, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
-                                   (14, 6), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_t")
+                                   (6.5, 3), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_t")
     for i in range(len(voices)):
         chart.chart_pitch_onset(results, False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
-                                                   f"({voices[i]})", (14, 6),
+                                                   f"({voices[i]})", (6.5, 3),
                                 f"{path}Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
-    chart.chart_pitch_onset(results, True, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (14, 6),
+    chart.chart_pitch_onset(results, True, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (6.5, 3),
                             f"{path}Register Analysis Files\\Graphs\\onset_time")
     for i in range(len(voices)):
         chart.chart_pitch_onset(results, True, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
-                                                  f"({voices[i]})", (14, 6),
+                                                  f"({voices[i]})", (6.5, 3),
                                 f"{path}Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
-    chart.chart_pitch_duration(results, "Pitch Duration in Elliott Carter’s Fifth String Quartet", (14, 6),
+    chart.chart_pitch_duration(results, "Pitch Duration in Elliott Carter’s Fifth String Quartet", (6.5, 3),
                                f"{path}Register Analysis Files\\Graphs\\pitch_duration")
     for i in range(len(voices)):
         chart.chart_pitch_duration(results, f"Pitch Duration in Elliott Carter’s Fifth String Quartet "
-                                               f"({voices[i]})", (14, 6),
+                                               f"({voices[i]})", (6.5, 3),
                                    f"{path}Register Analysis Files\\Graphs\\pitch_duration_{voices[i]}", i)
-    chart.chart_pc_duration(results, "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (8, 6),
+    chart.chart_pc_duration(results, "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (3, 3),
                             f"{path}Register Analysis Files\\Graphs\\pc_duration")
     for i in range(len(voices)):
         chart.chart_pc_duration(results, f"Pitch-Class Duration in Elliott Carter’s Fifth String Quartet "
-                                            f"({voices[i]})", (8, 6),
+                                            f"({voices[i]})", (3, 3),
                                 f"{path}Register Analysis Files\\Graphs\\pc_duration_{voices[i]}", i)
 
 
@@ -329,6 +329,6 @@ if __name__ == "__main__":
     print("################### Vertical Analyzer ####################\n" + \
           "Copyright (c) 2022 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
     # c_analyze()
-    # c_analyze_with_sections()
-    c_analyze_reduction()
+    c_analyze_with_sections()
+    # c_analyze_reduction()
     # metric_modulation()

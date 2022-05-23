@@ -49,15 +49,24 @@ def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", siz
             ps_s.append(s.p_cardinality)
         else:
             ps_s.append(0)
-    fig = matplotlib.pyplot.figure(figsize=size)
+    fig = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    matplotlib.pyplot.rc("font", size=8)
+    matplotlib.pyplot.rc("axes", titlesize=8)
+    matplotlib.pyplot.rc("axes", labelsize=8)
+    matplotlib.pyplot.rc("axes", linewidth=0.5)
+    matplotlib.pyplot.rc("xtick", labelsize=8)
+    matplotlib.pyplot.rc("xtick.major", width=0.5)
+    matplotlib.pyplot.rc("ytick", labelsize=8)
+    matplotlib.pyplot.rc("ytick.major", width=0.5)
     ax = fig.add_subplot(111)
-    ax.step(x, ps_s, color="#555555", linewidth=0.5, markersize=1)
-    matplotlib.pyplot.title(title, fontsize=18)
+    ax.step(x, ps_s, color="#555555", linewidth=0.3, markersize=1)
+    # matplotlib.pyplot.title(title, fontsize=18)
     if x_axis_time:
         matplotlib.pyplot.xlabel("Time (minutes)")
     else:
         matplotlib.pyplot.xlabel("Measure No.")
     matplotlib.pyplot.ylabel("Pset Cardinality")
+    matplotlib.pyplot.tight_layout()
     if path is None:
         matplotlib.pyplot.show()
     else:
@@ -91,15 +100,24 @@ def chart_pset_spacing_index(results, x_axis_time=False, title="Pset Spacing Ind
             ps_s.append(s.pset_spacing_index)
         else:
             ps_s.append(numpy.nan)
-    fig = matplotlib.pyplot.figure(figsize=size)
+    fig = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    matplotlib.pyplot.rc("font", size=8)
+    matplotlib.pyplot.rc("axes", titlesize=8)
+    matplotlib.pyplot.rc("axes", labelsize=8)
+    matplotlib.pyplot.rc("axes", linewidth=0.5)
+    matplotlib.pyplot.rc("xtick", labelsize=8)
+    matplotlib.pyplot.rc("xtick.major", width=0.5)
+    matplotlib.pyplot.rc("ytick", labelsize=8)
+    matplotlib.pyplot.rc("ytick.major", width=0.5)
     ax = fig.add_subplot(111)
-    ax.step(x, ps_s, color="#555555", linewidth=0.5, markersize=1)
-    matplotlib.pyplot.title(title, fontsize=18)
+    ax.step(x, ps_s, color="#555555", linewidth=0.3, markersize=1)
+    # matplotlib.pyplot.title(title, fontsize=18)
     if x_axis_time:
         matplotlib.pyplot.xlabel("Time (minutes)")
     else:
         matplotlib.pyplot.xlabel("Measure No.")
     matplotlib.pyplot.ylabel("Pset Spacing Index")
+    matplotlib.pyplot.tight_layout()
     if path is None:
         matplotlib.pyplot.show()
     else:
@@ -159,10 +177,18 @@ def chart_pitch_onset(results, x_axis_time=False, title="Pitch Onset Graph", siz
                         pitches[i].append(numpy.nan)
                 else:
                     pitches[i].append(numpy.nan)
-    draw = matplotlib.pyplot.figure(figsize=size)
+    draw = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    matplotlib.pyplot.rc("font", size=8)
+    matplotlib.pyplot.rc("axes", titlesize=8)
+    matplotlib.pyplot.rc("axes", labelsize=8)
+    matplotlib.pyplot.rc("axes", linewidth=0.5)
+    matplotlib.pyplot.rc("xtick", labelsize=8)
+    matplotlib.pyplot.rc("xtick.major", width=0.5)
+    matplotlib.pyplot.rc("ytick", labelsize=8)
+    matplotlib.pyplot.rc("ytick.major", width=0.5)
     axes = draw.add_subplot(111)
     for i in range(len(pitches)):
-        axes.scatter(x, pitches[i], c='#222222', marker='.')
+        axes.scatter(x, pitches[i], s=2, c='#222222', marker='.')
     ytick_tick = []
     ytick_labels = []
     for i in range(results.lower_bound, results.upper_bound + 1):
@@ -170,13 +196,13 @@ def chart_pitch_onset(results, x_axis_time=False, title="Pitch Onset Graph", siz
             ytick_tick.append(i)
             ytick_labels.append(f"C{i // 12 + 4}/{i}")
     matplotlib.pyplot.yticks(ytick_tick, ytick_labels)
-    matplotlib.pyplot.title(title, fontsize=18)
+    # matplotlib.pyplot.title(title, fontsize=18)
     if x_axis_time:
         matplotlib.pyplot.xlabel("Time (minutes)")
     else:
         matplotlib.pyplot.xlabel("Measure No.")
     matplotlib.pyplot.ylabel("Pitch")
-
+    matplotlib.pyplot.tight_layout()
     if path is None:
         matplotlib.pyplot.show()
     else:
@@ -209,7 +235,7 @@ def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), pat
                 y.append(float(results.pitch_duration_voices[voice][p]))
             else:
                 y.append(0)
-    draw = matplotlib.pyplot.figure(figsize=size)
+    draw = matplotlib.pyplot.figure(figsize=size, dpi=300)
     axes = draw.add_subplot(111)
     axes.bar(x, y)
     xtick_tick = []
@@ -255,7 +281,7 @@ def chart_pc_duration(results, title="Pitch-Class Duration Graph", size=(8, 6), 
                 y.append(float(results.pc_duration_voices[voice][pc]))
             else:
                 y.append(0)
-    draw = matplotlib.pyplot.figure(figsize=size)
+    draw = matplotlib.pyplot.figure(figsize=size, dpi=300)
     axes = draw.add_subplot(111)
     axes.bar(x, y)
     xtick_tick = [i for i in range(12)]
@@ -326,7 +352,7 @@ def chart_spaces(results, size=(8, 6), path=None):
     labels = ["NS", "LNS", "INS", "PS", "UNS"]
     colors = ["#000000", "#333333", "#555555", "#DDDDDD", "#333333"]
     fig, ax = matplotlib.pyplot.subplots()
-    matplotlib.pyplot.figure(figsize=size)
+    matplotlib.pyplot.figure(figsize=size, dpi=300)
     ax.stackplot(x, ns, lns, ins, ps, uns, labels=labels, colors=colors)
     ax.legend(loc="upper left")
     if path is None:
