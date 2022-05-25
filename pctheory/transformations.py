@@ -252,56 +252,15 @@ class TTO:
         :param item: A pcset, pcseg, or pc
         :return: The transformed item
         """
-        if type(item) == set:
-            pcset2 = set()
-            if len(item) > 0:
-                t = type(next(iter(item)))
-                if t == pitch.PitchClass12:
-                    for pc in item:
-                        pcn = pc.pc
-                        if self._tto[2]:
-                            pcn *= 11
-                        if self._tto[1]:
-                            pcn *= 5
-                        pcset2.add(pitch.PitchClass12(pcn + self._tto[0]))
-                else:
-                    for pc in item:
-                        pcn = pc.pc
-                        if self._tto[2]:
-                            pcn *= 23
-                        if self._tto[1]:
-                            pcn *= 17
-                        pcset2.add(pitch.PitchClass24(pcn + self._tto[0]))
-            return pcset2
-        elif type(item) == list:
-            pcseg2 = list()
-            if len(item) > 0:
-                t = type(next(iter(item)))
-                if t == pitch.PitchClass12:
-                    for pc in item:
-                        pcn = pc.pc
-                        if self._tto[2]:
-                            pcn *= 11
-                        if self._tto[1]:
-                            pcn *= 5
-                        pcseg2.append(pitch.PitchClass12(pcn + self._tto[0]))
-                else:
-                    for pc in item:
-                        pcn = pc.pc
-                        if self._tto[2]:
-                            pcn *= 23
-                        if self._tto[1]:
-                            pcn *= 17
-                        pcseg2.append(pitch.PitchClass24(pcn + self._tto[0]))
-            return pcseg2
-        elif type(item) == pitch.PitchClass12:
+        t = type(item)
+        if t == pitch.PitchClass12:
             pcn = item.pc
             if self._tto[2]:
                 pcn *= 11
             if self._tto[1]:
                 pcn *= 5
             return pitch.PitchClass12(pcn + self._tto[0])
-        elif type(item) == pitch.PitchClass24:
+        elif t == pitch.PitchClass24:
             pcn = item.pc
             if self._tto[2]:
                 pcn *= 23
@@ -309,7 +268,14 @@ class TTO:
                 pcn *= 17
             return pitch.PitchClass24(pcn + self._tto[0])
         else:
-            return None
+            new_item = t()
+            if t == set:
+                for i in item:
+                    new_item.add(self.transform(i))
+            if t == list:
+                for i in item:
+                    new_item.append(self.transform(i))
+            return new_item
 
 
 def find_ttos(pcset1: set, pcset2: set):
@@ -375,7 +341,6 @@ def get_ttos24():
 
 def left_multiply_ttos(*args):
     """
-    NOTE: this function needs to be updated since TTOs were changed. Need a way to support microtonal TTOs.
     Left-multiplies a list of TTOs
     :param args: A collection of TTOs (can be one argument as a list, or multiple TTOs separated by commas.
     The highest index is evaluated first, and the lowest index is evaluated last.
@@ -393,12 +358,33 @@ def left_multiply_ttos(*args):
     elif len(ttos) == 1:
         return ttos[0]
     else:
-        m = ttos[len(ttos)-1].transpose_n
-        n = ttos[len(ttos)-1].multiply_n
+        m = ttos[len(ttos)-1][0]
+        n = 1
+        if ttos[len(ttos) - 1][1] and ttos[len(ttos) - 1][2]:
+            n = 7
+        elif ttos[len(ttos) - 1][1]:
+            n = 5
+        elif ttos[len(ttos) - 1][2]:
+            n = 11
         for i in range(len(ttos)-2, -1, -1):
-            m = m * ttos[i].multiply_n + ttos[i].transpose_n
-            n *= ttos[i].multiply_n
-        return TTO(m % 12, n % 12)
+            tr_n = ttos[i][0]
+            mul_n = 1
+            if ttos[i][1] and ttos[i][2]:
+                mul_n = 7
+            elif ttos[i][1]:
+                mul_n = 5
+            elif ttos[i][2]:
+                mul_n = 11
+            m = m * mul_n + tr_n
+            n *= mul_n
+        if m % 12 == 11:
+            return TTO(n % 12, 0, 1)
+        elif m % 12 == 7:
+            return TTO(n % 12, 1, 1)
+        elif m % 12 == 5:
+            return TTO(n % 12, 1, 0)
+        else:
+            return TTO(n % 12, 0, 0)
 
 
 def make_tto_list(*args):
