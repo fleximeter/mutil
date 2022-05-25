@@ -66,7 +66,8 @@ class SetClass12:
         return self.pcset != other.pcset
 
     def __repr__(self):
-        return "<pctheory.pcset.SetClass12 object at " + str(id(self)) + ">: " + repr(self._pcset)
+        # return "<pctheory.pcset.SetClass12 object at " + str(id(self)) + ">: " + repr(self._pcset)
+        return self._name_morris
 
     def __str__(self):
         return str([str(pc) for pc in self._pcset])
@@ -297,6 +298,17 @@ class SetClass12:
         for s in sub:
             subset_classes.add(SetClass12(self._tables, s))
         return subset_classes
+
+    def get_partition2_subset_classes(self):
+        """
+        Gets a set of set-class partitions of this SetClass
+        :return:
+        """
+        p = partitions2(self._pcset)
+        p_set = set()
+        for part in p:
+            p_set.add((SetClass12(self._tables, part[0]), SetClass12(self._tables, part[1])))
+        return p_set
 
     def get_z_relation(self):
         """
@@ -671,6 +683,17 @@ class SetClass24:
             subset_classes.add(SetClass24(s))
         return subset_classes
 
+    def get_partition_subset_classes(self):
+        """
+        Gets a set of set-class partitions of this SetClass
+        :return:
+        """
+        p = partitions2(self._pcset)
+        p_set = set()
+        for part in p:
+            p_set.add((SetClass24(part[0]), SetClass24(part[1])))
+        return p_set
+
     @staticmethod
     def _invert(pcseg: list):
         """
@@ -902,6 +925,27 @@ def multiply(pcset: set, n: int):
         for pc in pcset:
             pcset2.add(t(pc.pc * n))
     return pcset2
+
+
+def partitions2(pcset: set):
+    """
+    Gets all partitions of a pcset (size 2 or 1)
+    :param pcset: A pcset
+    :return: A list of all partitions
+    """
+    subs = subsets(pcset)
+    partitions_dict = {}
+    partitions_list = []
+    len_pcset = (len(pcset) + 1) // 2 if len(pcset) % 2 else len(pcset) // 2
+    for sub in subs:
+        if len(sub) <= len_pcset:
+            s = frozenset(sub)
+            d = frozenset(pcset.difference(sub))
+            if d not in partitions_dict:
+                partitions_dict[s] = d
+    for s in partitions_dict:
+        partitions_list.append((set(s), set(partitions_dict[s])))
+    return partitions_list
 
 
 def set_class_filter12(name: str, sets: list):
