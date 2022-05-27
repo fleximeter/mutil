@@ -21,8 +21,9 @@ print(sc2.name_prime)
 """
 
 sc1 = pcset.SetClass12()
-sc1.load_from_name("[0137]")
+sc1.load_from_name("[012345]")
 p = list(sc1.get_partition2_subset_classes())
 p.sort()
 for i in p:
     print(i)
+

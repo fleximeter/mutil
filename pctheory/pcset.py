@@ -515,8 +515,16 @@ class SetClass24:
     def __eq__(self, other):
         return self.pcset == other.pcset
 
+    def __hash__(self):
+        return hash(self.name_prime)
+
     def __len__(self):
         return len(self._pcset)
+
+    def __lt__(self, other):
+        if len(self) < len(other) or (len(self) == len(other) and self.name_prime < other.name_prime):
+            return True
+        return False
 
     def __ne__(self, other):
         return self.pcset != other.pcset
