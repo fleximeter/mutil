@@ -21,7 +21,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from typing import Set
+import networkx
+import pyvis
+
 from pctheory import pitch, tables, transformations
 
 
@@ -917,6 +919,31 @@ def make_pcset24(*args):
     for pc in args:
         pcset.add(pitch.PitchClass24(pc))
     return pcset
+
+
+def make_subset_graph(set_class):
+    """
+    Makes a subset graph
+    :param set_class: A set-class
+    :return: A graph
+    """
+    g = networkx.Graph()
+    scs = list(set_class.get_subset_classes())
+    for s in scs:
+        g.add_node(s.name_prime)
+    for i in range(0, len(scs)):
+        for j in range(0, i):
+            if scs[i].contains_abstract_subset(scs[j]):
+                g.add_edge(scs[i].name_prime, scs[j].name_prime)
+        for j in range(i + 1, len(scs)):
+            if scs[i].contains_abstract_subset(scs[j]):
+                g.add_edge(scs[i].name_prime, scs[j].name_prime)
+    net = pyvis.network.Network(800, 800, notebook=True)
+    net.toggle_hide_edges_on_drag(False)
+    net.barnes_hut()
+    net.from_nx(g)
+    net.show("ex.html")
+    return g
 
 
 def multiply(pcset: set, n: int):

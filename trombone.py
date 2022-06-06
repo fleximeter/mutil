@@ -1,4 +1,5 @@
 from pctheory import array, group, pcseg, pcset, pitch, set_complex, tables, transformations, util
+import networkx, matplotlib, pyvis
 
 s1 = pcset.make_pcset24(0, 1, 9, 10, 17, 20)  # this is T1I of the prime form
 sc1 = pcset.SetClass24(s1)
@@ -8,6 +9,7 @@ sp.sort()
 for s in sp:
     print("{0: <25}{1}".format(s.name_prime, s.ic_vector_string))
 
+pcset.make_subset_graph(sc1)
 """
 Hexachord: [00, 01, 05, 08, 15, 16]
 
