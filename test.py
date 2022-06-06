@@ -1,4 +1,5 @@
-from pctheory import array, group, pcseg, pcset, pitch, set_complex, tables, transformations, util
+from pctheory import array, group, pcseg, pcset, pitch, set_complex, tables, tempo, transformations, util
+from fractions import Fraction
 
 """
 p1 = pcseg.make_pcseg(6, 9, 5, 8, 4, 7, 1, 10, 2, 11, 3, 0)
@@ -21,9 +22,15 @@ print(sc2.name_prime)
 """
 
 sc1 = pcset.SetClass12()
-sc1.load_from_name("[012345]")
+sc1.load_from_name("[024579]")
 p = list(sc1.get_partition2_subset_classes())
 p.sort()
 for i in p:
     print(i)
 
+tl = [52.5, 60, 70, 84, 105]
+t = tempo.make_tempo_table(tl)
+for row in t:
+    for i in row:
+        print(i, end=" ")
+    print()
