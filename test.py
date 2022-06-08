@@ -29,8 +29,4 @@ for i in p:
     print(i)
 
 tl = [52.5, 60, 70, 84, 105]
-t = tempo.make_tempo_table(tl)
-for row in t:
-    for i in row:
-        print(i, end=" ")
-    print()
+t = tempo.plot_tempo_table(tl)
