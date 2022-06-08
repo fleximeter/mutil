@@ -29,7 +29,7 @@ class SetComplex:
     Represents a Forte set-complex K or Kh around a nexus set
     """
 
-    def __init__(self, nexus_set: pcset.SetClass12 = None):
+    def __init__(self, nexus_set: pcset = None):
         """
         Creates a set-complex around a nexus set
         :param nexus_set: A nexus set
@@ -37,7 +37,7 @@ class SetComplex:
         self._nexus = []
 
     @staticmethod
-    def assert_k(s: pcset.SetClass12, t: pcset.SetClass12):
+    def assert_k(s, t):
         """
         Asserts that s and t are in a K-relationship
         Source: Morris, "Class Notes for Atonal Music Theory," p. 49
@@ -53,7 +53,7 @@ class SetComplex:
                s_bar.contains_abstract_subset(t)
 
     @staticmethod
-    def assert_kh(s: pcset.SetClass12, t: pcset.SetClass12):
+    def assert_kh(s, t):
         """
         Asserts that s and t are in a Kh-relationship
         Source: Morris, "Class Notes for Atonal Music Theory," p. 49

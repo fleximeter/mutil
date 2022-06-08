@@ -535,7 +535,7 @@ class SetClass24:
         return "<pctheory.pcset.SetClass24 object at " + str(id(self)) + ">: " + repr(self._pcset)
 
     def __str__(self):
-        return str([str(pc) for pc in self._pcset])
+        return self._name_prime
 
     @property
     def ic_vector(self):
@@ -904,6 +904,8 @@ def make_pcset12(*args):
     :return: A pcset
     """
     pcset = set()
+    if type(args[0]) == list:
+        args = args[0]
     for pc in args:
         pcset.add(pitch.PitchClass12(pc))
     return pcset
@@ -916,6 +918,8 @@ def make_pcset24(*args):
     :return: A pcset
     """
     pcset = set()
+    if type(args[0]) == list:
+        args = args[0]
     for pc in args:
         pcset.add(pitch.PitchClass24(pc))
     return pcset

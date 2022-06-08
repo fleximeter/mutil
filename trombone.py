@@ -1,5 +1,4 @@
-from pctheory import array, group, pcseg, pcset, pitch, set_complex, tables, transformations, util
-import networkx, matplotlib, pyvis
+from pctheory import pcseg, pcset, pitch, set_complex, tables, transformations
 
 s1 = pcset.make_pcset24(0, 1, 9, 10, 17, 20)  # this is T1I of the prime form
 sc1 = pcset.SetClass24(s1)
@@ -20,6 +19,7 @@ Only 2 pentachords
 [00, 01, 08, 15, 16]
 
 
-
+tl = [52.5, 60, 70, 84, 105]
+t = tempo.plot_tempo_table(tl)
 
 """
