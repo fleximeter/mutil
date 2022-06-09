@@ -932,7 +932,7 @@ def make_pcset24(*args):
     return pcset
 
 
-def make_subset_graph(set_class, smallest_cardinality=1, show_graph=False, size=(800, 800)):
+def make_subset_graph(set_class, smallest_cardinality=1, show_graph=False, size=(800, 1100)):
     """
     Makes a subset graph
     :param set_class: A set-class
