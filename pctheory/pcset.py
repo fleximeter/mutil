@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import networkx
 import pyvis
+import multiprocessing as mp
 
 from pctheory import pitch, tables, transformations
 
@@ -688,10 +689,16 @@ class SetClass24:
         :return:
         """
         sub = subsets(self._pcset)
-        subset_classes = set()
+        sc = SetClass24()
+        subset_classes = {}
         for s in sub:
-            subset_classes.add(SetClass24(s))
-        return subset_classes
+            sc.pcset = s
+            if sc.name_prime not in subset_classes:
+                subset_classes[sc.name_prime] = SetClass24(s)
+        subset_classes_set = set()
+        for s in subset_classes:
+            subset_classes_set = subset_classes[s]
+        return subset_classes_set
 
     def get_partition_subset_classes(self):
         """
