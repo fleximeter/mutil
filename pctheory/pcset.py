@@ -697,7 +697,7 @@ class SetClass24:
                 subset_classes[sc.name_prime] = SetClass24(s)
         subset_classes_set = set()
         for s in subset_classes:
-            subset_classes_set = subset_classes[s]
+            subset_classes_set.add(subset_classes[s])
         return subset_classes_set
 
     def get_partition_subset_classes(self):
@@ -932,10 +932,12 @@ def make_pcset24(*args):
     return pcset
 
 
-def make_subset_graph(set_class):
+def make_subset_graph(set_class, show_graph=True, size=(800, 1200)):
     """
     Makes a subset graph
     :param set_class: A set-class
+    :param show_graph: Whether or not to generate a visualization of the graph
+    :param size: The size of the visualized graph
     :return: A graph
     """
     g = networkx.Graph()
@@ -949,11 +951,17 @@ def make_subset_graph(set_class):
         for j in range(i + 1, len(scs)):
             if scs[i].contains_abstract_subset(scs[j]):
                 g.add_edge(scs[i].name_prime, scs[j].name_prime)
-    net = pyvis.network.Network(800, 800, notebook=True)
-    net.toggle_hide_edges_on_drag(False)
-    net.barnes_hut()
-    net.from_nx(g)
-    net.show("ex.html")
+    if show_graph:
+        net = pyvis.network.Network(f"{size[0]}px", f"{size[1]}px", bgcolor="#eeeeee", font_color="#333333")
+        net.toggle_hide_edges_on_drag(False)
+        net.barnes_hut()
+        net.from_nx(g, default_node_size=40)
+        for node in net.nodes:
+            node["title"] = node["id"]
+            node["color"] = "#41b535"
+        for edge in net.edges:
+            edge["color"] = "#1c4219"
+        net.show("subset_graph.html")
     return g
 
 
