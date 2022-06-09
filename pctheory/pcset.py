@@ -932,27 +932,30 @@ def make_pcset24(*args):
     return pcset
 
 
-def make_subset_graph(set_class, show_graph=True, size=(800, 1200)):
+def make_subset_graph(set_class, smallest_cardinality=1, show_graph=False, size=(800, 800)):
     """
     Makes a subset graph
     :param set_class: A set-class
+    :param smallest_cardinality: The smallest cardinality to include in the graph
     :param show_graph: Whether or not to generate a visualization of the graph
     :param size: The size of the visualized graph
     :return: A graph
     """
-    g = networkx.Graph()
+    g = networkx.DiGraph()
     scs = list(set_class.get_subset_classes())
     for s in scs:
-        g.add_node(s.name_prime)
+        if len(s.pcset) >= smallest_cardinality:
+            g.add_node(s.name_prime)
     for i in range(0, len(scs)):
         for j in range(0, i):
-            if scs[i].contains_abstract_subset(scs[j]):
+            if scs[i].contains_abstract_subset(scs[j]) and len(scs[j].pcset) >= smallest_cardinality:
                 g.add_edge(scs[i].name_prime, scs[j].name_prime)
         for j in range(i + 1, len(scs)):
-            if scs[i].contains_abstract_subset(scs[j]):
+            if scs[i].contains_abstract_subset(scs[j]) and len(scs[j].pcset) >= smallest_cardinality:
                 g.add_edge(scs[i].name_prime, scs[j].name_prime)
     if show_graph:
-        net = pyvis.network.Network(f"{size[0]}px", f"{size[1]}px", bgcolor="#eeeeee", font_color="#333333")
+        net = pyvis.network.Network(f"{size[0]}px", f"{size[1]}px", directed=True, bgcolor="#eeeeee",
+                                    font_color="#333333", heading="Subset Graph")
         net.toggle_hide_edges_on_drag(False)
         net.barnes_hut()
         net.from_nx(g, default_node_size=40)
