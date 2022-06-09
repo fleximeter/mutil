@@ -1,4 +1,12 @@
-from pctheory import pcseg, pcset, pitch, transformations
+"""
+File: trombone.py
+Author: Jeff Martin
+Email: jeffreymartin@outlook.com
+This file contains functionality for making a trombone piece.
+Copyright © 2022 by Jeff Martin. All rights reserved.
+"""
+
+from pctheory import pcset, tempo, transformations
 
 # Hexachord prime form: [00, 01, 05, 08, 15, 16]
 s1 = pcset.make_pcset24(0, 1, 9, 10, 17, 20)  # this is T1I of the prime form
@@ -20,23 +28,23 @@ def list_possible_subsets():
 
 
 def display_subset_graph():
+    """
+    Renders a subset graph
+    :return:
+    """
     pcset.make_subset_graph(sc1, 3, True)
 
 
+def display_tempo_table():
+    """
+    Makes a tempo table
+    :return:
+    """
+    tl = [52.5, 60, 70, 84, 105]
+    tempo.plot_tempo_table(tl)
+
+
 if __name__ == "__main__":
-    list_possible_subsets()
-
-"""
-Hexachord prime form: [00, 01, 05, 08, 15, 16]
-
-Selection of SCs w/o ic11, ic12 (tritone, qflat tritone)
-
-Only 2 pentachords
-[00, 01, 05, 08, 15] 
-[00, 01, 08, 15, 16]
-
-
-tl = [52.5, 60, 70, 84, 105]
-t = tempo.plot_tempo_table(tl)
-
-"""
+    # list_possible_subsets()
+    # display_subset_graph()
+    display_tempo_table()

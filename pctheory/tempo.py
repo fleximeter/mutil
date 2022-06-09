@@ -73,14 +73,18 @@ def plot_tempo_table(quarter_note_tempos: list):
 
     # Display the table
     df = pd.DataFrame(tempo_table, columns=columns)
+    plt.rcParams["font.family"] = "Segoe UI"
     fig, ax = plt.subplots()
-    fig.set_size_inches(10, 3)
+    fig.set_size_inches(10, 5)
     fig.canvas.set_window_title("Tempo Table")
     fig.patch.set_visible(False)
     ax.axis("off")
     ax.axis("tight")
-    t = ax.table(cellText=df.values, colLabels=columns, loc="center")
+    t = ax.table(cellText=df.values, colLabels=columns, colColours=["#DDDDDD" for i in range(len(DURATIONS))], loc="center")
     t.auto_set_font_size(False)
-    t.set_fontsize(10)
+    t.set_fontsize(11)
+    p = t.properties()
+    for c in p["celld"]:
+        p["celld"][c].set(linewidth=0.5, width=0.09, height=0.08)
     fig.tight_layout()
     plt.show()
