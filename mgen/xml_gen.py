@@ -244,13 +244,19 @@ def make_music21_list(items, durations):
         elif type(current_item) == float:
             if current_item == -numpy.inf:
                 m_list.append(music21.note.Rest(quarterLength=durations[i]))
+            else:
+                m_list.append(music21.note.Note(current_item + 60, quarterLength=durations[i]))
         elif type(current_item) == list:
             if type(current_item[0]) == int:
                 m_list.append(music21.chord.Chord([j + 60 for j in current_item], quarterLength=durations[i]))
             elif type(current_item[0]) == pitch.Pitch12:
                 m_list.append(music21.chord.Chord([p.p + 60 for p in current_item], quarterLength=durations[i]))
+            elif type(current_item[0]) == pitch.Pitch24:
+                m_list.append(music21.chord.Chord([music21.pitch.Pitch(p.p / 2 + 60) for p in current_item], quarterLength=durations[i]))
         elif type(current_item) == pitch.Pitch12:
             m_list.append(music21.note.Note(items[i].p + 60, quarterLength=durations[i]))
+        elif type(current_item) == pitch.Pitch24:
+            m_list.append(music21.note.Note(music21.pitch.Pitch(items[i].p / 2 + 60), quarterLength=durations[i]))
     return m_list
 
 
