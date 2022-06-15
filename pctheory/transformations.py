@@ -187,10 +187,10 @@ class TTO:
         :param n: The number of possible pcs
         :return: The cycles, as a list of lists
         """
-        int_list = [i for i in range(1, num_pcs)]
+        int_list = [i for i in range(num_pcs)]
         cycles = []
         while len(int_list) > 0:
-            cycle = [0]
+            cycle = [int_list[0]]
             pc = cycle[0]
             pc = (pc * self._tto[1] + self._tto[0]) % num_pcs
             while pc != cycle[0]:
@@ -199,6 +199,7 @@ class TTO:
                 pc = cycle[len(cycle) - 1]
                 pc = (pc * self._tto[1] + self._tto[0]) % num_pcs
             cycles.append(cycle)
+            del int_list[0]
         return cycles
 
     def inverse12(self):
@@ -245,7 +246,7 @@ def find_ttos(pcset1: set, pcset2: set):
     return ttos_final
 
 
-def get_ros():
+def get_ros12():
     """
     Gets ROs
     :return: A list of ROs
@@ -254,12 +255,12 @@ def get_ros():
     for i in range(12):
         ros[f"T{i}"] = RO(i)
         ros[f"T{i}R"] = RO(i, 1)
-        ros[f"T{i}I"] = RO(i, 0, 0, 1)
-        ros[f"T{i}RI"] = RO(i, 1, 0, 1)
-        ros[f"T{i}M"] = RO(i, 0, 1, 0)
-        ros[f"T{i}RM"] = RO(i, 1, 1, 0)
-        ros[f"T{i}MI"] = RO(i, 0, 1, 1)
-        ros[f"T{i}RMI"] = RO(i, 1, 1, 1)
+        ros[f"T{i}I"] = RO(i, 0, 11)
+        ros[f"T{i}RI"] = RO(i, 1, 11)
+        ros[f"T{i}M"] = RO(i, 0, 5)
+        ros[f"T{i}RM"] = RO(i, 1, 5)
+        ros[f"T{i}MI"] = RO(i, 0, 7)
+        ros[f"T{i}RMI"] = RO(i, 1, 7)
     return ros
 
 
@@ -315,8 +316,8 @@ def left_multiply_ttos(*args, num_pcs=12):
     elif len(ttos) == 1:
         return ttos[0]
     else:
-        m = ttos[len(ttos)-1][0]
-        n = ttos[len(ttos) - 1][1]
+        n = ttos[len(ttos) - 1][0]
+        m = ttos[len(ttos)-1][1]
         for i in range(len(ttos)-2, -1, -1):
             tr_n = ttos[i][0]
             mul_n = ttos[i][1]
