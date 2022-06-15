@@ -46,26 +46,26 @@ chains = poset.generate_chains_weak(pc[5], sc_lists[2][1], 0.5, 0.5, 0.9, 0.5, p
 # Filter exclusively
 chains = poset.filter_poset_positions(chains,
                                       [None,
-                                       None, # pcset.make_pcset(11, 9, 10, 3),
-                                       None, # pcset.make_pcset(6),
-                                       None, # pcset.make_pcset(8, 11, 3, 6),
-                                       None, # pcset.make_pcset(8),
-                                       None, # pcset.make_pcset(3, 4, 5, 7),
-                                       None, # pcset.make_pcset(4),
-                                       None, # pcset.make_pcset(4, 5, 6, 11),
+                                       None, # pcset.make_pcset12(11, 9, 10, 3),
+                                       None, # pcset.make_pcset12(6),
+                                       None, # pcset.make_pcset12(8, 11, 3, 6),
+                                       None, # pcset.make_pcset12(8),
+                                       None, # pcset.make_pcset12(3, 4, 5, 7),
+                                       None, # pcset.make_pcset12(4),
+                                       None, # pcset.make_pcset12(4, 5, 6, 11),
                                        None],
                                        True)
 
 # Filter inclusively
 chains = poset.filter_poset_positions(chains,
                                       [None,
-                                       None, # pcset.make_pcset(0, 1, 4, 6, 7, 8, 10),
-                                       pcset.make_pcset(7),
-                                       None, # pcset.make_pcset(2, 4, 5, 6, 7, 10, 11),
-                                       pcset.make_pcset(4),
-                                       None, # pcset.make_pcset(0, 1, 2, 3, 4, 6, 9),
-                                       pcset.make_pcset(2),
-                                       None, # pcset.make_pcset(1, 3, 5, 6, 7, 10, 11),
+                                       None, # pcset.make_pcset12(0, 1, 4, 6, 7, 8, 10),
+                                       pcset.make_pcset12(7),
+                                       None, # pcset.make_pcset12(2, 4, 5, 6, 7, 10, 11),
+                                       pcset.make_pcset12(4),
+                                       None, # pcset.make_pcset12(0, 1, 2, 3, 4, 6, 9),
+                                       pcset.make_pcset12(2),
+                                       None, # pcset.make_pcset12(1, 3, 5, 6, 7, 10, 11),
                                        None])
 
 # Print the chains

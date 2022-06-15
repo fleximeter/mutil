@@ -12,10 +12,10 @@ import music21
 google_drive = "H:\\My Drive"
 
 sets = {
-    "s": [pcset.make_pcset(0, 1, 4)],  # (3-3)[014]
-    "t": [pcset.make_pcset(0, 1, 5)],  # (3-4)[015]
-    "u": [pcset.make_pcset(0, 2, 6)],  # (3-8)[026]
-    "v": [pcset.make_pcset(0, 3, 7)]  # (3-11)[037]
+    "s": [pcset.make_pcset12(0, 1, 4)],  # (3-3)[014]
+    "t": [pcset.make_pcset12(0, 1, 5)],  # (3-4)[015]
+    "u": [pcset.make_pcset12(0, 2, 6)],  # (3-8)[026]
+    "v": [pcset.make_pcset12(0, 3, 7)]  # (3-11)[037]
 }
 
 t = transformations.get_ttos12()
@@ -42,7 +42,7 @@ for s in sets:
     for i in range(1, 12):
         sets[s].append(t[f"T{i}"].transform(sets[s][0]))
     for i in range(0, 12):
-        sets[s].append(t[f"T{i}I"].transform(sets[s][0]))
+        sets[s].append(t[f"T{i}M11"].transform(sets[s][0]))
 
 for u in unions:
     match(len(u)):

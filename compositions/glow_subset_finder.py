@@ -106,7 +106,7 @@ for pc in pcsets[k]:
 #s = pcset.make_pcset(1, 3, 4, 5, 7, 8, 11)
 
 for i in range(len(pcsets2)):
-    sub = pcset.subsets(pcsets2[i])
+    sub = pcset.subsets(set(pcsets2[i]))
 
     print(pcsets[k][i], "\n")
     filter = pcset.set_class_filter12("[026]", sub)

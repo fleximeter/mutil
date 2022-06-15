@@ -10,7 +10,7 @@ from pctheory import pcset, tables, transformations
 
 # The data table
 data_table = tables.create_tables()
-current = pcset.make_pcset(1, 2)
+current = pcset.make_pcset12(1, 2)
 
 
 def make_pcsets():
@@ -19,16 +19,16 @@ def make_pcsets():
     :return: The pcsets
     """
     pcsets = [
-        pcset.make_pcset(0, 1, 4),
-        pcset.make_pcset(0, 1, 5),
-        pcset.make_pcset(0, 2, 6),
-        pcset.make_pcset(0, 3, 7),
-        pcset.make_pcset(0, 1, 4, 8),
-        pcset.make_pcset(0, 1, 4, 6),
-        pcset.make_pcset(0, 1, 3, 7),
-        pcset.make_pcset(0, 1, 4, 6, 8),
-        pcset.make_pcset(0, 3, 4, 5, 8),
-        pcset.make_pcset(0, 1, 4, 5, 7, 9)
+        pcset.make_pcset12(0, 1, 4),
+        pcset.make_pcset12(0, 1, 5),
+        pcset.make_pcset12(0, 2, 6),
+        pcset.make_pcset12(0, 3, 7),
+        pcset.make_pcset12(0, 1, 4, 8),
+        pcset.make_pcset12(0, 1, 4, 6),
+        pcset.make_pcset12(0, 1, 3, 7),
+        pcset.make_pcset12(0, 1, 4, 6, 8),
+        pcset.make_pcset12(0, 3, 4, 5, 8),
+        pcset.make_pcset12(0, 1, 4, 5, 7, 9)
     ]
     return pcsets
 

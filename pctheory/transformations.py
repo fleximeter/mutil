@@ -46,29 +46,46 @@ class RO:
     [2] is the multiplier. Multiplication is performed first, then retrograding,
     then transposition. These operators can be used with pcsegs.
     """
-    def __init__(self, T=0, R=0, M=0, I=0):
+    def __init__(self, T=0, R=0, M=0):
         """
         Creates a RO
         :param T: The index of transposition
         :param R: Whether or not to retrograde
-        :param M: Whether or not to multiply
-        :param I: Whether or not to invert
+        :param M: The multiplier
         """
-        self._ro = [T, R, M, I]
+        self._ro = [T, R, M]
 
     def __eq__(self, other):
-        return self._ro[0] == other.ro[0] and self._ro[1] == other.ro[1] and self._ro[2] == other.ro[2] and \
-               self._ro[3] == other.ro[3]
+        return self._ro[0] == other.ro[0] and self._ro[1] == other.ro[1] and self._ro[2] == other.ro[2]
 
     def __getitem__(self, item):
         return self._ro[item]
 
     def __hash__(self):
-        return self._ro[0] * 10000 + self._ro[1] * 1000 + self._ro[2] * 100 + self._ro[3]
+        return self._ro[0] * 1000 + self._ro[1] * 100 + self._ro[2]
 
     def __ne__(self, other):
-        return self._ro[0] != other.ro[0] or self._ro[1] != other.ro[1] or self._ro[2] != other.ro[2] or \
-               self._ro[3] != other.ro[3]
+        return self._ro[0] != other.ro[0] or self._ro[1] != other.ro[1] or self._ro[2] != other.ro[2]
+
+    def __repr__(self):
+        if self._ro[1] and self._ro[2] != 1:
+            return f"T{self._ro[0]}RM{self._ro[2]}"
+        elif self._ro[2] != 1:
+            return f"T{self._ro[0]}M{self._ro[2]}"
+        elif self._ro[1]:
+            return f"T{self._ro[0]}R"
+        else:
+            return f"T{self._ro[0]}"
+
+    def __str__(self):
+        if self._ro[1] and self._ro[2] != 1:
+            return f"T{self._ro[0]}RM{self._ro[2]}"
+        elif self._ro[2] != 1:
+            return f"T{self._ro[0]}M{self._ro[2]}"
+        elif self._ro[1]:
+            return f"T{self._ro[0]}R"
+        else:
+            return f"T{self._ro[0]}"
 
     @property
     def ro(self):
@@ -95,23 +112,13 @@ class RO:
         :return: The transformed pcseg
         """
         pcseg2 = list()
-        n = 12
         if len(pcseg) > 0:
             if type(pcseg[0]) == pitch.PitchClass24:
-                n = 24
-        for i in range(len(pcseg)):
-            pc = pcseg[i].pc
-            if n == 12:
-                if self._ro[3]:
-                    pc *= 11
-                if self._ro[2]:
-                    pc *= 5
+                for i in range(len(pcseg)):
+                    pcseg2.append(pitch.PitchClass24(pcseg[i].pc * self._ro[2] + self._ro[0]))
             else:
-                if self._ro[3]:
-                    pc *= 23
-                if self._ro[2]:
-                    pc *= 17
-            pcseg2.append(pitch.PitchClass12(pc + self._ro[0]))
+                for i in range(len(pcseg)):
+                    pcseg2.append(pitch.PitchClass12(pcseg[i].pc * self._ro[2] + self._ro[0]))
         if self._ro[1]:
             pcseg2.reverse()
         return pcseg2
@@ -123,17 +130,17 @@ class TTO:
     [0] is the index of transposition. [1] is the multiplier. Multiplication is performed first,
     then transposition.
     """
-    def __init__(self, T=0, M=0, I=0):
+    def __init__(self, T=0, M=1):
         """
         Creates a TTO
         :param T: The index of transposition
         :param M: Whether or not to multiply
         :param I: Whether or not to invert
         """
-        self._tto = [T, M, I]
+        self._tto = [T, M]
 
     def __eq__(self, other):
-        return self._tto[0] == other.tto[0] and self._tto[1] == other.tto[1] and self._tto[2] == other.tto[2]
+        return self._tto[0] == other.tto[0] and self._tto[1] == other.tto[1]
 
     def __getitem__(self, item):
         return self._tto[item]
@@ -142,25 +149,17 @@ class TTO:
         return self._tto[0] * 100 + self._tto[1]
 
     def __ne__(self, other):
-        return self._tto[0] != other.tto[0] or self._tto[1] != other.tto[1] or self._tto[2] != other.tto[2]
+        return self._tto[0] != other.tto[0] or self._tto[1] != other.tto[1]
 
     def __repr__(self):
-        if self._tto[1] and self._tto[2]:
-            return f"T{self._tto[0]}MI"
-        elif self._tto[2]:
-            return f"T{self._tto[0]}I"
-        elif self._tto[3]:
-            return f"T{self._tto[0]}M"
+        if self._tto[1] != 1:
+            return f"T{self._tto[0]}M{self._tto[1]}"
         else:
             return f"T{self._tto[0]}"
 
     def __str__(self):
-        if self._tto[1] and self._tto[2]:
-            return f"T{self._tto[0]}MI"
-        elif self._tto[2]:
-            return f"T{self._tto[0]}I"
-        elif self._tto[3]:
-            return f"T{self._tto[0]}M"
+        if self._tto[1] != 1:
+            return f"T{self._tto[0]}M{self._tto[1]}"
         else:
             return f"T{self._tto[0]}"
 
@@ -181,65 +180,28 @@ class TTO:
         :return:
         """
         self._tto = value
-        self._tto[0] %= 12
 
-    def cycles12(self):
+    def cycles(self, num_pcs=12):
         """
         Gets the cycles of the TTO
+        :param n: The number of possible pcs
         :return: The cycles, as a list of lists
         """
-        int_list = [i for i in range(12)]
+        int_list = [i for i in range(1, num_pcs)]
         cycles = []
         while len(int_list) > 0:
-            cycle = [pitch.PitchClass24(int_list[0])]
-            n = cycle[0].pc
-            if self._tto[2]:
-                n *= 11
-            if self._tto[1]:
-                n *= 5
-            n = (n + self._tto[0]) % 12
-            while n != cycle[0].pc:
-                cycle.append(pitch.PitchClass24(n))
-                int_list.remove(n)
-                n = cycle[len(cycle) - 1].pc
-                if self._tto[2]:
-                    n *= 11
-                if self._tto[1]:
-                    n *= 5
-                n = (n + self._tto[0]) % 12
-            del int_list[0]
+            cycle = [0]
+            pc = cycle[0]
+            pc = (pc * self._tto[1] + self._tto[0]) % num_pcs
+            while pc != cycle[0]:
+                cycle.append(pc)
+                int_list.remove(pc)
+                pc = cycle[len(cycle) - 1]
+                pc = (pc * self._tto[1] + self._tto[0]) % num_pcs
             cycles.append(cycle)
         return cycles
 
-    def cycles24(self):
-        """
-        Gets the cycles of the TTO
-        :return: The cycles, as a list of lists
-        """
-        int_list = [i for i in range(24)]
-        cycles = []
-        while len(int_list) > 0:
-            cycle = [pitch.PitchClass24(int_list[0])]
-            n = cycle[0].pc
-            if self._tto[2]:
-                n *= 23
-            if self._tto[1]:
-                n *= 17
-            n = (n + self._tto[0]) % 24
-            while n != cycle[0].pc:
-                cycle.append(pitch.PitchClass24(n))
-                int_list.remove(n)
-                n = cycle[len(cycle)-1].pc
-                if self._tto[2]:
-                    n *= 23
-                if self._tto[1]:
-                    n *= 17
-                n = (n + self._tto[0]) % 24
-            del int_list[0]
-            cycles.append(cycle)
-        return cycles
-
-    def inverse(self):
+    def inverse12(self):
         """
         Gets the inverse of the TTO
         :return: The inverse
@@ -254,19 +216,9 @@ class TTO:
         """
         t = type(item)
         if t == pitch.PitchClass12:
-            pcn = item.pc
-            if self._tto[2]:
-                pcn *= 11
-            if self._tto[1]:
-                pcn *= 5
-            return pitch.PitchClass12(pcn + self._tto[0])
+            return pitch.PitchClass12(item.pc * self._tto[1] + self._tto[0])
         elif t == pitch.PitchClass24:
-            pcn = item.pc
-            if self._tto[2]:
-                pcn *= 23
-            if self._tto[1]:
-                pcn *= 17
-            return pitch.PitchClass24(pcn + self._tto[0])
+            return pitch.PitchClass24(item.pc * self._tto[1] + self._tto[0])
         else:
             new_item = t()
             if t == set:
@@ -318,10 +270,10 @@ def get_ttos12():
     """
     ttos = {}
     for i in range(12):
-        ttos[f"T{i}"] = TTO(i, 0, 0)
-        ttos[f"T{i}I"] = TTO(i, 0, 1)
-        ttos[f"T{i}M"] = TTO(i, 1, 0)
-        ttos[f"T{i}MI"] = TTO(i, 1, 1)
+        ttos[f"T{i}"] = TTO(i, 1)
+        ttos[f"T{i}M5"] = TTO(i, 5)
+        ttos[f"T{i}M7"] = TTO(i, 7)
+        ttos[f"T{i}M11"] = TTO(i, 11)
     return ttos
 
 
@@ -332,18 +284,23 @@ def get_ttos24():
     """
     ttos = {}
     for i in range(24):
-        ttos[f"T{i}"] = TTO(i, 0, 0)
-        ttos[f"T{i}I"] = TTO(i, 0, 1)
-        ttos[f"T{i}M"] = TTO(i, 1, 0)
-        ttos[f"T{i}MI"] = TTO(i, 1, 1)
+        ttos[f"T{i}"] = TTO(i, 1)
+        ttos[f"T{i}M5"] = TTO(i, 5)
+        ttos[f"T{i}M7"] = TTO(i, 7)
+        ttos[f"T{i}M11"] = TTO(i, 11)
+        ttos[f"T{i}M13"] = TTO(i, 13)
+        ttos[f"T{i}M17"] = TTO(i, 17)
+        ttos[f"T{i}M19"] = TTO(i, 19)
+        ttos[f"T{i}M23"] = TTO(i, 23)
     return ttos
 
 
-def left_multiply_ttos(*args):
+def left_multiply_ttos(*args, num_pcs=12):
     """
     Left-multiplies a list of TTOs
     :param args: A collection of TTOs (can be one argument as a list, or multiple TTOs separated by commas.
     The highest index is evaluated first, and the lowest index is evaluated last.
+    :param num_pcs: The number of pcs in the system
     :return: The result
     """
     ttos = args
@@ -359,32 +316,13 @@ def left_multiply_ttos(*args):
         return ttos[0]
     else:
         m = ttos[len(ttos)-1][0]
-        n = 1
-        if ttos[len(ttos) - 1][1] and ttos[len(ttos) - 1][2]:
-            n = 7
-        elif ttos[len(ttos) - 1][1]:
-            n = 5
-        elif ttos[len(ttos) - 1][2]:
-            n = 11
+        n = ttos[len(ttos) - 1][1]
         for i in range(len(ttos)-2, -1, -1):
             tr_n = ttos[i][0]
-            mul_n = 1
-            if ttos[i][1] and ttos[i][2]:
-                mul_n = 7
-            elif ttos[i][1]:
-                mul_n = 5
-            elif ttos[i][2]:
-                mul_n = 11
+            mul_n = ttos[i][1]
             m = m * mul_n + tr_n
             n *= mul_n
-        if m % 12 == 11:
-            return TTO(n % 12, 0, 1)
-        elif m % 12 == 7:
-            return TTO(n % 12, 1, 1)
-        elif m % 12 == 5:
-            return TTO(n % 12, 1, 0)
-        else:
-            return TTO(n % 12, 0, 0)
+        return TTO(n % num_pcs, m % num_pcs)
 
 
 def make_tto_list(*args):
@@ -394,5 +332,5 @@ def make_tto_list(*args):
     """
     tto_list = []
     for tto in args:
-        tto_list.append(TTO(tto[0], tto[1], tto[2]))
+        tto_list.append(TTO(tto[0], tto[1]))
     return tto_list
