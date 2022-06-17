@@ -148,6 +148,20 @@ def convert_pitch24(pitch21):
     return pitch.Pitch24(note)
 
 
+def dump_parts(new_parts):
+    """
+    Dumps the new part data
+    :param new_parts: New (parsed) parts
+    :return:
+    """
+    for p in new_parts:
+        for v in range(len(p)):
+            for v2 in range(len(p[v])):
+                print(f"Voice {v + 1}.{v2 + 1}")
+                for item in p[v][v2]:
+                    print(f"m{item.measure}, {item.pitch.p}, {item.duration}, {item.start_time}")
+
+
 def parse_parts(parts, part_indices=None):
     """
     Parses parts
@@ -228,6 +242,7 @@ def parse_parts(parts, part_indices=None):
                                 if len(new_parts[i][int(item.id) - 1]) < len(item2.pitches):
                                     for j in range(len(item2.pitches) - len(new_parts[i][int(item.id) - 1])):
                                         new_parts[i][int(item.id) - 1].append([])
+
                                 # Parse each pitch in the chord
                                 for p in range(len(item2.pitches)):
                                     n = Note(pitch=convert_pitch24(item2.pitches[p]),
@@ -235,6 +250,7 @@ def parse_parts(parts, part_indices=None):
                                              measure=measure.number,
                                              quarter_duration=Fraction(item2.duration.quarterLength),
                                              start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
+
                                     # If the note is tied, we need to keep track of it
                                     if item2.tie is not None:
                                         if item2.tie.type == "start":
@@ -263,6 +279,7 @@ def parse_parts(parts, part_indices=None):
                                          measure=measure.number,
                                          quarter_duration=Fraction(item2.duration.quarterLength),
                                          start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
+
                                 # If the note is tied, we need to keep track of it
                                 if item2.tie is not None:
                                     if item2.tie.type == "start":
@@ -291,6 +308,7 @@ def parse_parts(parts, part_indices=None):
                         if len(new_parts[i][0]) < len(item.pitches):
                             for j in range(len(item.pitches) - len(new_parts[i][0])):
                                 new_parts[i][0].append([])
+
                         # Parse each pitch in the chord
                         for p in range(len(item.pitches)):
                             n = Note(pitch=convert_pitch24(item.pitches[p]),
@@ -298,6 +316,7 @@ def parse_parts(parts, part_indices=None):
                                      measure=measure.number,
                                      quarter_duration=Fraction(item.duration.quarterLength),
                                      start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
+
                             # If the note is tied, we need to keep track of it
                             if item.tie is not None:
                                 if item.tie.type == "start":
@@ -325,6 +344,7 @@ def parse_parts(parts, part_indices=None):
                                  measure=measure.number,
                                  quarter_duration=Fraction(item.duration.quarterLength),
                                  start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
+
                         # If the note is tied, we need to keep track of it
                         if item.tie is not None:
                             if item.tie.type == "start":
@@ -369,9 +389,4 @@ def read_file(input_xml):
 if __name__ == "__main__":
     file_parts = read_file(f"{FOLDER}\\{FILE}")
     parsed_parts = parse_parts(file_parts, 1)
-    for p in parsed_parts:
-        for v in p:
-            for v2 in v:
-                print("Voice")
-                for item in v2:
-                    print(f"{item.pitch.p}, {item.duration}, {item.measure}, {item.start_time}")
+    dump_parts(parsed_parts)
