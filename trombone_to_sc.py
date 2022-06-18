@@ -168,7 +168,7 @@ def dump_sc(new_parts):
     :param new_parts: New (parsed) parts
     :return:
     """
-    data = ""
+    data = "(\n"
 
     # Get the number of voices
     num_voices = 0
@@ -188,6 +188,8 @@ def dump_sc(new_parts):
                         f"d.put(\\duration, {float(item.duration)});\n" + \
                         f"d.put(\\start, {float(item.start_time)});\n" + \
                         f"~score[{current_voice}].add(d);\n"
+
+    data += ")\n"
     return data
 
 
@@ -429,4 +431,4 @@ def write_to_file(data, file):
 if __name__ == "__main__":
     file_parts = read_file(f"{FOLDER}\\{FILE}")
     parsed_parts = parse_parts(file_parts, 1)
-    write_to_file(dump_sc(parsed_parts), f"{FOLDER}\\score.txt")
+    write_to_file(dump_sc(parsed_parts), f"{FOLDER}\\SuperCollider\\score.scd")
