@@ -134,6 +134,52 @@ class Note:
         self._start_time = value
 
 
+def add_sc_buffers(new_parts):
+    """
+    Adds buffer indices to a list of new parts for SuperCollider
+    :param new_parts: A list of new parts
+    :return:
+    """
+    for p in new_parts:
+        for v in p:
+            for v2 in v:
+                for note in v2:
+                    if -200 <= note.pitch.p < -51:
+                        note.buffer = 0
+                    elif -51 <= note.pitch.p < -39:
+                        note.buffer = 4
+                    elif -39 <= note.pitch.p < -27:
+                        note.buffer = 1
+                    elif -27 <= note.pitch.p < -15:
+                        note.buffer = 5
+                    elif -15 <= note.pitch.p < -3:
+                        note.buffer = 2
+                    elif -3 <= note.pitch.p < 9:
+                        note.buffer = 6
+                    elif 9 <= note.pitch.p < 21:
+                        note.buffer = 3
+                    elif 21 <= note.pitch.p:
+                        note.buffer = 7
+
+
+def add_sc_envelopes(new_parts):
+    """
+    Adds envelopes to a list of new parts for SuperCollider
+    :param new_parts: A list of new parts
+    :return:
+    """
+    for p in new_parts:
+        for v in p:
+            for v2 in v:
+                for note in v2:
+                    if note.duration < 2:
+                        note.envelope = f"[[0, 1, 0.8, 0.8, 0], [0.02, 0.08, {note.duration - 0.12}, 0.02], " \
+                                        f"[4, -4, 0, -4]]"
+                    else:
+                        note.envelope = f"[[0, 1, 0.8, 0.8, 0], [0.02, 0.08, {note.duration - 0.12}, 0.02], " \
+                                        f"[4, -4, 0, -4]]"
+
+
 def convert_pitch24(pitch21):
     """
     Converts a music21 pitch to a Pitch24 object
@@ -162,10 +208,11 @@ def dump_parts(new_parts):
                     print(f"m{item.measure}, {item.pitch.p}, {item.duration}, {item.start_time}")
 
 
-def dump_sc(new_parts):
+def dump_sc(new_parts, num_measures):
     """
     Dumps the new part data in SuperCollider format
     :param new_parts: New (parsed) parts
+    :param num_measures: The highest numbered measure
     :return:
     """
     data = "(\n"
@@ -178,19 +225,46 @@ def dump_sc(new_parts):
             num_voices += len(v)
 
     data += "~score = Array.fill({0}, {1});\n".format(num_voices, "{List.new}")
-    for p in new_parts:
-        for v in range(len(p)):
-            for v2 in range(len(p[v])):
-                for item in p[v][v2]:
-                    data += f"d = Dictionary.new;\n" + \
-                        f"d.put(\\measure, {item.measure});\n" + \
-                        f"d.put(\\pitch, {item.pitch.p});\n" + \
-                        f"d.put(\\duration, {float(item.duration)});\n" + \
-                        f"d.put(\\start, {float(item.start_time)});\n" + \
-                        f"~score[{current_voice}].add(d);\n"
+
+    idx = [0 for i in range(num_voices)]
+    for i in range(num_measures + 1):
+        cidx = 0
+        for p in new_parts:
+            for v in p:
+                for v2 in v:
+                    data += f"// Measure {i}, Voice {cidx}\n"
+                    for j in range(idx[cidx], len(v2)):
+                        if v2[j].measure == i:
+                            data += f"d = Dictionary.new;\n" + \
+                                    f"d.put(\"buf\", {v2[j].buffer});\n" + \
+                                    f"d.put(\"duration\", {float(v2[j].duration)});\n" + \
+                                    f"d.put(\"env\", {v2[j].envelope});\n" + \
+                                    f"d.put(\"measure\", {v2[j].measure});\n" + \
+                                    f"d.put(\"pitch\", {v2[j].pitch.p});\n" + \
+                                    f"d.put(\"start\", {float(v2[j].start_time)});\n" + \
+                                    f"~score[{cidx}].add(d);\n"
+                        else:
+                            idx[cidx] = j
+                            break
+                    cidx += 1
 
     data += ")\n"
     return data
+
+
+def get_highest_measure_no(parts):
+    """
+    Gets the highest measure number in a list of parts
+    :param parts: A list of parts
+    :return: The highest measure number
+    """
+    num_measures = 0
+    for p in parts:
+        for measure in p:
+            if type(measure) == music21.stream.Measure:
+                if measure.number > num_measures:
+                    num_measures = measure.number
+    return num_measures
 
 
 def parse_parts(parts, part_indices=None):
@@ -431,4 +505,7 @@ def write_to_file(data, file):
 if __name__ == "__main__":
     file_parts = read_file(f"{FOLDER}\\{FILE}")
     parsed_parts = parse_parts(file_parts, 1)
-    write_to_file(dump_sc(parsed_parts), f"{FOLDER}\\SuperCollider\\score.scd")
+    m_last = get_highest_measure_no(file_parts)
+    add_sc_envelopes(parsed_parts)
+    add_sc_buffers(parsed_parts)
+    write_to_file(dump_sc(parsed_parts, m_last), f"{FOLDER}\\SuperCollider\\score.scd")
