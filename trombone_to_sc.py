@@ -162,6 +162,35 @@ def dump_parts(new_parts):
                     print(f"m{item.measure}, {item.pitch.p}, {item.duration}, {item.start_time}")
 
 
+def dump_sc(new_parts):
+    """
+    Dumps the new part data in SuperCollider format
+    :param new_parts: New (parsed) parts
+    :return:
+    """
+    data = ""
+
+    # Get the number of voices
+    num_voices = 0
+    current_voice = 0
+    for p in new_parts:
+        for v in p:
+            num_voices += len(v)
+
+    data += "~score = Array.fill({0}, {1});\n".format(num_voices, "{List.new}")
+    for p in new_parts:
+        for v in range(len(p)):
+            for v2 in range(len(p[v])):
+                for item in p[v][v2]:
+                    data += f"d = Dictionary.new;\n" + \
+                        f"d.put(\\measure, {item.measure});\n" + \
+                        f"d.put(\\pitch, {item.pitch.p});\n" + \
+                        f"d.put(\\duration, {float(item.duration)});\n" + \
+                        f"d.put(\\start, {float(item.start_time)});\n" + \
+                        f"~score[{current_voice}].add(d);\n"
+    return data
+
+
 def parse_parts(parts, part_indices=None):
     """
     Parses parts
@@ -386,7 +415,18 @@ def read_file(input_xml):
     return parts
 
 
+def write_to_file(data, file):
+    """
+    Writes dumped data to a file
+    :param data: The data
+    :param file: The file name
+    :return:
+    """
+    with open(file, "w") as f:
+        f.write(data)
+
+
 if __name__ == "__main__":
     file_parts = read_file(f"{FOLDER}\\{FILE}")
     parsed_parts = parse_parts(file_parts, 1)
-    dump_parts(parsed_parts)
+    write_to_file(dump_sc(parsed_parts), f"{FOLDER}\\score.txt")
