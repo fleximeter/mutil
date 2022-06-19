@@ -234,7 +234,7 @@ def dump_sc(new_parts, num_measures):
                     data += f"// Measure {i}, Voice {cidx}\n"
                     for j in range(idx[cidx], len(v2)):
                         if v2[j].measure == i:
-                            data += f"d = Dictionary.new;" + \
+                            data += f"d = Dictionary.new;\n" + \
                                     f"d.put(\\buf, {v2[j].buffer});\n" + \
                                     f"d.put(\\duration, {float(v2[j].duration)});\n" + \
                                     f"d.put(\\env, {v2[j].env});\n" + \
