@@ -6,16 +6,10 @@ This file contains functionality for converting MusicXML data into SuperCollider
 Copyright © 2022 by Jeff Martin. All rights reserved.
 """
 
-import music21
-from pctheory import pitch, pcseg, pcset
-from fractions import Fraction
 from mgen import xml_parse_sc
 
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
 FILE = "Trombone Piece 0.2.1 - Full score - 01 Flow 1.xml"
-MAP24 = {"C": 0, "D": 4, "E": 8, "F": 10, "G": 14, "A": 18, "B": 22}
-PC12 = 12
-PC24 = 24
 
 
 def add_sc_data(new_parts):
