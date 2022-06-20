@@ -22,16 +22,17 @@ class Note:
     Represents a note with pitch, duration, and start time
     """
     def __init__(self, **kwargs):
-        self.buffer = kwargs["buffer"] if "buffer" in kwargs else 0
-        self.duration = kwargs["duration"] if "duration" in kwargs else 0
-        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0
-        self.env = kwargs["env"] if "env" in kwargs else "[[][][]]"
-        self.envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"
-        self.measure = kwargs["measure"] if "measure" in kwargs else 0
-        self.mul = kwargs["mul"] if "mul" in kwargs else 1
-        self.pitch = kwargs["pitch"] if "pitch" in kwargs else None
-        self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0
-        self.synth_index = kwargs["synth_index"] if "synth_index" in kwargs else 1
+        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
+        self.buffer = kwargs["buffer"] if "buffer" in kwargs else 0                 # buffer index for granulation
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # duration
+        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
+        self.env = kwargs["env"] if "env" in kwargs else "[[][][]]"                 # envelope specification
+        self.envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"        # number of points in envelope
+        self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
+        self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
+        self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
+        self.synth_index = kwargs["synth_index"] if "synth_index" in kwargs else 1  # the synth to use
 
 
 class Dynamic:
@@ -39,11 +40,26 @@ class Dynamic:
     Represents a dynamic object (crescendo, decrescendo, etc.
     """
     def __init__(self, **kwargs):
-        self.curvesynth = kwargs["curvesynth"] if "curvesynth" in kwargs else 0
-        self.duration = kwargs["duration"] if "duration" in kwargs else 0
-        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0
-        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0
-        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1
+        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
+        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0     # the synth to use
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # dynamic duration
+        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0        # end volume index
+        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0  # start volume index
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
+
+
+class Effect:
+    """
+    Represents an effect object
+    """
+    def __init__(self, **kwargs):
+        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
+        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # effect duration
+        self.start_index = kwargs["start_index"] if "start_index" in kwargs else 0  # start index
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
 
 
 def analyze_xml(xml_name, part_indices=None):
@@ -129,6 +145,7 @@ def dump_sc(new_parts):
                                         f"d.put(\\duration, {float(v2[j].duration)});\n" + \
                                         f"d.put(\\env, {v2[j].env});\n" + \
                                         f"d.put(\\envlen, {v2[j].envlen});\n" + \
+                                        f"d.put(\\in, {v2[j].bus_in});\n" + \
                                         f"d.put(\\measure, {v2[j].measure});\n" + \
                                         f"d.put(\\mul, {LEVELS[v2[j].mul]});\n" + \
                                         f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
@@ -140,10 +157,21 @@ def dump_sc(new_parts):
                                 data += f"d = Dictionary.new;\n" + \
                                         f"d.put(\\duration, {v2[j].duration});\n" + \
                                         f"d.put(\\end_level, {v2[j].end_level});\n" + \
+                                        f"d.put(\\in, {v2[j].bus_in});\n" + \
+                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
                                         f"d.put(\\start, {float(v2[j].start_time)});\n" + \
                                         f"d.put(\\start_level, {v2[j].start_level});\n" + \
-                                        f"d.put(\\synth, {v2[j].curvesynth});\n" + \
+                                        f"d.put(\\synth, {v2[j].synth});\n" + \
                                         f"d.put(\\type, \\Dynamic);\n" + \
+                                        f"~score[{cidx}].add(d);\n"
+                            elif type(v2[j]) == Effect:
+                                data += f"d = Dictionary.new;\n" + \
+                                        f"d.put(\\duration, {v2[j].duration});\n" + \
+                                        f"d.put(\\in, {v2[j].bus_in});\n" + \
+                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
+                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
+                                        f"d.put(\\synth, {v2[j].synth});\n" + \
+                                        f"d.put(\\type, \\Effect);\n" + \
                                         f"~score[{cidx}].add(d);\n"
                         else:
                             idx[cidx] = j
