@@ -25,6 +25,7 @@ class Note:
         self._buffer = kwargs["buffer"] if "buffer" in kwargs else 0
         self._duration = kwargs["duration"] if "duration" in kwargs else 0
         self._env = kwargs["env"] if "env" in kwargs else "[[][][]]"
+        self._envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"
         self._measure = kwargs["measure"] if "measure" in kwargs else 0
         self._mul = kwargs["mul"] if "mul" in kwargs else 1
         self._pitch = kwargs["pitch"] if "pitch" in kwargs else None
@@ -81,6 +82,23 @@ class Note:
         :return:
         """
         self._env = value
+
+    @property
+    def envlen(self):
+        """
+        The envelope length
+        :return: The envelope length
+        """
+        return self._envlen
+
+    @envlen.setter
+    def envlen(self, value):
+        """
+        The envelope length
+        :param value: The new value
+        :return:
+        """
+        self._envlen = value
 
     @property
     def measure(self):
@@ -218,7 +236,6 @@ def dump_sc(new_parts, num_measures):
 
     # Get the number of voices
     num_voices = 0
-    current_voice = 0
     for p in new_parts:
         for v in p:
             num_voices += len(v)
@@ -238,6 +255,7 @@ def dump_sc(new_parts, num_measures):
                                     f"d.put(\\buf, {v2[j].buffer});\n" + \
                                     f"d.put(\\duration, {float(v2[j].duration)});\n" + \
                                     f"d.put(\\env, {v2[j].env});\n" + \
+                                    f"d.put(\\envlen, {v2[j].envlen});\n" + \
                                     f"d.put(\\measure, {v2[j].measure});\n" + \
                                     f"d.put(\\mul, {v2[j].mul});\n" + \
                                     f"d.put(\\pitch, {v2[j].pitch.p});\n" + \

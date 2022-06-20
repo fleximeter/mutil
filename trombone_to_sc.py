@@ -6,10 +6,14 @@ This file contains functionality for converting MusicXML data into SuperCollider
 Copyright © 2022 by Jeff Martin. All rights reserved.
 """
 
-from mgen import xml_parse_sc
+from mgen import xml_parse_sc, sc_data_gen
+import random
+import time
 
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
 FILE = "Trombone Piece 0.2.1 - Full score - 01 Flow 1.xml"
+NUM_BUFFERS = 8
+random.seed(time.time())
 
 
 def add_sc_data(new_parts):
@@ -22,37 +26,56 @@ def add_sc_data(new_parts):
         for v in p:
             for v2 in v:
                 for note in v2:
-                    if -200 <= note.pitch.p < -51:
-                        note.buffer = 0
-                    elif -51 <= note.pitch.p < -39:
-                        note.buffer = 4
-                    elif -39 <= note.pitch.p < -27:
-                        note.buffer = 1
-                    elif -27 <= note.pitch.p < -15:
-                        note.buffer = 5
-                    elif -15 <= note.pitch.p < -3:
-                        note.buffer = 2
-                    elif -3 <= note.pitch.p < 9:
-                        note.buffer = 6
-                    elif 9 <= note.pitch.p < 21:
-                        note.buffer = 3
-                    elif 21 <= note.pitch.p:
-                        note.buffer = 7
-
-                    if note.duration > 1:
-                        note.env = f"[[0, 1, 0.9, 0.65, 0.65, 0, 0, 0, 0, 0], [0.04, 0.1, 0.08, " \
-                                   f"{note.duration - 0.04 - 0.1 - 0.08 - 0.15}, 0.15, 0, 0, 0, 0], " \
-                                   f"[4, -2, -4, 0, -4, 0, 0, 0, 0]]"
-                        note.synth_index = 2
-                    elif note.duration >= 0.2:
-                        note.env = f"[[0, 1, 0.65, 0, 0, 0, 0, 0, 0, 0], [0.03, {note.duration - 0.03 - 0.05}, " \
-                                   f"0.05, 0, 0, 0, 0, 0, 0], [4, -4, -4, 0, 0, 0, 0, 0, 0]]"
-                    else:
-                        note.env = f"[[0, 1, 0.9, 0.65, 0, 0, 0, 0, 0, 0], [0.02, 0.08, " \
-                                   f"{note.duration - 0.02 - 0.08 - 0.03}, 0.03, 0, 0, 0, 0, 0], " \
-                                        f"[4, -2, -5, -4, 0, 0, 0, 0, 0]]"
-
+                    add_buf(note)
+                    add_env(note)
                     note.mul = 1
+
+
+def add_buf(note):
+    """
+    Adds a buffer to a Note
+    :param note: A Note
+    :return:
+    """
+    # Choose a sensible buffer for long notes
+    if note.duration >= 1:
+        if -200 <= note.pitch.p < -51:
+            note.buffer = 0
+        elif -51 <= note.pitch.p < -39:
+            note.buffer = 4
+        elif -39 <= note.pitch.p < -27:
+            note.buffer = 1
+        elif -27 <= note.pitch.p < -15:
+            note.buffer = 5
+        elif -15 <= note.pitch.p < -3:
+            note.buffer = 2
+        elif -3 <= note.pitch.p < 9:
+            note.buffer = 6
+        elif 9 <= note.pitch.p < 21:
+            note.buffer = 3
+        elif 21 <= note.pitch.p:
+            note.buffer = 7
+    # For short notes, choose a random buffer
+    else:
+        note.buffer = random.randrange(0, NUM_BUFFERS, 1)
+
+
+def add_env(note):
+    """
+    Adds an envelope to a Note
+    :param note: A Note
+    :return:
+    """
+    if note.duration > 1:
+        note.env = sc_data_gen.env6_strong_atk(note.duration)
+        note.envlen = 6
+        note.synth_index = 2
+    elif note.duration >= 0.25:
+        note.env = sc_data_gen.env5_strong_atk(note.duration)
+        note.envlen = 5
+    else:
+        note.env = sc_data_gen.env4_strong_atk(note.duration)
+        note.envlen = 4
 
 
 if __name__ == "__main__":
