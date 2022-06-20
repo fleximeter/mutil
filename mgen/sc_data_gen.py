@@ -35,9 +35,9 @@ def env5_strong_atk(duration):
     :param duration: The duration
     :return: The envelope as a string
     """
-    env = f"[[0, 1, 0.5, 0.5, 0, 0, 0, 0, 0], [0.04, 0.1" \
-          f"{duration - 0.04 - 0.12 - 0.06}, 0.06, 0, 0, 0, 0], " \
-          f"[4, -3, 0, -4, 0, 0, 0, 0]]"
+    env = f"[[0, 1, 0.5, 0.5, 0, 0, 0, 0, 0, 0], [0.04, 0.1, " \
+          f"{duration - 0.04 - 0.12 - 0.06}, 0.06, 0, 0, 0, 0, 0], " \
+          f"[4, -3, 0, -4, 0, 0, 0, 0, 0]]"
     return env
 
 
@@ -47,9 +47,9 @@ def env5_weak_atk(duration):
     :param duration: The duration
     :return: The envelope as a string
     """
-    env = f"[[0, 1, 0.75, 0.75, 0, 0, 0, 0, 0], [0.04, 0.1" \
-          f"{duration - 0.04 - 0.12 - 0.06}, 0.06, 0, 0, 0, 0], " \
-          f"[4, -3, 0, -4, 0, 0, 0, 0]]"
+    env = f"[[0, 1, 0.75, 0.75, 0, 0, 0, 0, 0, 0], [0.04, 0.1" \
+          f"{duration - 0.04 - 0.12 - 0.06}, 0.06, 0, 0, 0, 0, 0], " \
+          f"[4, -3, 0, -4, 0, 0, 0, 0, 0]]"
     return env
 
 

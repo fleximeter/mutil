@@ -6,10 +6,11 @@ This file contains functionality for parsing MusicXML data into lists of Notes f
 Copyright © 2022 by Jeff Martin. All rights reserved.
 """
 
+from fractions import Fraction
 import music21
 from pctheory import pitch, pcseg, pcset
-from fractions import Fraction
 
+LEVELS = {-5: 0.2, -4: 0.28, -3: 0.36, -2: 0.44, -1: 0.52, 0: 0.6, 1: 0.68, 2: 0.76, 3: 0.84, 4: 0.92, 5: 1.0}
 MAP12 = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 MAP24 = {"C": 0, "D": 4, "E": 8, "F": 10, "G": 14, "A": 18, "B": 22}
 PC12 = 12
@@ -20,170 +21,28 @@ class Note:
     """
     Represents a note with pitch, duration, and start time
     """
-
     def __init__(self, **kwargs):
-        self._buffer = kwargs["buffer"] if "buffer" in kwargs else 0
-        self._duration = kwargs["duration"] if "duration" in kwargs else 0
-        self._env = kwargs["env"] if "env" in kwargs else "[[][][]]"
-        self._envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"
-        self._measure = kwargs["measure"] if "measure" in kwargs else 0
-        self._mul = kwargs["mul"] if "mul" in kwargs else 1
-        self._pitch = kwargs["pitch"] if "pitch" in kwargs else None
-        self._start_time = kwargs["start_time"] if "start_time" in kwargs else 0
-        self._synth_index = kwargs["synth_index"] if "synth_index" in kwargs else 1
+        self.buffer = kwargs["buffer"] if "buffer" in kwargs else 0
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0
+        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0
+        self.env = kwargs["env"] if "env" in kwargs else "[[][][]]"
+        self.envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"
+        self.measure = kwargs["measure"] if "measure" in kwargs else 0
+        self.mul = kwargs["mul"] if "mul" in kwargs else 1
+        self.pitch = kwargs["pitch"] if "pitch" in kwargs else None
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0
+        self.synth_index = kwargs["synth_index"] if "synth_index" in kwargs else 1
 
-    @property
-    def buffer(self):
-        """
-        The buffer index
-        :return: The buffer index
-        """
-        return self._buffer
 
-    @buffer.setter
-    def buffer(self, value):
-        """
-        The buffer index
-        :param value: The new value
-        :return:
-        """
-        self._buffer = value
-
-    @property
-    def duration(self):
-        """
-        The duration in seconds
-        :return: The duration in seconds
-        """
-        return self._duration
-
-    @duration.setter
-    def duration(self, value):
-        """
-        The duration in seconds
-        :param value: The new value
-        :return:
-        """
-        self._duration = value
-
-    @property
-    def env(self):
-        """
-        The envelope
-        :return: The envelope
-        """
-        return self._env
-
-    @env.setter
-    def env(self, value):
-        """
-        The envelope
-        :param value: The new value
-        :return:
-        """
-        self._env = value
-
-    @property
-    def envlen(self):
-        """
-        The envelope length
-        :return: The envelope length
-        """
-        return self._envlen
-
-    @envlen.setter
-    def envlen(self, value):
-        """
-        The envelope length
-        :param value: The new value
-        :return:
-        """
-        self._envlen = value
-
-    @property
-    def measure(self):
-        """
-        The measure number
-        :return: The measure number
-        """
-        return self._measure
-
-    @measure.setter
-    def measure(self, value):
-        """
-        The measure number
-        :param value: The new value
-        :return:
-        """
-        self._measure = value
-
-    @property
-    def mul(self):
-        """
-        The multiplier
-        :return: The multiplier
-        """
-        return self._mul
-
-    @mul.setter
-    def mul(self, value):
-        """
-        The multiplier
-        :param value: The new value
-        :return:
-        """
-        self._mul = value
-
-    @property
-    def pitch(self):
-        """
-        The pitch
-        :return: The pitch
-        """
-        return self._pitch
-
-    @pitch.setter
-    def pitch(self, value):
-        """
-        The pitch
-        :param value: The new pitch
-        :return:
-        """
-        self._pitch = value
-
-    @property
-    def start_time(self):
-        """
-        The start time
-        :return: The start time
-        """
-        return self._start_time
-
-    @start_time.setter
-    def start_time(self, value):
-        """
-        The start time
-        :param value: The new value
-        :return:
-        """
-        self._start_time = value
-
-    @property
-    def synth_index(self):
-        """
-        The synth index
-        :return: The synth index
-        """
-        return self._synth_index
-
-    @synth_index.setter
-    def synth_index(self, value):
-        """
-        The synth index
-        :param value: The new value
-        :return:
-        """
-        self._synth_index = value
+class Dynamic:
+    """
+    Represents a dynamic object (crescendo, decrescendo, etc.
+    """
+    def __init__(self, **kwargs):
+        self.curvesynth = kwargs["curvesynth"] if "curvesynth" in kwargs else 0
+        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0
+        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0
 
 
 def analyze_xml(xml_name, part_indices=None):
@@ -221,18 +80,24 @@ def dump_parts(new_parts):
         for v in range(len(p)):
             for v2 in range(len(p[v])):
                 print(f"Voice {v + 1}.{v2 + 1}")
-                for item in p[v][v2]:
-                    print(f"m{item.measure}, {item.pitch.p}, {item.duration}, {item.start_time}")
+                print("{0: <3}{1: >4}{2: >5}{3: >5}{4: >9}{5: >10}{6: >10}".format("m", "i", "p", "mul", "dur",
+                                                                                   "start", "end"))
+                for i in range(len(p[v][v2])):
+                    if type(p[v][v2][i]) == Note:
+                        print("{0: <3}{1: >4}{2: >5}{3: >5}{4: >9}{5: >10}{6: >10}".format(p[v][v2][i].measure, i,
+                              p[v][v2][i].pitch.p, p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
+                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4)))
+                print()
 
 
-def dump_sc(new_parts, num_measures):
+def dump_sc(new_parts):
     """
     Dumps the new part data in SuperCollider format
     :param new_parts: New (parsed) parts
-    :param num_measures: The highest numbered measure
     :return:
     """
     data = "(\n"
+    num_measures = get_highest_measure_no(new_parts)
 
     # Get the number of voices
     num_voices = 0
@@ -251,17 +116,27 @@ def dump_sc(new_parts, num_measures):
                     data += f"// Measure {i}, Voice {cidx}\n"
                     for j in range(idx[cidx], len(v2)):
                         if v2[j].measure == i:
-                            data += f"d = Dictionary.new;\n" + \
-                                    f"d.put(\\buf, {v2[j].buffer});\n" + \
-                                    f"d.put(\\duration, {float(v2[j].duration)});\n" + \
-                                    f"d.put(\\env, {v2[j].env});\n" + \
-                                    f"d.put(\\envlen, {v2[j].envlen});\n" + \
-                                    f"d.put(\\measure, {v2[j].measure});\n" + \
-                                    f"d.put(\\mul, {v2[j].mul});\n" + \
-                                    f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
-                                    f"d.put(\\start, {float(v2[j].start_time)});\n" + \
-                                    f"d.put(\\synth, \\granulator{v2[j].synth_index});\n" + \
-                                    f"~score[{cidx}].add(d);\n"
+                            if type(v2[j]) == Note:
+                                data += f"d = Dictionary.new;\n" + \
+                                        f"d.put(\\buf, {v2[j].buffer});\n" + \
+                                        f"d.put(\\duration, {float(v2[j].duration)});\n" + \
+                                        f"d.put(\\env, {v2[j].env});\n" + \
+                                        f"d.put(\\envlen, {v2[j].envlen});\n" + \
+                                        f"d.put(\\measure, {v2[j].measure});\n" + \
+                                        f"d.put(\\mul, {LEVELS[v2[j].mul]});\n" + \
+                                        f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
+                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
+                                        f"d.put(\\synth, \\granulator{v2[j].envlen});\n" + \
+                                        f"d.put(\\type, \\Note);\n" + \
+                                        f"~score[{cidx}].add(d);\n"
+                            elif type(v2[j]) == Dynamic:
+                                data += f"d = Dictionary.new;\n" + \
+                                        f"d.put(\\curvesynth, {v2[j].curvesynth});\n" + \
+                                        f"d.put(\\start_level, {v2[j].start_level});\n" + \
+                                        f"d.put(\\end_level, {v2[j].end_level});\n" + \
+                                        f"d.put(\\duration, {v2[j].duration});\n" + \
+                                        f"d.put(\\type, \\Dynamic);\n" + \
+                                        f"~score[{cidx}].add(d);\n"
                         else:
                             idx[cidx] = j
                             break
@@ -271,7 +146,7 @@ def dump_sc(new_parts, num_measures):
     return data
 
 
-def dump_sc_to_file(file, new_parts, num_measures):
+def dump_sc_to_file(file, new_parts):
     """
     Writes dumped SC data to a file
     :param file: The file name
@@ -281,7 +156,7 @@ def dump_sc_to_file(file, new_parts, num_measures):
     :return:
     """
     with open(file, "w") as f:
-        f.write(dump_sc(new_parts, num_measures))
+        f.write(dump_sc(new_parts))
 
 
 def get_highest_measure_no(parsed_parts):
@@ -385,6 +260,9 @@ def parse_parts(parts, part_indices=None):
                                 for p in range(len(item2.pitches)):
                                     n = Note(pitch=convert_pitch24(item2.pitches[p]),
                                              duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
+                                             end_time=Fraction(
+                                                 part_time_offset + item2.offset * current_quarter_duration) + \
+                                                      Fraction(item2.duration.quarterLength) * current_quarter_duration,
                                              measure=measure.number,
                                              quarter_duration=Fraction(item2.duration.quarterLength),
                                              start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
@@ -414,6 +292,8 @@ def parse_parts(parts, part_indices=None):
                             elif type(item2) == music21.note.Note:
                                 n = Note(pitch=convert_pitch24(item2.pitch),
                                          duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
+                                         end_time=Fraction(part_time_offset + item2.offset * current_quarter_duration) + \
+                                                  Fraction(item2.duration.quarterLength) * current_quarter_duration,
                                          measure=measure.number,
                                          quarter_duration=Fraction(item2.duration.quarterLength),
                                          start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
@@ -451,6 +331,8 @@ def parse_parts(parts, part_indices=None):
                         for p in range(len(item.pitches)):
                             n = Note(pitch=convert_pitch24(item.pitches[p]),
                                      duration=Fraction(item.duration.quarterLength) * current_quarter_duration,
+                                     end_time=Fraction(part_time_offset + item.offset * current_quarter_duration) + \
+                                              Fraction(item.duration.quarterLength) * current_quarter_duration,
                                      measure=measure.number,
                                      quarter_duration=Fraction(item.duration.quarterLength),
                                      start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
@@ -479,6 +361,8 @@ def parse_parts(parts, part_indices=None):
                     elif type(item) == music21.note.Note:
                         n = Note(pitch=convert_pitch24(item.pitch),
                                  duration=Fraction(item.duration.quarterLength) * current_quarter_duration,
+                                 end_time=Fraction(part_time_offset + item.offset * current_quarter_duration) + \
+                                          Fraction(item.duration.quarterLength) * current_quarter_duration,
                                  measure=measure.number,
                                  quarter_duration=Fraction(item.duration.quarterLength),
                                  start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))

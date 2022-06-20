@@ -28,7 +28,7 @@ def add_sc_data(new_parts):
                 for note in v2:
                     add_buf(note)
                     add_env(note)
-                    note.mul = 1
+                    note.mul = 5
 
 
 def add_buf(note):
@@ -69,7 +69,6 @@ def add_env(note):
     if note.duration > 1:
         note.env = sc_data_gen.env6_strong_atk(note.duration)
         note.envlen = 6
-        note.synth_index = 2
     elif note.duration >= 0.25:
         note.env = sc_data_gen.env5_strong_atk(note.duration)
         note.envlen = 5
@@ -83,5 +82,5 @@ if __name__ == "__main__":
     m_last = xml_parse_sc.get_highest_measure_no(parsed_parts)
     add_sc_data(parsed_parts)
     # xml_parse_sc.dump_parts(parsed_parts)
-    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts,
-                                 xml_parse_sc.get_highest_measure_no(parsed_parts))
+    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
+    xml_parse_sc.dump_parts(parsed_parts)
