@@ -7,6 +7,7 @@ Copyright © 2022 by Jeff Martin. All rights reserved.
 """
 
 from mgen import xml_parse_sc, sc_data_gen
+from mgen.xml_parse_sc import Dynamic, Note
 import random
 import time
 
@@ -60,6 +61,34 @@ def add_buf(note):
         note.buffer = random.randrange(0, NUM_BUFFERS, 1)
 
 
+def add_dynamics(new_parts, dynamic_parts=None):
+    """
+    Adds dynamics to a list of parsed parts
+    :param new_parts: A list of parsed parts
+    :param dynamic_parts: A list of dynamic parts
+    :return:
+    """
+    if dynamic_parts is None:
+        dynamic_parts = [[
+            [[Dynamic(curvesynth=1, start_level=-4, end_level=-1, duration=4)]],
+            [[], []],
+            [[Dynamic(curvesynth=1, start_level=-4, end_level=-1, duration=4, start_time=2.5)]]
+        ]]
+    for i in range(len(new_parts)):
+        n = 0
+        for j in range(len(dynamic_parts[i])):
+            for k in range(len(dynamic_parts[i][j])):
+                for m in range(len(dynamic_parts[i][j][k])):
+                    if j < len(new_parts[i]):
+                        if type(dynamic_parts[i][j][k][m]) == Dynamic:
+                            if dynamic_parts[i][j][k][m].start_time < 0:
+                                dynamic_parts[i][j][k][m].start_time = new_parts[i][j][k][n].start_time
+                            new_parts[i][j][k].insert(n, dynamic_parts[i][j][k][m])
+                        else:
+                            new_parts[i][j][k][n].mul = dynamic_parts[i][j][k][m]
+                        n += 1
+
+
 def add_env(note):
     """
     Adds an envelope to a Note
@@ -81,6 +110,8 @@ if __name__ == "__main__":
     parsed_parts = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE}", 1)
     m_last = xml_parse_sc.get_highest_measure_no(parsed_parts)
     add_sc_data(parsed_parts)
+    add_dynamics(parsed_parts)
     # xml_parse_sc.dump_parts(parsed_parts)
+
     xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
     xml_parse_sc.dump_parts(parsed_parts)

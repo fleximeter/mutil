@@ -40,9 +40,10 @@ class Dynamic:
     """
     def __init__(self, **kwargs):
         self.curvesynth = kwargs["curvesynth"] if "curvesynth" in kwargs else 0
-        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0
-        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0
         self.duration = kwargs["duration"] if "duration" in kwargs else 0
+        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0
+        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1
 
 
 def analyze_xml(xml_name, part_indices=None):
@@ -115,7 +116,13 @@ def dump_sc(new_parts):
                 for v2 in v:
                     data += f"// Measure {i}, Voice {cidx}\n"
                     for j in range(idx[cidx], len(v2)):
-                        if v2[j].measure == i:
+                        flag = False
+                        if type(v2[j]) == Dynamic:
+                            if v2[j + 1].measure == i:
+                                flag = True
+                        elif v2[j].measure == i:
+                            flag = True
+                        if flag:
                             if type(v2[j]) == Note:
                                 data += f"d = Dictionary.new;\n" + \
                                         f"d.put(\\buf, {v2[j].buffer});\n" + \
@@ -131,10 +138,11 @@ def dump_sc(new_parts):
                                         f"~score[{cidx}].add(d);\n"
                             elif type(v2[j]) == Dynamic:
                                 data += f"d = Dictionary.new;\n" + \
-                                        f"d.put(\\curvesynth, {v2[j].curvesynth});\n" + \
-                                        f"d.put(\\start_level, {v2[j].start_level});\n" + \
-                                        f"d.put(\\end_level, {v2[j].end_level});\n" + \
                                         f"d.put(\\duration, {v2[j].duration});\n" + \
+                                        f"d.put(\\end_level, {v2[j].end_level});\n" + \
+                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
+                                        f"d.put(\\start_level, {v2[j].start_level});\n" + \
+                                        f"d.put(\\synth, {v2[j].curvesynth});\n" + \
                                         f"d.put(\\type, \\Dynamic);\n" + \
                                         f"~score[{cidx}].add(d);\n"
                         else:
@@ -170,8 +178,9 @@ def get_highest_measure_no(parsed_parts):
         for v in p:
             for v1 in v:
                 for n in v1:
-                    if n.measure > num_measures:
-                        num_measures = n.measure
+                    if type(n) == Note:
+                        if n.measure > num_measures:
+                            num_measures = n.measure
     return num_measures
 
 
