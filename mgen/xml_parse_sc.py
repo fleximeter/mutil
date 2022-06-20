@@ -145,9 +145,9 @@ def dump_sc(new_parts):
                                         f"d.put(\\duration, {float(v2[j].duration)});\n" + \
                                         f"d.put(\\env, {v2[j].env});\n" + \
                                         f"d.put(\\envlen, {v2[j].envlen});\n" + \
-                                        f"d.put(\\in, {v2[j].bus_in});\n" + \
                                         f"d.put(\\measure, {v2[j].measure});\n" + \
                                         f"d.put(\\mul, {LEVELS[v2[j].mul]});\n" + \
+                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
                                         f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
                                         f"d.put(\\start, {float(v2[j].start_time)});\n" + \
                                         f"d.put(\\synth, \\granulator{v2[j].envlen});\n" + \
