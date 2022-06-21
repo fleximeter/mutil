@@ -74,9 +74,9 @@ def add_dynamics(new_parts, dynamic_parts):
     """
     # Iterate through each part, voice, and subvoice to add corresponding dynamics
     for i in range(len(new_parts)):  # part
-        n = 0
-        for j in range(len(dynamic_parts[i])):  # voice
-            for k in range(len(dynamic_parts[i][j])):  # subvoice
+        for j in range(len(new_parts[i])):  # voice
+            for k in range(len(new_parts[i][j])):  # subvoice
+                n = 0
                 for m in range(len(dynamic_parts[i][j][k])):  # note
                     if m < len(new_parts[i][j][k]):
                         # Insert the dynamic if it is here
