@@ -35,6 +35,24 @@ class Note:
         self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
 
 
+class Sound:
+    """
+    Represents a sound
+    """
+    def __init__(self, **kwargs):
+        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
+        self.buffer = kwargs["buffer"] if "buffer" in kwargs else 0                 # buffer index for granulation
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # duration
+        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
+        self.env = kwargs["env"] if "env" in kwargs else "[[][][]]"                 # envelope specification
+        self.envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"        # number of points in envelope
+        self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
+        self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
+        self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
+
+
 class Dynamic:
     """
     Represents a dynamic object (crescendo, decrescendo, etc.
@@ -97,12 +115,16 @@ def dump_parts(new_parts):
         for v in range(len(p)):
             for v2 in range(len(p[v])):
                 print(f"Voice {v + 1}.{v2 + 1}")
-                print("{0: <3}{1: >4}{2: >5}{3: >5}{4: >9}{5: >10}{6: >10}".format("m", "i", "p", "mul", "dur",
+                print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}".format("m", "i", "p", "mul", "dur",
                                                                                    "start", "end"))
                 for i in range(len(p[v][v2])):
                     if type(p[v][v2][i]) == Note:
-                        print("{0: <3}{1: >4}{2: >5}{3: >5}{4: >9}{5: >10}{6: >10}".format(p[v][v2][i].measure, i,
+                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}".format(p[v][v2][i].measure, i,
                               p[v][v2][i].pitch.p, p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
+                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4)))
+                    if type(p[v][v2][i]) == Sound:
+                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}".format(p[v][v2][i].measure, i,
+                              "sound", p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
                               round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4)))
                 print()
 
@@ -350,11 +372,20 @@ def parse_parts(parts, part_indices=None):
                                         new_parts[i][int(item.id) - 1][p].append(n)
 
                             elif type(item2) == music21.note.Note:
-                                n = Note(pitch=convert_pitch24(item2.pitch),
-                                         duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
-                                         measure=measure.number,
-                                         quarter_duration=Fraction(item2.duration.quarterLength),
-                                         start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
+                                n = None
+                                # Catch special notes that represent nonstandard sounds
+                                if item2.notehead == "x":
+                                    n = Sound(pitch=convert_pitch24(item2.pitch),
+                                             duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
+                                             measure=measure.number,
+                                             quarter_duration=Fraction(item2.duration.quarterLength),
+                                             start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
+                                else:
+                                    n = Note(pitch=convert_pitch24(item2.pitch),
+                                             duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
+                                             measure=measure.number,
+                                             quarter_duration=Fraction(item2.duration.quarterLength),
+                                             start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
 
                                 # If the note is tied, we need to keep track of it
                                 if item2.tie is not None:
@@ -421,11 +452,20 @@ def parse_parts(parts, part_indices=None):
                                 new_parts[i][0][p].append(n)
 
                     elif type(item) == music21.note.Note:
-                        n = Note(pitch=convert_pitch24(item.pitch),
-                                 duration=Fraction(item.duration.quarterLength) * current_quarter_duration,
-                                 measure=measure.number,
-                                 quarter_duration=Fraction(item.duration.quarterLength),
-                                 start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
+                        n = None
+                        # Catch special notes that represent nonstandard sounds
+                        if item.notehead == "x":
+                            n = Sound(pitch=convert_pitch24(item.pitch),
+                                      duration=Fraction(item.duration.quarterLength) * current_quarter_duration,
+                                      measure=measure.number,
+                                      quarter_duration=Fraction(item.duration.quarterLength),
+                                      start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
+                        else:
+                            n = Note(pitch=convert_pitch24(item.pitch),
+                                     duration=Fraction(item.duration.quarterLength) * current_quarter_duration,
+                                     measure=measure.number,
+                                     quarter_duration=Fraction(item.duration.quarterLength),
+                                     start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
 
                         # If the note is tied, we need to keep track of it
                         if item.tie is not None:
