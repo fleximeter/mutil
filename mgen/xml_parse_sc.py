@@ -297,9 +297,6 @@ def parse_parts(parts, part_indices=None):
                                 for p in range(len(item2.pitches)):
                                     n = Note(pitch=convert_pitch24(item2.pitches[p]),
                                              duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
-                                             end_time=Fraction(
-                                                 part_time_offset + item2.offset * current_quarter_duration) + \
-                                                      Fraction(item2.duration.quarterLength) * current_quarter_duration,
                                              measure=measure.number,
                                              quarter_duration=Fraction(item2.duration.quarterLength),
                                              start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
@@ -318,19 +315,20 @@ def parse_parts(parts, part_indices=None):
                                         else:
                                             delete = 0
                                             for t in range(len(unresolved_ties)):
-                                                if new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].pitch == n.pitch:
-                                                    new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].duration += n.duration
+                                                prev = new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]]
+                                                if prev.pitch == n.pitch:
+                                                    prev.duration += n.duration
+                                                    prev.end_time = prev.start_time + prev.duration
                                                     delete = t
                                                     break
                                             del unresolved_ties[delete]
                                     else:
+                                        n.end_time = n.start_time + n.duration
                                         new_parts[i][int(item.id) - 1][p].append(n)
 
                             elif type(item2) == music21.note.Note:
                                 n = Note(pitch=convert_pitch24(item2.pitch),
                                          duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
-                                         end_time=Fraction(part_time_offset + item2.offset * current_quarter_duration) + \
-                                                  Fraction(item2.duration.quarterLength) * current_quarter_duration,
                                          measure=measure.number,
                                          quarter_duration=Fraction(item2.duration.quarterLength),
                                          start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
@@ -349,12 +347,15 @@ def parse_parts(parts, part_indices=None):
                                     else:
                                         delete = 0
                                         for t in range(len(unresolved_ties)):
-                                            if new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].pitch == n.pitch:
-                                                new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].duration += n.duration
+                                            prev = new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]]
+                                            if prev.pitch == n.pitch:
+                                                prev.duration += n.duration
+                                                prev.end_time = prev.start_time + prev.duration
                                                 delete = t
                                                 break
                                         del unresolved_ties[delete]
                                 else:
+                                    n.end_time = n.start_time + n.duration
                                     new_parts[i][int(item.id) - 1][0].append(n)
 
                     elif type(item) == music21.chord.Chord:
@@ -368,8 +369,6 @@ def parse_parts(parts, part_indices=None):
                         for p in range(len(item.pitches)):
                             n = Note(pitch=convert_pitch24(item.pitches[p]),
                                      duration=Fraction(item.duration.quarterLength) * current_quarter_duration,
-                                     end_time=Fraction(part_time_offset + item.offset * current_quarter_duration) + \
-                                              Fraction(item.duration.quarterLength) * current_quarter_duration,
                                      measure=measure.number,
                                      quarter_duration=Fraction(item.duration.quarterLength),
                                      start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
@@ -387,19 +386,20 @@ def parse_parts(parts, part_indices=None):
                                 else:
                                     delete = 0
                                     for t in range(len(unresolved_ties)):
-                                        if new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].pitch == n.pitch:
-                                            new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].duration += n.duration
+                                        prev = new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]]
+                                        if prev.pitch == n.pitch:
+                                            prev.duration += n.duration
+                                            prev.end_time = prev.start_time + prev.duration
                                             delete = t
                                             break
                                     del unresolved_ties[delete]
                             else:
+                                n.end_time = n.start_time + n.duration
                                 new_parts[i][0][p].append(n)
 
                     elif type(item) == music21.note.Note:
                         n = Note(pitch=convert_pitch24(item.pitch),
                                  duration=Fraction(item.duration.quarterLength) * current_quarter_duration,
-                                 end_time=Fraction(part_time_offset + item.offset * current_quarter_duration) + \
-                                          Fraction(item.duration.quarterLength) * current_quarter_duration,
                                  measure=measure.number,
                                  quarter_duration=Fraction(item.duration.quarterLength),
                                  start_time=Fraction(part_time_offset + item.offset * current_quarter_duration))
@@ -417,12 +417,15 @@ def parse_parts(parts, part_indices=None):
                             else:
                                 delete = 0
                                 for t in range(len(unresolved_ties)):
-                                    if new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].pitch == n.pitch:
-                                        new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]].duration += n.duration
+                                    prev = new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]]
+                                    if prev.pitch == n.pitch:
+                                        prev.duration += n.duration
+                                        prev.end_time = prev.start_time + prev.duration
                                         delete = t
                                         break
                                 del unresolved_ties[delete]
                         else:
+                            n.end_time = n.start_time + n.duration
                             new_parts[i][0][0].append(n)
 
                 # Update how far we've moved
