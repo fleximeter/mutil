@@ -32,7 +32,7 @@ class Note:
         self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
-        self.synth_index = kwargs["synth_index"] if "synth_index" in kwargs else 1  # the synth to use
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
 
 
 class Dynamic:
@@ -146,11 +146,11 @@ def dump_sc(new_parts):
                                         f"d.put(\\env, {v2[j].env});\n" + \
                                         f"d.put(\\envlen, {v2[j].envlen});\n" + \
                                         f"d.put(\\measure, {v2[j].measure});\n" + \
-                                        f"d.put(\\mul, {LEVELS[v2[j].mul]});\n" + \
+                                        f"d.put(\\mul, {equal_loudness(v2[j])});\n" + \
                                         f"d.put(\\out, {v2[j].bus_out});\n" + \
                                         f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
                                         f"d.put(\\start, {float(v2[j].start_time)});\n" + \
-                                        f"d.put(\\synth, \\granulator{v2[j].envlen});\n" + \
+                                        f"d.put(\\synth, \\synth{v2[j].synth}_{v2[j].envlen});\n" + \
                                         f"d.put(\\type, \\Note);\n" + \
                                         f"~score[{cidx}].add(d);\n"
                             elif type(v2[j]) == Dynamic:
@@ -161,7 +161,7 @@ def dump_sc(new_parts):
                                         f"d.put(\\out, {v2[j].bus_out});\n" + \
                                         f"d.put(\\start, {float(v2[j].start_time)});\n" + \
                                         f"d.put(\\start_level, {v2[j].start_level});\n" + \
-                                        f"d.put(\\synth, {v2[j].synth});\n" + \
+                                        f"d.put(\\synth, \\dynamic{v2[j].synth});\n" + \
                                         f"d.put(\\type, \\Dynamic);\n" + \
                                         f"~score[{cidx}].add(d);\n"
                             elif type(v2[j]) == Effect:
@@ -170,7 +170,7 @@ def dump_sc(new_parts):
                                         f"d.put(\\in, {v2[j].bus_in});\n" + \
                                         f"d.put(\\out, {v2[j].bus_out});\n" + \
                                         f"d.put(\\start, {float(v2[j].start_time)});\n" + \
-                                        f"d.put(\\synth, {v2[j].synth});\n" + \
+                                        f"d.put(\\synth, \\effect{v2[j].synth});\n" + \
                                         f"d.put(\\type, \\Effect);\n" + \
                                         f"~score[{cidx}].add(d);\n"
                         else:
@@ -193,6 +193,29 @@ def dump_sc_to_file(file, new_parts):
     """
     with open(file, "w") as f:
         f.write(dump_sc(new_parts))
+
+
+def equal_loudness(note):
+    """
+    Applies an equal loudness effect to a Note
+    :param note: A Note
+    :return: A mul value
+    """
+    # 20, 65
+    # 50, 35
+    # 100, 30 8x
+    # 500, 10 2x
+    # 1000, 5 1.5x
+    # 2000, 0
+    # 5000, 5
+    # 10000, 15
+    level = LEVELS[note.mul]
+    frequency = 440.0 * 2 ** ((note.pitch.p - 18) / 24)
+    if frequency < 2000:
+        level *= (8 * 10 ** -15) * ((-frequency + 2000) ** 4.5) + 1
+    else:
+        level *= (1.5 * 10 ** -8) * ((frequency - 2000) ** 2) + 1
+    return level
 
 
 def get_highest_measure_no(parsed_parts):
