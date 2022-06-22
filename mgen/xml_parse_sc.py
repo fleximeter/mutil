@@ -17,6 +17,37 @@ PC12 = 12
 PC24 = 24
 
 
+class Dynamic:
+    """
+    Represents a dynamic object (crescendo, decrescendo, etc.
+    """
+    def __init__(self, **kwargs):
+        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
+        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0     # the synth to use
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # dynamic duration
+        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0        # end volume index
+        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0  # start volume index
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
+        if "start_note" in kwargs:
+            self.start_time = kwargs["start_note"].start_time
+        if "end_note" in kwargs:
+            self.duration = kwargs["end_note"].end_time - self.start_time
+
+
+class Effect:
+    """
+    Represents an effect object
+    """
+    def __init__(self, **kwargs):
+        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
+        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # effect duration
+        self.start_index = kwargs["start_index"] if "start_index" in kwargs else 0  # start index
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
+
+
 class Note:
     """
     Represents a note with pitch, duration, and start time
@@ -35,6 +66,18 @@ class Note:
         self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
 
 
+class Pan:
+    """
+    Represents a panning object
+    """
+    def __init__(self, **kwargs):
+        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # effect duration
+        self.start_index = kwargs["start_index"] if "start_index" in kwargs else 0  # start index
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
+
+
 class Sound:
     """
     Represents a sound
@@ -51,33 +94,6 @@ class Sound:
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
         self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
-
-
-class Dynamic:
-    """
-    Represents a dynamic object (crescendo, decrescendo, etc.
-    """
-    def __init__(self, **kwargs):
-        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
-        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0     # the synth to use
-        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # dynamic duration
-        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0        # end volume index
-        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0  # start volume index
-        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
-
-
-class Effect:
-    """
-    Represents an effect object
-    """
-    def __init__(self, **kwargs):
-        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
-        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
-        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # effect duration
-        self.start_index = kwargs["start_index"] if "start_index" in kwargs else 0  # start index
-        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
 
 
 def analyze_xml(xml_name, part_indices=None):
@@ -115,17 +131,19 @@ def dump_parts(new_parts):
         for v in range(len(p)):
             for v2 in range(len(p[v])):
                 print(f"Voice {v + 1}.{v2 + 1}")
-                print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}".format("m", "i", "p", "mul", "dur",
-                                                                                   "start", "end"))
+                print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format("m", "i", "p", "mul", "dur",
+                                                                                   "start", "end", "index"))
                 for i in range(len(p[v][v2])):
                     if type(p[v][v2][i]) == Note:
-                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}".format(p[v][v2][i].measure, i,
-                              p[v][v2][i].pitch.p, p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
-                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4)))
+                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(p[v][v2][i].measure,
+                              i, p[v][v2][i].pitch.p, p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
+                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4),
+                              f"[{v}][{v2}][{i}]"))
                     if type(p[v][v2][i]) == Sound:
-                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}".format(p[v][v2][i].measure, i,
-                              "sound", p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
-                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4)))
+                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(p[v][v2][i].measure,
+                              i, "sound", p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
+                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4),
+                              f"[{v}][{v2}][{i}]"))
                 print()
 
 

@@ -151,12 +151,12 @@ def add_env(note):
 
 
 if __name__ == "__main__":
-    dynamics = [[
-        [[Dynamic(curvesynth=1, start_level=-4, end_level=-1, duration=4)]],
-        [[], []],
-        [[Dynamic(curvesynth=1, start_level=-4, end_level=-1, duration=4.5)]]
-    ]]
     parsed_parts = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE}", 1)
+    dynamics = [[
+        [[Dynamic(synth=0, start_level=-4, end_level=-1, start_note=parsed_parts[0][2][0][0], end_note=parsed_parts[0][0][0][0])]],
+        [[], []],
+        [[Dynamic(synth=0, start_level=-4, end_level=-1, start_note=parsed_parts[0][2][0][0], end_note=parsed_parts[0][0][0][0])]]
+    ]]
     m_last = xml_parse_sc.get_highest_measure_no(parsed_parts)
     add_sc_data(parsed_parts)
     add_dynamics(parsed_parts, dynamics)
