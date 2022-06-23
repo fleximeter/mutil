@@ -22,3 +22,5 @@ for i in range(0, 24, 2):
                     print(v)
                 if w[0] % 2 != 0 or w[1] % 2 == 0:
                     print(w)
+
+# a test comment here
