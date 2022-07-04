@@ -59,10 +59,10 @@ class PitchClass12:
 
     def __repr__(self):
         # return "<pctheory.pitch.PitchClass object at " + str(id(self)) + ">: " + self.pc_char
-        return self.pc_char
+        return self.pc_str
 
     def __str__(self):
-        return self.pc_char
+        return self.pc_str
 
     def __sub__(self, other):
         return PitchClass12(self.pc - other.pc)
@@ -87,10 +87,10 @@ class PitchClass12:
             self._pc += 12
 
     @property
-    def pc_char(self):
+    def pc_str(self):
         """
-        The pitch-class character
-        :return: The pitch-class character
+        The pitch-class string
+        :return: The pitch-class string
         """
         if self._pc == 10:
             return 'A'
@@ -137,10 +137,10 @@ class PitchClass24:
 
     def __repr__(self):
         # return "<pctheory.pitch.PitchClass24 object at " + str(id(self)) + ">: " + self.pc_char
-        return self.pc_char
+        return self.pc_str
 
     def __str__(self):
-        return self.pc_char
+        return self.pc_str
 
     def __sub__(self, other):
         return PitchClass24(self.pc - other.pc)
@@ -165,10 +165,10 @@ class PitchClass24:
             self._pc += 24
 
     @property
-    def pc_char(self):
+    def pc_str(self):
         """
-        The pitch-class character
-        :return: The pitch-class character
+        The pitch-class string
+        :return: The pitch-class string
         """
         if self._pc < 10:
             return f"0{self._pc}"

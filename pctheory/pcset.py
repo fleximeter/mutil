@@ -47,7 +47,7 @@ class SetClass12:
         self._num_forte = 0
         self._pcset = set()
         self._weight_right = True
-        self._tables = name_tables if name_tables is not None else tables.create_tables()
+        self._tables = name_tables if name_tables is not None else tables.create_tables_set()
         if pcset is not None:
             self.pcset = pcset
 

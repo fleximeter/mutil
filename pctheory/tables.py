@@ -25,12 +25,32 @@ import importlib.resources
 import json
 
 
-def create_tables():
+def create_tables_set():
     """
-    Creates tables
+    Creates tables for SetClass12 objects
     :return: Tables
     """
     json_data = None
+    t = {}
+    include = ["hexChars", "hexToInt", "setToForteNameTable", "setToForteNameTableLeftPacking", "forteToSetNameTable",
+               "zNameTable", "forteToCarterNameTable", "carterDerivedCoreTable"]
     with importlib.resources.open_text("pctheory", "resources.json") as table_json:
         json_data = json.loads(table_json.read())
+    for i in include:
+        t[i] = json_data[i]
+    return json_data
+
+
+def create_tables_row():
+    """
+    Creates tables for twelve-tone rows
+    :return: Tables
+    """
+    json_data = None
+    t = {}
+    include = ["allIntervalRowGenerators"]
+    with importlib.resources.open_text("pctheory", "resources.json") as table_json:
+        json_data = json.loads(table_json.read())
+    for i in include:
+        t[i] = json_data[i]
     return json_data
