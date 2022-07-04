@@ -21,49 +21,115 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from pctheory import pcset, pcset, poset, pitch, tables, transformations
+import numpy as np
+from pctheory import pcset, poset, pitch, tables, transformations
+from pctheory.pcseg import rotate, transpose
 
 
-def str_array(array: list):
+class RotationalArray:
+    """
+    Represents a rotational array
+    """
+    def __init__(self, pcseg=None):
+        """
+        Creates a rotational array
+        :param pcseg: A pcseg to import
+        """
+        self._array = None
+        self._pcseg = None
+        if pcseg is not None:
+            self.import_pcseg(pcseg)
+
+    def __repr__(self):
+        return "<pctheory.pcseg.RotationalArray object at " + str(id(self)) + ">: " + str(self._array)
+
+    def __str__(self):
+        chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B']
+        lines = ""
+        for i in range(len(self._array) - 1):
+            for j in range(len(self._array[i])):
+                lines += chars[self._array[i][j].pc] + " "
+            lines += "\n"
+        for j in range(len(self._array[len(self._array) - 1])):
+            lines += chars[self._array[len(self._array) - 1][j].pc] + " "
+        return lines
+
+    @property
+    def array(self):
+        """
+        Gets the rotational array
+        :return: The rotational array
+        """
+        return self._array
+
+    @property
+    def pcseg(self):
+        """
+        Gets the pcseg
+        :return: The pcseg
+        """
+        return self._pcseg
+
+    def at(self, i: int, j: int):
+        """
+        Gets the pc at the specified row and column
+        :param i: The row
+        :param j: The column
+        :return: The pc
+        """
+        return self._array[i, j]
+
+    def get_column(self, j: int):
+        """
+        Gets a column of the rotational array
+        :param j: The column index
+        :return: The column
+        """
+        return self._array[:, j]
+
+    def get_row(self, i: int):
+        """
+        Gets a row of the rotational array
+        :param i: The row index
+        :return: The row
+        """
+        return self._array[i]
+
+    def import_pcseg(self, pcseg: list):
+        """
+        Imports a pcseg
+        :param pcseg: A pcseg
+        :return: None
+        """
+        self._pcseg = transpose(pcseg, 12 - pcseg[0].pc)
+        self._array = np.empty([len(pcseg), len(pcseg)])
+        for i in range(len(self._pcseg)):
+            new_row = rotate(transpose(self._pcseg, -self._pcseg[i].pc), len(self._pcseg) - i)
+            for j in range(len(self._pcseg)):
+                self._array[i, j] = new_row[j]
+
+
+def str_array(array):
     """
     Converts an array of pcs to string
     :param array: The array to convert
     :return: The string
     """
     str_temp = ""
-    for l in array:
-        for pc in l:
-            str_temp += f"{pc} "
-        str_temp += "\n"
+    if type(array) == list:
+        for l in array:
+            for pc in l:
+                str_temp += f"{pc} "
+            str_temp += "\n"
+    elif type(array) == np.array:
+        for i in range(array.shape[0]):
+            for j in range(array.shape[1]):
+                str_temp += f"{array[i][j]} "
+            str_temp += "\n"
     return str_temp
 
 
-def transform_row_content(array: list, ro: transformations.RO):
-    """
-    Transforms a 2D array with no nestings
-    :param array: An array
-    :param ro: A row operator
-    :return: The transformed array
-    """
-    array1 = []
-    for i in range(len(array)):
-        row = []
-        for j in range(len(array[i])):
-            t = type(array[i][j])
-            if t == list:
-                row.append(ro.transform(array[i][j]))
-            elif t == set:
-                cell = set()
-                for item in array[i][j]:
-                    cell.add(ro.transform(item))
-                row.append(cell)
-            elif t == pitch.PitchClass12 or t == pitch.PitchClass24:
-                row.append(ro.transform(array[i][j]))
-        array1.append(row)
-    return array1
-
-
-def make_array_chain(array: list, length: int, alt_ret=True):
+def make_array_chain(array, length: int):
     """
     Makes a chain of arrays
     :param array: An array
@@ -101,17 +167,9 @@ def make_array_chain(array: list, length: int, alt_ret=True):
 
         # Get the row operator we need for the transformation, and transform the array
         r = transformations.RO()
-        m = None
-        if alt_ret and i % 2:
-            transformation = transformations.find_ttos(pcset_end, pcset_end_temp)
-            r.ro = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
-            m = transform_row_content(array1, r)
-            for j in range(len(m)):
-                m[j].reverse()
-        else:
-            transformation = transformations.find_ttos(pcset_start, pcset_end_temp)
-            r.ro = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
-            m = transform_row_content(array1, r)
+        transformation = transformations.find_ttos(pcset_start, pcset_end_temp)
+        r.ro = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
+        m = transform_row_content(array1, r)
         m.reverse()
 
         # Add the transformed array content to the end of the large array
