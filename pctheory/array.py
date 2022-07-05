@@ -166,9 +166,9 @@ def make_array_chain(array, length: int):
             pcset_end_temp.add(array1[j][len(array1[j]) - 1])
 
         # Get the row operator we need for the transformation, and transform the array
-        r = transformations.RO()
-        transformation = transformations.find_ttos(pcset_start, pcset_end_temp)
-        r.ro = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
+        r = transformations.OTO()
+        transformation = transformations.find_utos(pcset_start, pcset_end_temp)
+        r.oto = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
         m = transform_row_content(array1, r)
         m.reverse()
 

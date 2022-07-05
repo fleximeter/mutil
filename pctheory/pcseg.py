@@ -41,15 +41,16 @@ def bip_n(imb_n: list):
     return bip
 
 
-def create_ormap(row: list):
+def create_ormap(pcseg: list):
     """
     Creates the ORMAP of a row
-    :param row: A row
+    :param pcseg: A row
     :return: The ORMAP
     """
     omap = {}
-    for i in range(len(row)):
-        omap[pitch.PitchClass12(row[i].pc)] = i
+    t = type(pcseg[0])
+    for i in range(len(pcseg)):
+        omap[t(pcseg[i].pc)] = i
     return omap
 
 
@@ -80,7 +81,7 @@ def generate_random_all_interval_row(name_tables=None, starting_pc=None):
     :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
     :return: An all-interval row
     """
-    _tables = name_tables if name_tables is not None else tables.create_tables()
+    _tables = name_tables if name_tables is not None else tables.create_tables_row()
     random.seed()
     generator = _tables["allIntervalRowGenerators"][random.randrange(len(_tables["allIntervalRowGenerators"]))]
     row = [pitch.PitchClass12(random.randrange(12) if starting_pc is None else starting_pc)]
@@ -162,10 +163,10 @@ def get_secondary_forms(pcseg: list, subseg: list):
 
     # Exhaust all transformations and search them
     for i in range(12):
-        t = [[transformations.RO(i, 0, 1), transpose(pcseg, i)], [transformations.RO(i, 0, 5), transpose(m5, i)],
-             [transformations.RO(i, 0, 7), transpose(m7, i)], [transformations.RO(i, 0, 11), transpose(m11, i)],
-             [transformations.RO(i, 1, 1), transpose(r, i)], [transformations.RO(i, 1, 5), transpose(rm5, i)],
-             [transformations.RO(i, 1, 7), transpose(rm7, i)], [transformations.RO(i, 1, 11), transpose(rm11, i)]]
+        t = [[transformations.OTO(i, 0, 1), transpose(pcseg, i)], [transformations.OTO(i, 0, 5), transpose(m5, i)],
+             [transformations.OTO(i, 0, 7), transpose(m7, i)], [transformations.OTO(i, 0, 11), transpose(m11, i)],
+             [transformations.OTO(i, 1, 1), transpose(r, i)], [transformations.OTO(i, 1, 5), transpose(rm5, i)],
+             [transformations.OTO(i, 1, 7), transpose(rm7, i)], [transformations.OTO(i, 1, 11), transpose(rm11, i)]]
 
         # Search each transformation in t
         for item in t:
@@ -208,13 +209,20 @@ def imb_n(pcseg: list, n: int, name_tables=None):
     """
     imb = set()
     scs = []
-    if name_tables is None:
-        name_tables = tables.create_tables()
-    for i in range(len(pcseg) + 1 - n):
-        for j in range(i, i + n):
-            imb.add(pcseg[j])
-        scs.append(pcset.SetClass12(name_tables, imb))
-        imb.clear()
+    if type(pcseg[0]) == pitch.PitchClass12:
+        if name_tables is None:
+            name_tables = tables.create_tables_set()
+        for i in range(len(pcseg) + 1 - n):
+            for j in range(i, i + n):
+                imb.add(pcseg[j])
+            scs.append(pcset.SetClass12(name_tables, imb))
+            imb.clear()
+    elif type(pcseg[0]) == pitch.PitchClass24:
+        for i in range(len(pcseg) + 1 - n):
+            for j in range(i, i + n):
+                imb.add(pcseg[j])
+            scs.append(pcset.SetClass24(imb))
+            imb.clear()
     return scs
 
 
@@ -382,9 +390,19 @@ class InvarianceMatrix:
         self._b = None
         self._c = None
         self._mx_type = mx_type.upper()
-        self._mx = []
+        self._mx = None
+        self._t = None
         if a is not None and c is not None:
             self.load_matrix(a, c)
+
+    def __getitem__(self, i, j):
+        """
+        Gets the pc at the specified row and column
+        :param i: The row
+        :param j: The column
+        :return: The pc
+        """
+        return self._mx[i][j]
 
     def __repr__(self):
         """
@@ -448,25 +466,16 @@ class InvarianceMatrix:
         """
         return self._c
 
-    def at(self, i, j):
-        """
-        Gets the pc at the specified row and column
-        :param i: The row
-        :param j: The column
-        :return: The pc
-        """
-        return self._mx[i][j]
-
     def get_column(self, j):
         """
         Gets a column of the matrix
         :param j: The column index
         :return: The column
         """
-        pcseg = []
+        c = []
         for i in range(len(self._mx)):
-            pcseg.append(pitch.PitchClass12(self._mx[i][j].pc))
-        return pcseg
+            c.append(self._mx[i][j])
+        return c
 
     def get_row(self, i):
         """
@@ -474,7 +483,7 @@ class InvarianceMatrix:
         :param i: The row index
         :return: The row
         """
-        return self._mx[i].copy()
+        return self._mx[i]
 
     def load_matrix(self, a: list, c: list):
         """
@@ -483,21 +492,44 @@ class InvarianceMatrix:
         :param c: Pcseg C
         :return: None
         """
-        ro = transformations.RO()
-        if self._mx_type == "T":
-            ro.ro = [0, 0, 11]
-        elif self._mx_type == "I":
-            ro.ro = [0, 0, 1]
-        elif self._mx_type == "M":
-            ro.ro = [0, 0, 7]
-        elif self._mx_type == "MI":
-            ro.ro = [0, 0, 5]
-        b = ro.transform(c)
-        for i in range(len(c)):
-            mx_row = []
+        self._t = type(a[0])
+        ro = transformations.OTO()
+        if self._t == pitch.PitchClass12:
+            INVERT = 11
+            if self._mx_type == "T":
+                ro.oto = [0, 0, 1 * INVERT % 12]
+            elif self._mx_type == "M" or self._mx_type == "M5":
+                ro.oto = [0, 0, 5 * INVERT % 12]
+            elif self._mx_type == "MI" or self._mx_type == "M7":
+                ro.oto = [0, 0, 7 * INVERT % 12]
+            elif self._mx_type == "I" or self._mx_type == "M11":
+                ro.oto = [0, 0, 11 * INVERT % 12]
+            b = ro.transform(c)
+        if self._t == pitch.PitchClass24:
+            INVERT = 23
+            if self._mx_type == "T":
+                ro.oto = [0, 0, 1 * INVERT % 24]
+            elif self._mx_type == "M5":
+                ro.oto = [0, 0, 5 * INVERT % 24]
+            elif self._mx_type == "M7":
+                ro.oto = [0, 0, 7 * INVERT % 24]
+            elif self._mx_type == "M11":
+                ro.oto = [0, 0, 11 * INVERT % 24]
+            elif self._mx_type == "M13":
+                ro.oto = [0, 0, 13 * INVERT % 24]
+            elif self._mx_type == "M17":
+                ro.oto = [0, 0, 17 * INVERT % 24]
+            elif self._mx_type == "M19":
+                ro.oto = [0, 0, 19 * INVERT % 24]
+            elif self._mx_type == "I" or self._mx_type == "M23":
+                ro.oto = [0, 0, 23 * INVERT % 24]
+            b = ro.transform(c)
+        self._mx = []
+        for i in range(len(b)):
+            mxrow = []
             for j in range(len(a)):
-                mx_row.append(pitch.PitchClass12(b[i].pc + a[j].pc))
-            self._mx.append(mx_row)
+                mxrow.append(self._t(b[i].pc + a[j].pc))
+            self._mx.append(mxrow)
         self._a = a.copy()
         self._b = b
         self._c = c.copy()
@@ -560,6 +592,35 @@ class TwelveToneMatrix:
         self._row = None
         if row is not None:
             self.import_row(row)
+
+    def __getitem__(self, i, j):
+        """
+        Gets the pc at the specified row and column
+        :param i: The row
+        :param j: The column
+        :return: The pc
+        """
+        return self._mx[i][j]
+
+    def __repr__(self):
+        """
+        Generates a string representation of the TwelveToneMatrix that can be printed
+        :return: A string representation of the TwelveToneMatrix
+        """
+        lines = "     "
+        for i in range(12):
+            lines += f"{self._labels_top[i]: <5} "
+        lines += "\n"
+        for i in range(12):
+            lines += f"{self._labels_left[i]: <4}"
+            for j in range(12):
+                lines += f"  {str(self._mx[i][j])}   "
+            lines += f"{self._labels_right[i]: >4}"
+            lines += "\n"
+        lines += "     "
+        for i in range(12):
+            lines += f"{self._labels_bottom[i]: <5} "
+        return lines
 
     def __str__(self):
         """
@@ -628,15 +689,6 @@ class TwelveToneMatrix:
         :return: The row
         """
         return self._row
-
-    def at(self, i, j):
-        """
-        Gets the pc at the specified row and column
-        :param i: The row
-        :param j: The column
-        :return: The pc
-        """
-        return self._mx[i][j]
 
     def get_column(self, j):
         """

@@ -179,7 +179,7 @@ def subsets(pset: set):
     return sub
 
 
-def transform(pset: set, transformation: transformations.TTO):
+def transform(pset: set, transformation: transformations.UTO):
     """
     Transforms a pset
     :param pset: A pset

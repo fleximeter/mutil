@@ -112,7 +112,7 @@ class OperatorGroup:
         """
         coset = []
         for t in self._ttos:
-            coset.append(transformations.left_multiply_ttos(tto, t))
+            coset.append(transformations.left_multiply_utos(tto, t))
         coset.sort()
         return coset
 
@@ -147,6 +147,6 @@ class OperatorGroup:
         """
         coset = []
         for t in self._ttos:
-            coset.append(transformations.left_multiply_ttos(t, tto))
+            coset.append(transformations.left_multiply_utos(t, tto))
         coset.sort()
         return coset
