@@ -54,7 +54,7 @@ def create_ormap(pcseg: list):
     return omap
 
 
-def generate_pcseg_from_interval_list(interval_list: list, starting_pc=None):
+def generate_pcseg12_from_interval_list(interval_list: list, starting_pc=None):
     """
     Generates a pcseg from an interval list
     :param interval_list: The interval list
@@ -74,6 +74,26 @@ def generate_pcseg_from_interval_list(interval_list: list, starting_pc=None):
         return pcseg
 
 
+def generate_pcseg24_from_interval_list(interval_list: list, starting_pc=None):
+    """
+    Generates a pcseg from an interval list
+    :param interval_list: The interval list
+    :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
+    :return: A pcseg
+    """
+    if starting_pc is None:
+        random.seed()
+        pcseg = [pitch.PitchClass24(random.randrange(24))]
+        for i in range(len(interval_list)):
+            pcseg.append(pitch.PitchClass24(pcseg[i].pc + interval_list[i]))
+        return pcseg
+    else:
+        pcseg = [pitch.PitchClass24(starting_pc)]
+        for i in range(len(interval_list)):
+            pcseg.append(pitch.PitchClass24(pcseg[i].pc + interval_list[i]))
+        return pcseg
+
+
 def generate_random_all_interval_row(name_tables=None, starting_pc=None):
     """
     Generates a random all-interval row
@@ -90,7 +110,7 @@ def generate_random_all_interval_row(name_tables=None, starting_pc=None):
     return row
 
 
-def generate_random_pcseg(length: int, non_duplicative=False, starting_pc=None):
+def generate_random_pcseg12(length: int, non_duplicative=False, starting_pc=None):
     """
     Generates a random pcseg
     :param length: The length of the pcseg
@@ -101,7 +121,7 @@ def generate_random_pcseg(length: int, non_duplicative=False, starting_pc=None):
     random.seed()
     pcseg = [pitch.PitchClass12(random.randrange(12) if starting_pc is None else starting_pc)]
     if non_duplicative and 0 < length < 12:
-        pcs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        pcs = [i for i in range(12)]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
             j = random.randrange(len(pcs))
@@ -110,6 +130,31 @@ def generate_random_pcseg(length: int, non_duplicative=False, starting_pc=None):
     elif not non_duplicative and 0 < length:
         for i in range(length - 1):
             pcseg.append(pitch.PitchClass12(random.randrange(12)))
+    else:
+        raise ValueError("Invalid length")
+    return pcseg
+
+
+def generate_random_pcseg24(length: int, non_duplicative=False, starting_pc=None):
+    """
+    Generates a random pcseg
+    :param length: The length of the pcseg
+    :param non_duplicative: Whether or not duplicate pcs may occur (must be True to generate a row)
+    :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
+    :return: A random pcseg
+    """
+    random.seed()
+    pcseg = [pitch.PitchClass24(random.randrange(24) if starting_pc is None else starting_pc)]
+    if non_duplicative and 0 < length < 24:
+        pcs = [i for i in range(24)]
+        del pcs[pcseg[0].pc]
+        for i in range(length - 1):
+            j = random.randrange(len(pcs))
+            pcseg.append(pitch.PitchClass24(pcs[j]))
+            del pcs[j]
+    elif not non_duplicative and 0 < length:
+        for i in range(length - 1):
+            pcseg.append(pitch.PitchClass24(random.randrange(24)))
     else:
         raise ValueError("Invalid length")
     return pcseg
@@ -124,9 +169,10 @@ def generate_random_pcseg_from_pcset(pcset: set):
     random.seed()
     pcseg = []
     setseg = list(pcset)
+    t = type(setseg[0])
     for i in range(len(setseg)):
         j = random.randrange(len(setseg))
-        pcseg.append(pitch.PitchClass12(setseg[j].pc))
+        pcseg.append(t(setseg[j].pc))
         del setseg[j]
     return pcseg
 

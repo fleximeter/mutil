@@ -39,6 +39,7 @@ class SetClass12:
         :param name_tables: A list of name tables
         :param pcset: A pcset to initialize the SetClass
         """
+        self._dsym = 12
         self._ic_vector = [0, 0, 0, 0, 0, 0, 0]
         self._name_carter = ""
         self._name_forte = ""
@@ -85,6 +86,14 @@ class SetClass12:
             return [name for name in self._tables["carterDerivedCoreTable"][self.name_prime]]
         else:
             return None
+
+    @property
+    def dsym(self):
+        """
+        Gets the degree of symmetry of the set-class.
+        :return: The degree of symmetry
+        """
+        return self._dsym
 
     @property
     def ic_vector(self):
@@ -280,10 +289,10 @@ class SetClass12:
         """
         iv = [0, 0, 0, 0, 0, 0, 0, 0]
         c = get_complement(self._pcset)
-        ttos = transformations.get_ttos12()
+        utos = transformations.get_utos12()
         for i in range(12):
-            h = [ttos[f"T{i}"].transform(self._pcset), ttos[f"T{i}I"].transform(self._pcset),
-                 ttos[f"T{i}M"].transform(self._pcset), ttos[f"T{i}MI"].transform(self._pcset)]
+            h = [utos[f"T{i}"].transform(self._pcset), utos[f"T{i}I"].transform(self._pcset),
+                 utos[f"T{i}M"].transform(self._pcset), utos[f"T{i}MI"].transform(self._pcset)]
             for j in range(4):
                 if h[j] == self._pcset:
                     iv[j] += 1
@@ -422,6 +431,8 @@ class SetClass12:
                 self._ic_vector[interval] += 1
         for i in range(1, 7):
             self._ic_vector[i] //= 2
+        c = get_corpus(self._pcset)
+        self._dsym = 24 / len(c)
 
     @staticmethod
     def _weight_from_right(pclists: list):
@@ -508,6 +519,7 @@ class SetClass24:
         Creates a SetClass
         :param pcset: A pcset to initialize the SetClass
         """
+        self._dsym = 12
         self._ic_vector = [0 for i in range(13)]
         self._name_prime = ""
         self._pcset = set()
@@ -537,6 +549,14 @@ class SetClass24:
 
     def __str__(self):
         return self._name_prime
+
+    @property
+    def dsym(self):
+        """
+        Gets the degree of symmetry of the set-class.
+        :return: The degree of symmetry
+        """
+        return self._dsym
 
     @property
     def ic_vector(self):
@@ -752,6 +772,8 @@ class SetClass24:
                 self._ic_vector[interval] += 1
         for i in range(1, 13):
             self._ic_vector[i] //= 2
+        c = get_corpus(self._pcset)
+        self._dsym = 48 / len(c)
 
     @staticmethod
     def _weight_from_right(pclists: list):
@@ -852,7 +874,7 @@ def get_corpus(pcset: set):
     :param pcset: A pcset
     :return: A set of all transformations of the pcset
     """
-    tto = transformations.get_ttos12()
+    uto = transformations.get_utos24()
     pcsets = set()
     if len(pcset) > 0:
         n = 12
@@ -860,8 +882,8 @@ def get_corpus(pcset: set):
         if t == pitch.PitchClass24:
             n = 24
         for i in range(n):
-            pcsets.add(frozenset(tto[f"T{i}"].transform(pcset)))
-            pcsets.add(frozenset(tto[f"T{i}I"].transform(pcset)))
+            pcsets.add(frozenset(uto[f"T{i}"].transform(pcset)))
+            pcsets.add(frozenset(uto[f"T{i}I"].transform(pcset)))
     return pcsets
 
 
