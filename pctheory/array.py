@@ -21,7 +21,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import numpy as np
 from pctheory import pcset, poset, pitch, tables, transformations
 from pctheory.pcseg import rotate, transpose
 
@@ -70,14 +69,14 @@ class RotationalArray:
         """
         return self._pcseg
 
-    def at(self, i: int, j: int):
+    def __getitem__(self, i: int, j: int):
         """
         Gets the pc at the specified row and column
         :param i: The row
         :param j: The column
         :return: The pc
         """
-        return self._array[i, j]
+        return self._array[i][j]
 
     def get_column(self, j: int):
         """
@@ -85,7 +84,10 @@ class RotationalArray:
         :param j: The column index
         :return: The column
         """
-        return self._array[:, j]
+        c = []
+        for i in range(len(self._array)):
+            c.append(self._array[i][j])
+        return c
 
     def get_row(self, i: int):
         """
@@ -102,11 +104,9 @@ class RotationalArray:
         :return: None
         """
         self._pcseg = transpose(pcseg, 12 - pcseg[0].pc)
-        self._array = np.empty([len(pcseg), len(pcseg)])
+        self._array = []
         for i in range(len(self._pcseg)):
-            new_row = rotate(transpose(self._pcseg, -self._pcseg[i].pc), len(self._pcseg) - i)
-            for j in range(len(self._pcseg)):
-                self._array[i, j] = new_row[j]
+            self._array.append(rotate(transpose(self._pcseg, -self._pcseg[i].pc), len(self._pcseg) - i))
 
 
 def str_array(array):
