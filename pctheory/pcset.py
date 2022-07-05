@@ -865,28 +865,28 @@ def get_corpus(pcset: set):
     return pcsets
 
 
-def get_tto(original_pcset: set, transformed_pcset: set):
+def get_uto(original_pcset: set, transformed_pcset: set):
     """
-    Finds all TTOs that produce a set that contains transformed_pcset as a proper or improper subset.
-    If the list of TTOs is empty, transformed_pcset is not an abstract subset of original_pcset.
+    Finds all UTOs that produce a set that contains transformed_pcset as a proper or improper subset.
+    If the list of UTOs is empty, transformed_pcset is not an abstract subset of original_pcset.
     :param original_pcset: The original pcset
     :param transformed_pcset: The new pcset
-    :return: A list of TTOs
+    :return: A list of UTOs
     """
-    ttos = None
-    ttos_final = {}
+    utos = None
+    utos_final = {}
     if len(original_pcset) == len(transformed_pcset) == 0:
-        return ttos
+        return utos
     else:
         t = type(next(iter(original_pcset)))
         if t == pitch.PitchClass12:
-            ttos = transformations.get_ttos12()
+            utos = transformations.get_utos12()
         else:
-            ttos = transformations.get_ttos24()
-        for u in ttos:
-            if transformed_pcset.issubset(ttos[u].transform(original_pcset)):
-                ttos_final[u] = ttos[u]
-        return ttos_final
+            utos = transformations.get_utos24()
+        for u in utos:
+            if transformed_pcset.issubset(utos[u].transform(original_pcset)):
+                utos_final[u] = utos[u]
+        return utos_final
 
 
 def invert(pcset: set):
