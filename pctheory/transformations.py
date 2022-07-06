@@ -255,7 +255,7 @@ def get_otos12():
 
 def get_otos24():
     """
-    Gets chromatic OTOs
+    Gets microtonal OTOs
     :return: A list of microtonal OTOs
     """
     otos = {}
@@ -268,14 +268,14 @@ def get_otos24():
         otos[f"T{i}RM7"] = OTO(i, 1, 7)
         otos[f"T{i}M11"] = OTO(i, 0, 11)
         otos[f"T{i}RM11"] = OTO(i, 1, 11)
-        otos[f"T{i}M13"] = OTO(i, 0, 11)
-        otos[f"T{i}RM13"] = OTO(i, 1, 11)
-        otos[f"T{i}M17"] = OTO(i, 0, 11)
-        otos[f"T{i}RM17"] = OTO(i, 1, 11)
-        otos[f"T{i}M19"] = OTO(i, 0, 11)
-        otos[f"T{i}RM19"] = OTO(i, 1, 11)
-        otos[f"T{i}M23"] = OTO(i, 0, 11)
-        otos[f"T{i}RM23"] = OTO(i, 1, 11)
+        otos[f"T{i}M13"] = OTO(i, 0, 13)
+        otos[f"T{i}RM13"] = OTO(i, 1, 13)
+        otos[f"T{i}M17"] = OTO(i, 0, 17)
+        otos[f"T{i}RM17"] = OTO(i, 1, 17)
+        otos[f"T{i}M19"] = OTO(i, 0, 19)
+        otos[f"T{i}RM19"] = OTO(i, 1, 19)
+        otos[f"T{i}M23"] = OTO(i, 0, 23)
+        otos[f"T{i}RM23"] = OTO(i, 1, 23)
         otos[f"T{i}I"] = otos[f"T{i}M23"]
         otos[f"T{i}RI"] = otos[f"T{i}RM23"]
     return otos
