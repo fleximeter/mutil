@@ -39,7 +39,7 @@ class OTO:
         :param R: Whether or not to retrograde
         :param M: The multiplier
         """
-        self._oto = [T, R, M]
+        self._oto = (T, R, M)
 
     def __eq__(self, other):
         return self._oto[0] == other.oto[0] and self._oto[1] == other.oto[1] and self._oto[2] == other.oto[2]
@@ -76,7 +76,7 @@ class OTO:
     @property
     def oto(self):
         """
-        Gets the OTO as a list. Index 0 is the index of transposition, index 1 is whether or not to retrograde, and
+        Gets the OTO as a tuple. Index 0 is the index of transposition, index 1 is whether or not to retrograde, and
         index 2 is the multiplier.
         :return: The OTO
         """
@@ -85,8 +85,8 @@ class OTO:
     @oto.setter
     def oto(self, value):
         """
-        Sets the OTO using a list
-        :param value: A list
+        Sets the OTO using a tuple
+        :param value: A tuple
         :return:
         """
         self._oto = value
@@ -121,10 +121,9 @@ class UTO:
         """
         Creates a UTO
         :param T: The index of transposition
-        :param M: Whether or not to multiply
-        :param I: Whether or not to invert
+        :param M: The index of multiplication
         """
-        self._uto = [T, M]
+        self._uto = (T, M)
 
     def __eq__(self, other):
         return self._uto[0] == other.uto[0] and self._uto[1] == other.uto[1]
@@ -162,8 +161,8 @@ class UTO:
     @uto.setter
     def uto(self, value):
         """
-        Sets the UTO using a list
-        :param value: A list
+        Sets the UTO using a tuple
+        :param value: A tuple
         :return:
         """
         self._uto = value
@@ -171,7 +170,7 @@ class UTO:
     def cycles(self, num_pcs=12):
         """
         Gets the cycles of the UTO
-        :param num_pcs: The number of possible pcs
+        :param num_pcs: The number of possible pcs in the system
         :return: The cycles, as a list of lists
         """
         int_list = [i for i in range(num_pcs)]
@@ -189,12 +188,13 @@ class UTO:
             del int_list[0]
         return cycles
 
-    def inverse12(self):
+    def inverse(self, num_pcs=12):
         """
         Gets the inverse of the UTO
+        :param num_pcs: The number of possible pcs in the system
         :return: The inverse
         """
-        return UTO((self._uto[0] * self._uto[1] * -1) % 12, self._uto[1])
+        return UTO((-self._uto[1] * self._uto[0]) % num_pcs, self._uto[1])
 
     def transform(self, item):
         """
