@@ -53,29 +53,29 @@ class OperatorGroup:
         if len(self._tn) == 12:
             group_name += "*"
         else:
-            for tto in self._tn:
-                group_name += str(tto[0])
+            for uto in self._tn:
+                group_name += str(uto[0])
         if len(self._tni) > 0 or len(self._tnm5) > 0 or len(self._tnm7) > 0:
             group_name += "/"
         if len(self._tni) == 12:
             group_name += "*"
         else:
-            for tto in self._tni:
-                group_name += str(tto[0])
+            for uto in self._tni:
+                group_name += str(uto[0])
         if len(self._tnm5) > 0 or len(self._tnm7) > 0:
             group_name += "/"
         if len(self._tnm5) == 12:
             group_name += "*"
         else:
-            for tto in self._tnm5:
-                group_name += str(tto[0])
+            for uto in self._tnm5:
+                group_name += str(uto[0])
         if len(self._tnm7) > 0:
             group_name += "/"
         if len(self._tnm7) == 12:
             group_name += "*"
         else:
-            for tto in self._tnm7:
-                group_name += str(tto[0])
+            for uto in self._tnm7:
+                group_name += str(uto[0])
         return group_name
 
     def get_orbits(self):
@@ -138,14 +138,14 @@ class OperatorGroup:
         self._tnm7.sort()
         self._utos.sort()
 
-    def right_coset(self, tto):
+    def right_coset(self, uto):
         """
         Gets a right coset of the group
-        :param tto: A TTO
+        :param uto: A UTO
         :return: The right coset
         """
         coset = []
-        for t in self._utos:
-            coset.append(transformations.left_multiply_utos(t, tto))
+        for u in self._utos:
+            coset.append(transformations.left_multiply_utos(u, uto))
         coset.sort()
         return coset
