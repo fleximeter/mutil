@@ -29,19 +29,26 @@ class OperatorGroup:
     """
     Represents a group of operators
     """
-    def __init__(self, utos: list = None):
+    def __init__(self, utos: list = None, num_pcs: int = 12):
         """
         Creates an OperatorGroup
         :param utos: TTOs
+        :param num_pcs: The number of pcs in the system of the group (chromatic: 12, microtonal: 24)
         """
+        self._MNUM_12 = {1, 5, 7, 11}
+        self._MNUM_24 = {1, 5, 7, 11, 13, 17, 19, 23}
         self._name = ""
-        self._utos = []
-        self._tn = []
-        self._tni = []
-        self._tnm5 = []
-        self._tnm7 = []
+        self._num_pcs = num_pcs
+        self._operators = [[] for i in range(len(self._MNUM_12))]
+        self._utos = {}
         if utos is not None:
             self.load_utos(utos)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
     @property
     def name(self):
@@ -50,32 +57,36 @@ class OperatorGroup:
         :return: The group name
         """
         group_name = "G"
-        if len(self._tn) == 12:
-            group_name += "*"
+        if self._num_pcs == 12:
+            for i in range(len(self._MNUM_12) - 1):
+                if len(self._operators[i]) == 12:
+                    group_name += "*"
+                else:
+                    for uto in self._operators[i]:
+                        group_name += str(uto[0])
+                group_name += "/"
+            if len(self._operators[len(self._MNUM_12) - 1]) == 12:
+                group_name += "*"
+            else:
+                for uto in self._operators[len(self._MNUM_12) - 1]:
+                    group_name += str(uto[0])
         else:
-            for uto in self._tn:
-                group_name += str(uto[0])
-        if len(self._tni) > 0 or len(self._tnm5) > 0 or len(self._tnm7) > 0:
-            group_name += "/"
-        if len(self._tni) == 12:
-            group_name += "*"
-        else:
-            for uto in self._tni:
-                group_name += str(uto[0])
-        if len(self._tnm5) > 0 or len(self._tnm7) > 0:
-            group_name += "/"
-        if len(self._tnm5) == 12:
-            group_name += "*"
-        else:
-            for uto in self._tnm5:
-                group_name += str(uto[0])
-        if len(self._tnm7) > 0:
-            group_name += "/"
-        if len(self._tnm7) == 12:
-            group_name += "*"
-        else:
-            for uto in self._tnm7:
-                group_name += str(uto[0])
+            for i in range(len(self._MNUM_24) - 1):
+                if len(self._operators[i]) == 24:
+                    group_name += "*"
+                else:
+                    for j in range(len(self._operators[i]) - 1):
+                        group_name += f"{self._operators[i][j][0]},"
+                    if len(self._operators[i]) > 0:
+                        group_name += str(self._operators[i][len(self._operators[i]) - 1][0])
+                group_name += "/"
+            if len(self._operators[len(self._MNUM_24) - 1]) == 24:
+                group_name += "*"
+            else:
+                for j in range(len(self._operators[len(self._MNUM_24) - 1]) - 1):
+                    group_name += f"{self._operators[len(self._MNUM_24) - 1][j][0]},"
+                if len(self._operators[len(self._MNUM_24) - 1]) > 0:
+                    group_name += str(self._operators[len(self._MNUM_24) - 1][len(self._operators[len(self._MNUM_24) - 1]) - 1][0])
         return group_name
 
     def get_orbits(self):
