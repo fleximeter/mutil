@@ -29,20 +29,19 @@ class OperatorGroup:
     """
     Represents a group of operators
     """
-    def __init__(self, ttos: list = None):
+    def __init__(self, utos: list = None):
         """
         Creates an OperatorGroup
-        :param ttos: TTOs
+        :param utos: TTOs
         """
         self._name = ""
-        self._ttos = []
+        self._utos = []
         self._tn = []
         self._tni = []
         self._tnm5 = []
         self._tnm7 = []
-        self._ttos = []
-        if ttos is not None:
-            self.load_ttos(ttos)
+        if utos is not None:
+            self.load_utos(utos)
 
     @property
     def name(self):
@@ -93,7 +92,7 @@ class OperatorGroup:
             operator_table[0][i] = i
         for i in range(1, n):
             for j in range(0, 12):
-                operator_table[i][j] = self._ttos[i].transform(operator_table[0][j])
+                operator_table[i][j] = self._utos[i].transform(operator_table[0][j])
 
         # Compute the orbits
         for i in range(12):
@@ -111,33 +110,33 @@ class OperatorGroup:
         :return: The left coset
         """
         coset = []
-        for t in self._ttos:
+        for t in self._utos:
             coset.append(transformations.left_multiply_utos(tto, t))
         coset.sort()
         return coset
 
-    def load_ttos(self, ttos: list):
+    def load_utos(self, utos: list):
         """
         Loads TTOs into the group
-        :param ttos: TTOs
+        :param utos: TTOs
         :return:
         """
-        for tto in ttos:
-            match tto[1]:
+        for uto in utos:
+            match uto[1]:
                 case 1:
-                    self._tn.append(tto)
+                    self._tn.append(uto)
                 case 5:
-                    self._tnm5.append(tto)
+                    self._tnm5.append(uto)
                 case 7:
-                    self._tnm7.append(tto)
+                    self._tnm7.append(uto)
                 case 11:
-                    self._tni.append(tto)
-            self._ttos.append(tto)
+                    self._tni.append(uto)
+            self._utos.append(uto)
         self._tn.sort()
         self._tni.sort()
         self._tnm5.sort()
         self._tnm7.sort()
-        self._ttos.sort()
+        self._utos.sort()
 
     def right_coset(self, tto):
         """
@@ -146,7 +145,7 @@ class OperatorGroup:
         :return: The right coset
         """
         coset = []
-        for t in self._ttos:
+        for t in self._utos:
             coset.append(transformations.left_multiply_utos(t, tto))
         coset.sort()
         return coset
