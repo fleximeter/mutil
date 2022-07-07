@@ -44,8 +44,9 @@ def invert(pseg: list):
     :return: The inverted pseg
     """
     pseg2 = []
+    t = type(iter(next(pseg)))
     for p in pseg:
-        pseg2.append(pitch.Pitch12(p.p * -1))
+        pseg2.append(t(p.p * -1))
     return pseg2
 
 
@@ -76,8 +77,9 @@ def multiply_order(pseg: list, n: int):
     :return: The order-multiplied pseg
     """
     pseg2 = []
+    t = type(iter(next(pseg)))
     for i in range(len(pseg)):
-        pseg2.append(pitch.Pitch12(pseg[(i * n) % len(pseg)].p))
+        pseg2.append(t(pseg[(i * n) % len(pseg)].p))
     return pseg2
 
 
@@ -88,8 +90,9 @@ def retrograde(pseg: list):
     :return: The retrograded pseg
     """
     pseg2 = []
+    t = type(iter(next(pseg)))
     for i in range(len(pseg) - 1, -1, -1):
-        pseg2.append(pitch.Pitch12(pseg[i].pc))
+        pseg2.append(t(pseg[i].pc))
     return pseg2
 
 
@@ -101,8 +104,9 @@ def rotate(pseg: list, n: int):
     :return: The rotated pseg
     """
     pseg2 = []
+    t = type(iter(next(pseg)))
     for i in range(len(pseg)):
-        pseg2.append(pitch.Pitch12(pseg[(i - n) % len(pseg)].p))
+        pseg2.append(t(pseg[(i - n) % len(pseg)].p))
     return pseg2
 
 
@@ -114,6 +118,7 @@ def transpose(pseg: list, n: int):
     :return: The transposed pseg
     """
     pseg2 = []
+    t = type(iter(next(pseg)))
     for p in pseg:
-        pseg2.append(pitch.Pitch12(p.p + n))
+        pseg2.append(t(p.p + n))
     return pseg2

@@ -34,8 +34,9 @@ def fb_class(pset: set, p0: int):
     :return: The FB-class as a list of integers
     """
     intlist = []
+    n = 12 if type(iter(next(pset))) == pitch.PitchClass12 else 24
     for p in pset:
-        intlist.append((p.p - p0) % 12)
+        intlist.append((p.p - p0) % n)
     intlist.sort()
     if len(intlist) > 0:
         del intlist[0]
@@ -49,8 +50,9 @@ def invert(pset: set):
     :return: The inverted pset
     """
     pset2 = set()
+    t = type(iter(next(pset)))
     for p in pset:
-        pset2.add(pitch.Pitch12(p.p * -1))
+        pset2.add(t(p.p * -1))
     return pset2
 
 
@@ -129,9 +131,10 @@ def pcint_class(pset: set):
     """
     pseg = list(pset)
     pseg.sort()
+    n = 12 if type(iter(next(pset))) == pitch.PitchClass12 else 24
     intlist = []
     for i in range(1, len(pseg)):
-        intlist.append((pseg[i].p - pseg[i - 1].p) % 12)
+        intlist.append((pseg[i].p - pseg[i - 1].p) % n)
     return intlist
 
 
@@ -167,6 +170,7 @@ def subsets(pset: set):
     :return: A list containing all subsets of the pset
     """
     total = 2 ** len(pset)
+    t = type(iter(next(pset)))
     sub = []
     pseg = list(pset)
     pseg.sort()
@@ -174,7 +178,7 @@ def subsets(pset: set):
         sub.append([])
         for i in range(len(pset)):
             if index & (1 << i):
-                sub[index].append(pitch.Pitch12(pseg[i].p))
+                sub[index].append(t(pseg[i].p))
     sub.sort()
     return sub
 
@@ -200,6 +204,7 @@ def transpose(pset: set, n: int):
     :return: The transposed pset
     """
     pset2 = set()
+    t = type(iter(next(pset)))
     for p in pset:
-        pset2.add(pitch.Pitch12(p.p + n))
+        pset2.add(t(p.p + n))
     return pset2
