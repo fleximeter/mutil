@@ -21,49 +21,34 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from pctheory import pcset, pitch, tables, transformations
 
-
-class SetComplex:
+def assert_k(s, t):
     """
-    Represents a Forte set-complex K or Kh around a nexus set
+    Asserts that s and t are in a K-relationship
+    Source: Morris, "Class Notes for Atonal Music Theory," p. 49
+    :param s: A set-class
+    :param t: A set-class
+    :return: A boolean
     """
+    s_bar = s.get_abstract_complement()
+    t_bar = t.get_abstract_complement()
+    return t.contains_abstract_subset(s) or \
+           t_bar.contains_abstract_subset(s) or \
+           s.contains_abstract_subset(t) or \
+           s_bar.contains_abstract_subset(t)
 
-    def __init__(self, nexus_set: pcset = None):
-        """
-        Creates a set-complex around a nexus set
-        :param nexus_set: A nexus set
-        """
-        self._nexus = []
 
-    @staticmethod
-    def assert_k(s, t):
-        """
-        Asserts that s and t are in a K-relationship
-        Source: Morris, "Class Notes for Atonal Music Theory," p. 49
-        :param s: A set-class
-        :param t: A set-class
-        :return: A boolean
-        """
-        s_bar = s.get_abstract_complement()
-        t_bar = t.get_abstract_complement()
-        return t.contains_abstract_subset(s) or \
-               t_bar.contains_abstract_subset(s) or \
-               s.contains_abstract_subset(t) or \
-               s_bar.contains_abstract_subset(t)
-
-    @staticmethod
-    def assert_kh(s, t):
-        """
-        Asserts that s and t are in a Kh-relationship
-        Source: Morris, "Class Notes for Atonal Music Theory," p. 49
-        :param s: A set-class
-        :param t: A set-class
-        :return: A boolean
-        """
-        s_bar = s.get_abstract_complement()
-        t_bar = t.get_abstract_complement()
-        return (t.contains_abstract_subset(s) and t_bar.contains_abstract_subset(s)) or \
-               (s.contains_abstract_subset(t) and s_bar.contains_abstract_subset(t)) or \
-               (s_bar.contains_abstract_subset(t) and s_bar.contains_abstract_subset(t_bar)) or \
-               (t_bar.contains_abstract_subset(s) and t_bar.contains_abstract_subset(s_bar))
+def assert_kh(s, t):
+    """
+    Asserts that s and t are in a Kh-relationship
+    Source: Morris, "Class Notes for Atonal Music Theory," p. 49
+    :param s: A set-class
+    :param t: A set-class
+    :return: A boolean
+    """
+    s_bar = s.get_abstract_complement()
+    t_bar = t.get_abstract_complement()
+    return (t.contains_abstract_subset(s) and t_bar.contains_abstract_subset(s)) or \
+           (s.contains_abstract_subset(t) and s_bar.contains_abstract_subset(t)) or \
+           (s_bar.contains_abstract_subset(t) and s_bar.contains_abstract_subset(t_bar)) or \
+           (t_bar.contains_abstract_subset(s) and t_bar.contains_abstract_subset(s_bar))

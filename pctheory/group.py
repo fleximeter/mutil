@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import numpy
+from queue import Queue
 from pctheory import pitch, transformations
 
 
@@ -40,7 +41,7 @@ class OperatorGroup:
         self._name = ""
         self._num_pcs = num_pcs
         self._operators = [[] for i in range(len(self._MNUM_12))]
-        self._utos = {}
+        self._utos = set()
         if utos is not None:
             self.load_utos(utos)
 
@@ -89,40 +90,51 @@ class OperatorGroup:
                     group_name += str(self._operators[len(self._MNUM_24) - 1][len(self._operators[len(self._MNUM_24) - 1]) - 1][0])
         return group_name
 
+    @property
+    def utos(self):
+        """
+        The set of UTOs in the group
+        :return: The set of UTOs
+        """
+        return self._utos
+
     def get_orbits(self):
         """
         Gets the orbits of the group
         :return: The orbits, as a list of sets
         """
         orbits = []
-        n = len(self._tn) + len(self._tni) + len(self._tnm5) + len(self._tnm7)
-        operator_table = numpy.empty((n, 12), dtype=numpy.int32)
-
-        # Populate the operator table
-        for i in range(12):
-            operator_table[0][i] = i
-        for i in range(1, n):
-            for j in range(0, 12):
-                operator_table[i][j] = self._utos[i].transform(operator_table[0][j])
-
-        # Compute the orbits
-        for i in range(12):
+        u = None
+        if self._num_pcs == 12:
+            u = {pitch.PitchClass12(i) for i in range(self._num_pcs)}
+        elif self._num_pcs == 24:
+            u = {pitch.PitchClass24(i) for i in range(self._num_pcs)}
+        while len(u) > 0:
             orbit = set()
-            for j in range(n):
-                orbit.add(pitch.PitchClass12(int(operator_table[j][i])))
-            if orbit not in orbits:
-                orbits.append(orbit)
-        return orbits
+            q = Queue()
+            pc = next(iter(u))
+            q.put(pc)
+            orbit.add(pc)
+            u.remove(pc)
+            while not q.empty():
+                pc = q.get()
+                for op in self._utos:
+                    tr = op.transform(pc)
+                    if tr not in orbit:
+                        orbit.add(tr)
+                        q.put(tr)
+                        u.remove(tr)
+            orbits.append(orbit)
 
-    def left_coset(self, tto):
+    def left_coset(self, uto):
         """
         Gets a left coset of the group
-        :param tto: A TTO
+        :param uto: A UTO
         :return: The left coset
         """
         coset = []
-        for t in self._utos:
-            coset.append(transformations.left_multiply_utos(tto, t))
+        for u in self._utos:
+            coset.append(transformations.left_multiply_utos(uto, u))
         coset.sort()
         return coset
 
@@ -132,22 +144,28 @@ class OperatorGroup:
         :param utos: TTOs
         :return:
         """
+        self._utos = set()
         for uto in utos:
             match uto[1]:
                 case 1:
-                    self._tn.append(uto)
+                    self._operators[0].append(uto)
                 case 5:
-                    self._tnm5.append(uto)
+                    self._operators[1].append(uto)
                 case 7:
-                    self._tnm7.append(uto)
+                    self._operators[2].append(uto)
                 case 11:
-                    self._tni.append(uto)
-            self._utos.append(uto)
-        self._tn.sort()
-        self._tni.sort()
-        self._tnm5.sort()
-        self._tnm7.sort()
-        self._utos.sort()
+                    self._operators[3].append(uto)
+                case 13:
+                    self._operators[4].append(uto)
+                case 17:
+                    self._operators[5].append(uto)
+                case 19:
+                    self._operators[6].append(uto)
+                case 23:
+                    self._operators[7].append(uto)
+            self._utos.add(uto)
+        for li in self._operators:
+            li.sort()
 
     def right_coset(self, uto):
         """
