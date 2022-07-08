@@ -44,7 +44,7 @@ def invert(pseg: list):
     :return: The inverted pseg
     """
     pseg2 = []
-    t = type(iter(next(pseg)))
+    t = type(next(iter(pseg)))
     for p in pseg:
         pseg2.append(t(p.p * -1))
     return pseg2
@@ -69,6 +69,28 @@ def m21_make_pseg(item):
     return pseg2
 
 
+def make_pseg12(*args):
+    """
+    Makes a pseg
+    :param *args: Ps
+    :return: A pseg
+    """
+    if type(args[0]) == list:
+        args = args[0]
+    return [pitch.Pitch12(p) for p in args]
+
+
+def make_pseg24(*args):
+    """
+    Makes a pseg
+    :param *args: Ps
+    :return: A pseg
+    """
+    if type(args[0]) == list:
+        args = args[0]
+    return [pitch.Pitch24(p) for p in args]
+
+
 def multiply_order(pseg: list, n: int):
     """
     Multiplies a pseg's order
@@ -77,7 +99,7 @@ def multiply_order(pseg: list, n: int):
     :return: The order-multiplied pseg
     """
     pseg2 = []
-    t = type(iter(next(pseg)))
+    t = type(next(iter(pseg)))
     for i in range(len(pseg)):
         pseg2.append(t(pseg[(i * n) % len(pseg)].p))
     return pseg2
@@ -90,7 +112,7 @@ def retrograde(pseg: list):
     :return: The retrograded pseg
     """
     pseg2 = []
-    t = type(iter(next(pseg)))
+    t = type(next(iter(pseg)))
     for i in range(len(pseg) - 1, -1, -1):
         pseg2.append(t(pseg[i].pc))
     return pseg2
@@ -104,10 +126,22 @@ def rotate(pseg: list, n: int):
     :return: The rotated pseg
     """
     pseg2 = []
-    t = type(iter(next(pseg)))
+    t = type(next(iter(pseg)))
     for i in range(len(pseg)):
         pseg2.append(t(pseg[(i - n) % len(pseg)].p))
     return pseg2
+
+
+def to_pcseg(pseg: list):
+    """
+    Makes a pcseg out of a pseg
+    :param pseg: A pseg
+    :return: A pcseg
+    """
+    if type(next(iter(pseg))) == pitch.Pitch12:
+        return [pitch.PitchClass12(p.pc) for p in pseg]
+    else:
+        return [pitch.PitchClass24(p.pc) for p in pseg]
 
 
 def transpose(pseg: list, n: int):
@@ -118,7 +152,7 @@ def transpose(pseg: list, n: int):
     :return: The transposed pseg
     """
     pseg2 = []
-    t = type(iter(next(pseg)))
+    t = type(next(iter(pseg)))
     for p in pseg:
         pseg2.append(t(p.p + n))
     return pseg2

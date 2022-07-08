@@ -34,7 +34,7 @@ def fb_class(pset: set, p0: int):
     :return: The FB-class as a list of integers
     """
     intlist = []
-    n = 12 if type(iter(next(pset))) == pitch.PitchClass12 else 24
+    n = 12 if type(next(iter(pset))) == pitch.PitchClass12 else 24
     for p in pset:
         intlist.append((p.p - p0) % n)
     intlist.sort()
@@ -50,7 +50,7 @@ def invert(pset: set):
     :return: The inverted pset
     """
     pset2 = set()
-    t = type(iter(next(pset)))
+    t = type(next(iter(pset)))
     for p in pset:
         pset2.add(t(p.p * -1))
     return pset2
@@ -73,6 +73,28 @@ def m21_make_pset(item):
     else:
         raise TypeError("Unsupported music21 type")
     return pset2
+
+
+def make_pset12(*args):
+    """
+    Makes a pset
+    :param *args: Ps
+    :return: A pset
+    """
+    if type(args[0]) == list:
+        args = args[0]
+    return {pitch.Pitch12(p) for p in args}
+
+
+def make_pset24(*args):
+    """
+    Makes a pset
+    :param *args: Ps
+    :return: A pset
+    """
+    if type(args[0]) == list:
+        args = args[0]
+    return {pitch.Pitch24(p) for p in args}
 
 
 def p_ic_matrix(pset: set):
@@ -131,7 +153,7 @@ def pcint_class(pset: set):
     """
     pseg = list(pset)
     pseg.sort()
-    n = 12 if type(iter(next(pset))) == pitch.PitchClass12 else 24
+    n = 12 if type(next(iter(pset))) == pitch.PitchClass12 else 24
     intlist = []
     for i in range(1, len(pseg)):
         intlist.append((pseg[i].p - pseg[i - 1].p) % n)
@@ -170,7 +192,7 @@ def subsets(pset: set):
     :return: A list containing all subsets of the pset
     """
     total = 2 ** len(pset)
-    t = type(iter(next(pset)))
+    t = type(next(iter(pset)))
     sub = []
     pseg = list(pset)
     pseg.sort()
@@ -181,6 +203,18 @@ def subsets(pset: set):
                 sub[index].append(t(pseg[i].p))
     sub.sort()
     return sub
+
+
+def to_pcset(pset: set):
+    """
+    Makes a pcset out of a pset
+    :param pset: A pset
+    :return: A pcset
+    """
+    if type(next(iter(pset))) == pitch.Pitch12:
+        return {pitch.PitchClass12(p.pc) for p in pset}
+    else:
+        return {pitch.PitchClass24(p.pc) for p in pset}
 
 
 def transform(pset: set, transformation: transformations.UTO):
@@ -204,7 +238,7 @@ def transpose(pset: set, n: int):
     :return: The transposed pset
     """
     pset2 = set()
-    t = type(iter(next(pset)))
+    t = type(next(iter(pset)))
     for p in pset:
         pset2.add(t(p.p + n))
     return pset2

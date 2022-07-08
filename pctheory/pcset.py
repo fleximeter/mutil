@@ -932,12 +932,9 @@ def make_pcset12(*args):
     :param *args: Pcs
     :return: A pcset
     """
-    pcset = set()
     if type(args[0]) == list:
         args = args[0]
-    for pc in args:
-        pcset.add(pitch.PitchClass12(pc))
-    return pcset
+    return {pitch.PitchClass24(pc) for pc in args}
 
 
 def make_pcset24(*args):
@@ -946,12 +943,9 @@ def make_pcset24(*args):
     :param *args: Pcs
     :return: A pcset
     """
-    pcset = set()
     if type(args[0]) == list:
         args = args[0]
-    for pc in args:
-        pcset.add(pitch.PitchClass24(pc))
-    return pcset
+    return {pitch.PitchClass24(pc) for pc in args}
 
 
 def make_subset_graph(set_class, smallest_cardinality=1, show_graph=False, size=(800, 1100)):
@@ -1080,6 +1074,23 @@ def transpose(pcset: set, n: int):
         for pc in pcset:
             pcset2.add(t(pc.pc + n))
     return pcset2
+
+
+def transpositional_combination(pcset1: set, pcset2: set):
+    """
+    Transpositionally combines (TC) two pcsets. This is Boulez's "multiplication."
+    :param pcset1: A pcset
+    :param pcset2: A pcset
+    :return: The TC pcset
+    """
+    pcset3 = set()
+    if len(pcset1) > 0 and len(pcset2) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcset1)))
+        for pc2 in pcset2:
+            for pc1 in pcset1:
+                pcset3.add(t(pc1.pc + pc2.pc))
+    return pcset3
 
 
 def visualize(pcset: set):

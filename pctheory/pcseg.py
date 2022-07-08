@@ -307,6 +307,8 @@ def make_pcseg12(*args):
     :param *args: Pcs
     :return: A pcseg
     """
+    if type(args[0]) == list:
+        args = args[0]
     return [pitch.PitchClass12(pc) for pc in args]
 
 
@@ -316,6 +318,8 @@ def make_pcseg24(*args):
     :param *args: Pcs
     :return: A pcseg
     """
+    if type(args[0]) == list:
+        args = args[0]
     return [pitch.PitchClass24(pc) for pc in args]
 
 
@@ -419,6 +423,23 @@ def transpose(pcseg: list, n: int):
         for pc in pcseg:
             pcseg2.append(t(pc.pc + n))
     return pcseg2
+
+
+def transpositional_combination(pcseg1: list, pcseg2: list):
+    """
+    Transpositionally combines (TC) two pcsegs. This is Boulez's "multiplication."
+    :param pcseg1: A pcseg
+    :param pcseg2: A pcseg
+    :return: The TC pcset
+    """
+    pcseg3 = []
+    if len(pcseg1) > 0 and len(pcseg2) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcseg1)))
+        for pc2 in pcseg2:
+            for pc1 in pcseg1:
+                pcseg3.append(t(pc1.pc + pc2.pc))
+    return pcseg3
 
 
 class InvarianceMatrix:
