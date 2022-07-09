@@ -5,5 +5,6 @@ import importlib.resources
 
 
 s = pcset.SetClass12()
-s.load_from_name("4-Z15")
-print(s.pcset)
+s.load_from_name("7-1")
+t = s.get_abstract_subset_classes()
+print(t)

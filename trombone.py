@@ -23,7 +23,7 @@ def list_possible_subsets():
     Lists subsets that you might want to use (not including tritones or microtonal flat tritone)
     :return: None
     """
-    sp = list(sc1.get_subset_classes())
+    sp = list(sc1.get_abstract_subset_classes())
     sp.sort()
     # separate the ones with tritones
     for s in sp:
@@ -60,7 +60,7 @@ def make_score():
     xml_gen.add_instrument(score, "Trombone", "Tbn.")
 
     # Get the subset-classes
-    sp = list(sc1.get_subset_classes())
+    sp = list(sc1.get_abstract_subset_classes())
     sp.sort()
 
     # Make chords and lyrics

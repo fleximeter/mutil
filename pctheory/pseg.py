@@ -21,8 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from pctheory import pitch, transformations
-import music21
+from pctheory import pitch
 
 
 def intervals(pseg: list):
@@ -53,7 +52,7 @@ def invert(pseg: list):
 def make_pseg12(*args):
     """
     Makes a pseg
-    :param *args: Ps
+    :param args: Ps
     :return: A pseg
     """
     if type(args[0]) == list:
@@ -64,7 +63,7 @@ def make_pseg12(*args):
 def make_pseg24(*args):
     """
     Makes a pseg
-    :param *args: Ps
+    :param args: Ps
     :return: A pseg
     """
     if type(args[0]) == list:

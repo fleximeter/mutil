@@ -31,6 +31,7 @@ class SetClass12:
     """
     Represents a pc-set-class
     """
+    NUM_PC = 12
 
     def __init__(self, name_tables=None, pcset=None):
         """
@@ -38,8 +39,9 @@ class SetClass12:
         :param name_tables: A list of name tables
         :param pcset: A pcset to initialize the SetClass
         """
-        self._dsym = 12
-        self._ic_vector = [0, 0, 0, 0, 0, 0, 0]
+        self._dsym = SetClass12.NUM_PC * 2
+        self._ic_vector = [0 for i in range(SetClass12.NUM_PC // 2)]
+        self._ic_vector_long = [0 for i in range(SetClass12.NUM_PC // 2 + 1)]
         self._name_carter = ""
         self._name_forte = ""
         self._name_morris = ""
@@ -103,14 +105,34 @@ class SetClass12:
         return self._ic_vector
 
     @property
-    def ic_vector_string(self):
+    def ic_vector_long(self):
         """
-        Gets the IC vector
+        Gets the IC vector in long format
+        :return: The IC vector in long format
+        """
+        return self._ic_vector_long
+
+    @property
+    def ic_vector_str(self):
+        """
+        Gets the IC vector as a string
         :return: The IC vector
         """
         s = "["
         for a in self._ic_vector:
-            s += str(a)
+            s += self._tables["hexChars"][a]
+        s += "]"
+        return s
+
+    @property
+    def ic_vector_long_str(self):
+        """
+        Gets the IC vector in long format as a string
+        :return: The IC vector in long format
+        """
+        s = "["
+        for a in self._ic_vector_long:
+            s += self._tables["hexChars"][a]
         s += "]"
         return s
 
@@ -227,7 +249,7 @@ class SetClass12:
                 for i2 in range(0, len(lists_to_weight[i])):
                     lists_to_weight[i][i2] -= initial_pitch
                     if lists_to_weight[i][i2] < 0:
-                        lists_to_weight[i][i2] += 12
+                        lists_to_weight[i][i2] += SetClass12.NUM_PC
                 lists_to_weight[i].sort()
 
             # Add inverted forms
@@ -241,7 +263,7 @@ class SetClass12:
                 for i2 in range(0, len(lists_to_weight[i])):
                     lists_to_weight[i + len(pclist)][i2] -= initial_pitch
                     if lists_to_weight[i + len(pclist)][i2] < 0:
-                        lists_to_weight[i + len(pclist)][i2] += 12
+                        lists_to_weight[i + len(pclist)][i2] += SetClass12.NUM_PC
                 lists_to_weight[i + len(pclist)].sort()
 
             # Weight lists
@@ -264,7 +286,7 @@ class SetClass12:
         """
         tr = []
         inv = invert(sc.pcset)
-        for i in range(12):
+        for i in range(SetClass12.NUM_PC):
             tr.append(transpose(sc.pcset, i))
             tr.append(transpose(inv, i))
         for pcs in tr:
@@ -289,7 +311,7 @@ class SetClass12:
         iv = [0, 0, 0, 0, 0, 0, 0, 0]
         c = get_complement(self._pcset)
         utos = transformations.get_utos12()
-        for i in range(12):
+        for i in range(SetClass12.NUM_PC):
             h = [utos[f"T{i}"].transform(self._pcset), utos[f"T{i}I"].transform(self._pcset),
                  utos[f"T{i}M"].transform(self._pcset), utos[f"T{i}MI"].transform(self._pcset)]
             for j in range(4):
@@ -299,7 +321,7 @@ class SetClass12:
                     iv[4 + j] += 1
         return iv
 
-    def get_subset_classes(self):
+    def get_abstract_subset_classes(self):
         """
         Gets a set of subset-classes contained in this SetClass
         :return:
@@ -343,7 +365,7 @@ class SetClass12:
         """
         if "[" in name and "-" in name:
             name = name.split(")")
-            name.split[0] = name.split[0].replace("(", "")
+            name[0] = name[0].replace("(", "")
             if name[0] in self._tables["forteToSetNameTable"] and name[1] in self._tables["setToForteNameTable"]:
                 return True
         elif "-" in name:
@@ -359,19 +381,30 @@ class SetClass12:
         :param name: The name
         :return:
         """
+        valid = True
         pname = ""
         if "[" in name and "-" in name:
             pname = name.split("[")[1]
         elif "-" in name:
+            # Allow Forte names without Z
+            name2 = name.split('-')
+            name2 = "-Z".join(name2)
             if name in self._tables["forteToSetNameTable"]:
                 pname = self._tables["forteToSetNameTable"][name]
+            elif name2 in self._tables["forteToSetNameTable"]:
+                pname = self._tables["forteToSetNameTable"][name2]
+            else:
+                valid = False
         elif name in self._tables["setToForteNameTable"]:
             pname = name
-        pname = pname.replace("[", "")
-        pname = pname.replace("]", "")
-        pname = [c for c in pname]
-        pcset = set([pitch.PitchClass12(self._tables["hexToInt"][pn]) for pn in pname])
-        self.pcset = pcset
+        else:
+            valid = False
+        if valid:
+            pname = pname.replace("[", "")
+            pname = pname.replace("]", "")
+            pname = [c for c in pname]
+            pcset = set([pitch.PitchClass12(self._tables["hexToInt"][pn]) for pn in pname])
+            self.pcset = pcset
 
     @staticmethod
     def _invert(pcseg: list):
@@ -382,7 +415,7 @@ class SetClass12:
         """
         pcseg2 = []
         for pc in pcseg:
-            pcseg2.append(pitch.PitchClass12((pc * 11) % 12))
+            pcseg2.append(pitch.PitchClass12((pc * 11) % SetClass12.NUM_PC))
         return pcseg2
 
     @staticmethod
@@ -419,19 +452,23 @@ class SetClass12:
         forte_num = self.name_forte.split('-')[1]
         forte_num = forte_num.strip('Z')
         self._num_forte = int(forte_num)
-        self._ic_vector = [0, 0, 0, 0, 0, 0, 0]
+        self._ic_vector_long = [0 for i in range(SetClass12.NUM_PC // 2 + 1)]
         for pc in self._pcset:
             for pc2 in self._pcset:
-                interval = (pc2.pc - pc.pc) % 12
+                interval = (pc2.pc - pc.pc) % SetClass12.NUM_PC
                 if interval < 0:
-                    interval += 12
-                if interval > 6:
-                    interval = interval * -1 + 12
-                self._ic_vector[interval] += 1
-        for i in range(1, 7):
-            self._ic_vector[i] //= 2
-        c = get_corpus(self._pcset)
-        self._dsym = 24 / len(c)
+                    interval += SetClass12.NUM_PC
+                if interval > SetClass12.NUM_PC // 2:
+                    interval = interval * -1 + SetClass12.NUM_PC
+                self._ic_vector_long[interval] += 1
+        for i in range(1, len(self._ic_vector_long)):
+            self._ic_vector_long[i] //= 2
+        self._ic_vector = self._ic_vector_long[1:]
+        if len(self._pcset) > 0:
+            c = get_corpus(self._pcset)
+            self._dsym = (SetClass12.NUM_PC * 2) / len(c)
+        else:
+            self._dsym = SetClass12.NUM_PC * 2
 
     @staticmethod
     def _weight_from_right(pclists: list):
@@ -443,7 +480,7 @@ class SetClass12:
         for i in range(len(pclists[0]) - 1, -1, -1):
             if len(pclists) > 1:
                 # The smallest item at the current index
-                smallest_item = 11
+                smallest_item = SetClass12.NUM_PC - 1
 
                 # Identify the smallest item at the current index
                 for j in range(len(pclists)):
@@ -471,7 +508,7 @@ class SetClass12:
         """
         if len(pclists) > 1:
             # The smallest item at the current index
-            smallest_item = 11
+            smallest_item = SetClass12.NUM_PC - 1
 
             # Identify the smallest item at the last index
             for j in range(0, len(pclists)):
@@ -489,7 +526,7 @@ class SetClass12:
             # Continue processing, but now pack from the left
             for i in range(0, len(pclists[0])):
                 if len(pclists) > 1:
-                    smallest_item = 11
+                    smallest_item = SetClass12.NUM_PC - 1
 
                     # Identify the smallest item at the current index
                     for j in range(len(pclists)):
@@ -512,14 +549,16 @@ class SetClass24:
     """
     Represents a pc-set-class
     """
+    NUM_PC = 24
 
     def __init__(self, pcset=None):
         """
         Creates a SetClass
         :param pcset: A pcset to initialize the SetClass
         """
-        self._dsym = 12
-        self._ic_vector = [0 for i in range(13)]
+        self._dsym = SetClass24.NUM_PC * 2
+        self._ic_vector = [0 for i in range(SetClass24.NUM_PC // 2)]
+        self._ic_vector_long = [0 for i in range(SetClass24.NUM_PC // 2 + 1)]
         self._name_prime = ""
         self._pcset = set()
         self._weight_right = True
@@ -566,13 +605,34 @@ class SetClass24:
         return self._ic_vector
 
     @property
-    def ic_vector_string(self):
+    def ic_vector_long(self):
         """
-        Gets the IC vector
+        Gets the IC vector in long format
+        :return: The IC vector in long format
+        """
+        return self._ic_vector_long
+
+    @property
+    def ic_vector_str(self):
+        """
+        Gets the IC vector as a string
         :return: The IC vector
         """
         s = "["
-        for a in self._ic_vector:
+        for a in range(len(self._ic_vector) - 1):
+            s += f"{self._ic_vector[a]}, "
+        s += str(self._ic_vector[len(self._ic_vector_long) - 1])
+        s += "]"
+        return s
+
+    @property
+    def ic_vector_long_str(self):
+        """
+        Gets the IC vector in long format as a string
+        :return: The IC vector in long format
+        """
+        s = "["
+        for a in self._ic_vector_long:
             s += str(a)
         s += "]"
         return s
@@ -648,7 +708,7 @@ class SetClass24:
                 for i2 in range(0, len(lists_to_weight[i])):
                     lists_to_weight[i][i2] -= initial_pitch
                     if lists_to_weight[i][i2] < 0:
-                        lists_to_weight[i][i2] += 24
+                        lists_to_weight[i][i2] += SetClass24.NUM_PC
                 lists_to_weight[i].sort()
 
             # Add inverted forms
@@ -662,7 +722,7 @@ class SetClass24:
                 for i2 in range(0, len(lists_to_weight[i])):
                     lists_to_weight[i + len(pclist)][i2] -= initial_pitch
                     if lists_to_weight[i + len(pclist)][i2] < 0:
-                        lists_to_weight[i + len(pclist)][i2] += 24
+                        lists_to_weight[i + len(pclist)][i2] += SetClass24.NUM_PC
                 lists_to_weight[i + len(pclist)].sort()
 
             # Weight lists
@@ -685,7 +745,7 @@ class SetClass24:
         """
         tr = []
         inv = invert(sc.pcset)
-        for i in range(24):
+        for i in range(SetClass24.NUM_PC):
             tr.append(transpose(sc.pcset, i))
             tr.append(transpose(inv, i))
         for pcs in tr:
@@ -702,7 +762,7 @@ class SetClass24:
         csc.pcset = get_complement(self._pcset)
         return csc
 
-    def get_subset_classes(self):
+    def get_abstract_subset_classes(self):
         """
         Gets a set of subset-classes contained in this SetClass
         :return:
@@ -739,7 +799,7 @@ class SetClass24:
         """
         pcseg2 = []
         for pc in pcseg:
-            pcseg2.append(pitch.PitchClass24((pc * 23) % 24))
+            pcseg2.append(pitch.PitchClass24((pc * (SetClass24.NUM_PC - 1)) % SetClass24.NUM_PC))
         return pcseg2
 
     @staticmethod
@@ -762,17 +822,23 @@ class SetClass24:
         pcseg = list(self._pcset)
         pcseg.sort()
         self._name_prime = str(pcseg)
-        self._ic_vector = [0 for i in range(13)]
+        self._ic_vector_long = [0 for i in range(13)]
         for pc in self._pcset:
             for pc2 in self._pcset:
-                interval = (pc2.pc - pc.pc) % 24
-                if interval > 12:
-                    interval = (interval * 11) % 12
-                self._ic_vector[interval] += 1
-        for i in range(1, 13):
-            self._ic_vector[i] //= 2
-        c = get_corpus(self._pcset)
-        self._dsym = 48 / len(c)
+                interval = (pc2.pc - pc.pc) % SetClass24.NUM_PC
+                if interval < 0:
+                    interval += SetClass24.NUM_PC
+                if interval > 6:
+                    interval = interval * -1 + SetClass24.NUM_PC
+                self._ic_vector_long[interval] += 1
+        for i in range(1, len(self._ic_vector_long)):
+            self._ic_vector_long[i] //= 2
+        self._ic_vector = self._ic_vector_long[1:]
+        if len(self._pcset) > 0:
+            c = get_corpus(self._pcset)
+            self._dsym = (SetClass24.NUM_PC * 2) / len(c)
+        else:
+            self._dsym = (SetClass24.NUM_PC * 2)
 
     @staticmethod
     def _weight_from_right(pclists: list):
@@ -784,7 +850,7 @@ class SetClass24:
         for i in range(len(pclists[0]) - 1, -1, -1):
             if len(pclists) > 1:
                 # The smallest item at the current index
-                smallest_item = 23
+                smallest_item = SetClass24.NUM_PC - 1
 
                 # Identify the smallest item at the current index
                 for j in range(len(pclists)):
@@ -812,7 +878,7 @@ class SetClass24:
         """
         if len(pclists) > 1:
             # The smallest item at the current index
-            smallest_item = 11
+            smallest_item = SetClass24.NUM_PC - 1
 
             # Identify the smallest item at the last index
             for j in range(0, len(pclists)):
@@ -830,7 +896,7 @@ class SetClass24:
             # Continue processing, but now pack from the left
             for i in range(0, len(pclists[0])):
                 if len(pclists) > 1:
-                    smallest_item = 11
+                    smallest_item = SetClass24.NUM_PC - 1
 
                     # Identify the smallest item at the current index
                     for j in range(len(pclists)):
@@ -957,7 +1023,7 @@ def make_subset_graph(set_class, smallest_cardinality=1, show_graph=False, size=
     :return: A graph
     """
     g = networkx.DiGraph()
-    scs = list(set_class.get_subset_classes())
+    scs = list(set_class.get_abstract_subset_classes())
     for s in scs:
         if len(s.pcset) >= smallest_cardinality:
             g.add_node(s.name_prime)
