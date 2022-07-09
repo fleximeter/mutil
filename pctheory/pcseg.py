@@ -120,7 +120,7 @@ def generate_random_pcseg12(length: int, non_duplicative=False, starting_pc=None
     """
     random.seed()
     pcseg = [pitch.PitchClass12(random.randrange(12) if starting_pc is None else starting_pc)]
-    if non_duplicative and 0 < length < 12:
+    if non_duplicative and 0 < length <= 12:
         pcs = [i for i in range(12)]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
@@ -145,7 +145,7 @@ def generate_random_pcseg24(length: int, non_duplicative=False, starting_pc=None
     """
     random.seed()
     pcseg = [pitch.PitchClass24(random.randrange(24) if starting_pc is None else starting_pc)]
-    if non_duplicative and 0 < length < 24:
+    if non_duplicative and 0 < length <= 24:
         pcs = [i for i in range(24)]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
@@ -278,12 +278,18 @@ def is_row(pcseg: list):
     :param pcseg: The pcseg
     :return: Whether or not the pcseg is a row
     """
-    if len(pcseg) != 12:
-        return False
-    pcset = set([pc.pc for pc in pcseg])
-    if len(pcset) < 12:
-        return False
-    return True
+    pcs = set([pc.pc for pc in pcseg])
+    if type(pcseg[0]) == pitch.PitchClass12:
+        if len(pcs) != 12 or len(pcs) != len(pcseg):
+            return False
+        else:
+            return True
+    elif type(pcseg[0]) == pitch.PitchClass24:
+        if len(pcs) != 24 or len(pcs) != len(pcseg):
+            return False
+        else:
+            return True
+    return False
 
 
 def is_row_generator(rgen: list):
