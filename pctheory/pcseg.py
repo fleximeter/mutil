@@ -272,7 +272,7 @@ def imb_n(pcseg: list, n: int, name_tables=None):
     return scs
 
 
-def is_valid_row(pcseg: list):
+def is_row(pcseg: list):
     """
     Determines if a pcseg is a row
     :param pcseg: The pcseg
@@ -286,7 +286,7 @@ def is_valid_row(pcseg: list):
     return True
 
 
-def is_valid_rgen(rgen: list):
+def is_row_generator(rgen: list):
     """
     Determines if a row generator is valid
     :param rgen: A row generator
