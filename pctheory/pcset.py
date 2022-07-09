@@ -883,7 +883,7 @@ def get_corpus(pcset: set):
             n = 24
         for i in range(n):
             pcsets.add(frozenset(uto[f"T{i}"].transform(pcset)))
-            pcsets.add(frozenset(uto[f"T{i}I"].transform(pcset)))
+            pcsets.add(frozenset(uto[f"T{i}M11"].transform(pcset)))
     return pcsets
 
 

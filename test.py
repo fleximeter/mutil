@@ -3,5 +3,7 @@ from fractions import Fraction
 import json
 import importlib.resources
 
-s = pset.Sieve12(((3, 0), (4, 0)), 0)
-print(s.ints)
+
+s = pcset.SetClass12()
+s.load_from_name("4-Z15")
+print(s.pcset)
