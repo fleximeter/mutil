@@ -3,8 +3,11 @@ from fractions import Fraction
 import json
 import importlib.resources
 
-
-s = pcset.SetClass12()
-s.load_from_name("7-1")
+pc = pcset.make_pcset24(5,2,11,15,21,18)
+s = pcset.SetClass24(pc)
 t = s.get_abstract_subset_classes()
-print(t)
+print(s.pcset)
+
+tr = transformations.UTO(5, 13)
+print(tr.transform(s.pcset))
+

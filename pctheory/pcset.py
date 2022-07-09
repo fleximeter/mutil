@@ -456,8 +456,6 @@ class SetClass12:
         for pc in self._pcset:
             for pc2 in self._pcset:
                 interval = (pc2.pc - pc.pc) % SetClass12.NUM_PC
-                if interval < 0:
-                    interval += SetClass12.NUM_PC
                 if interval > SetClass12.NUM_PC // 2:
                     interval = interval * -1 + SetClass12.NUM_PC
                 self._ic_vector_long[interval] += 1
@@ -466,7 +464,7 @@ class SetClass12:
         self._ic_vector = self._ic_vector_long[1:]
         if len(self._pcset) > 0:
             c = get_corpus(self._pcset)
-            self._dsym = (SetClass12.NUM_PC * 2) / len(c)
+            self._dsym = (SetClass12.NUM_PC * 2) // len(c)
         else:
             self._dsym = SetClass12.NUM_PC * 2
 
@@ -583,7 +581,8 @@ class SetClass24:
         return self.pcset != other.pcset
 
     def __repr__(self):
-        return "<pctheory.pcset.SetClass24 object at " + str(id(self)) + ">: " + repr(self._pcset)
+        # return "<pctheory.pcset.SetClass24 object at " + str(id(self)) + ">: " + repr(self._pcset)
+        return self._name_prime
 
     def __str__(self):
         return self._name_prime
@@ -621,7 +620,7 @@ class SetClass24:
         s = "["
         for a in range(len(self._ic_vector) - 1):
             s += f"{self._ic_vector[a]}, "
-        s += str(self._ic_vector[len(self._ic_vector_long) - 1])
+        s += str(self._ic_vector[len(self._ic_vector) - 1])
         s += "]"
         return s
 
@@ -632,8 +631,9 @@ class SetClass24:
         :return: The IC vector in long format
         """
         s = "["
-        for a in self._ic_vector_long:
-            s += str(a)
+        for a in range(len(self._ic_vector_long) - 1):
+            s += f"{self._ic_vector_long[a]}, "
+        s += str(self._ic_vector_long[len(self._ic_vector_long) - 1])
         s += "]"
         return s
 
@@ -826,9 +826,7 @@ class SetClass24:
         for pc in self._pcset:
             for pc2 in self._pcset:
                 interval = (pc2.pc - pc.pc) % SetClass24.NUM_PC
-                if interval < 0:
-                    interval += SetClass24.NUM_PC
-                if interval > 6:
+                if interval > SetClass24.NUM_PC // 2:
                     interval = interval * -1 + SetClass24.NUM_PC
                 self._ic_vector_long[interval] += 1
         for i in range(1, len(self._ic_vector_long)):
@@ -836,7 +834,7 @@ class SetClass24:
         self._ic_vector = self._ic_vector_long[1:]
         if len(self._pcset) > 0:
             c = get_corpus(self._pcset)
-            self._dsym = (SetClass24.NUM_PC * 2) / len(c)
+            self._dsym = (SetClass24.NUM_PC * 2) // len(c)
         else:
             self._dsym = (SetClass24.NUM_PC * 2)
 
