@@ -23,7 +23,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import networkx
 import pyvis
-import multiprocessing as mp
 
 from pctheory import pitch, tables, transformations
 
