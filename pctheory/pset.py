@@ -38,7 +38,7 @@ class Sieve12:
         in the sieve - it will just serve as the 0 reference point.
         """
         self._tuples = set()
-        self._ints = []
+        self._intervals = []
         self._period = 0
         self._base_pitch = pitch.Pitch12(base_pitch.p) if type(base_pitch) == pitch.Pitch12 \
             else pitch.Pitch12(base_pitch)
@@ -53,12 +53,12 @@ class Sieve12:
         return self._base_pitch
 
     @property
-    def ints(self):
+    def intervals(self):
         """
         The intervallic succession of the Sieve12
         :return: The intervallic succession
         """
-        return self._ints
+        return self._intervals
 
     @property
     def period(self):
@@ -94,7 +94,7 @@ class Sieve12:
         r = list(r)
         r.sort()
         for i in range(1, len(r)):
-            self._ints.append(r[i].p - r[i-1].p)
+            self._intervals.append(r[i].p - r[i - 1].p)
 
     def get_range(self, p0, p1):
         """
