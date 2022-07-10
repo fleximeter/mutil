@@ -32,7 +32,7 @@ class OTO:
     retrograde (0-no or 1-yes). [2] is the multiplier. Multiplication is performed first, then retrograding,
     then transposition. These operators can be used with pcsegs.
     """
-    def __init__(self, T=0, R=0, M=0):
+    def __init__(self, T=0, R=0, M=1):
         """
         Creates an OTO
         :param T: The index of transposition
@@ -240,14 +240,22 @@ def get_otos12():
     """
     otos = {}
     for i in range(12):
-        otos[f"T{i}"] = OTO(i)
-        otos[f"T{i}R"] = OTO(i, 1)
+        otos[f"T{i}"] = OTO(i, 0, 1)
+        otos[f"T{i}R"] = OTO(i, 1, 1)
+        otos[f"T{i}M1"] = otos[f"T{i}"]
+        otos[f"T{i}RM1"] = otos[f"T{i}R"]
         otos[f"T{i}M11"] = OTO(i, 0, 11)
         otos[f"T{i}RM11"] = OTO(i, 1, 11)
         otos[f"T{i}M5"] = OTO(i, 0, 5)
         otos[f"T{i}RM5"] = OTO(i, 1, 5)
+        otos[f"T{i}M"] = otos[f"T{i}M5"]
+        otos[f"T{i}RM"] = otos[f"T{i}RM5"]
         otos[f"T{i}M7"] = OTO(i, 0, 7)
         otos[f"T{i}RM7"] = OTO(i, 1, 7)
+        otos[f"T{i}MI"] = otos[f"T{i}M7"]
+        otos[f"T{i}RMI"] = otos[f"T{i}RM7"]
+        otos[f"T{i}M11"] = OTO(i, 0, 11)
+        otos[f"T{i}RM11"] = OTO(i, 1, 11)
         otos[f"T{i}I"] = otos[f"T{i}M11"]
         otos[f"T{i}RI"] = otos[f"T{i}RM11"]
     return otos
@@ -260,8 +268,10 @@ def get_otos24():
     """
     otos = {}
     for i in range(24):
-        otos[f"T{i}"] = OTO(i)
-        otos[f"T{i}R"] = OTO(i, 1)
+        otos[f"T{i}"] = OTO(i, 0, 1)
+        otos[f"T{i}R"] = OTO(i, 1, 1)
+        otos[f"T{i}M1"] = otos[f"T{i}"]
+        otos[f"T{i}RM1"] = otos[f"T{i}R"]
         otos[f"T{i}M5"] = OTO(i, 0, 5)
         otos[f"T{i}RM5"] = OTO(i, 1, 5)
         otos[f"T{i}M7"] = OTO(i, 0, 7)
@@ -289,9 +299,13 @@ def get_utos12():
     utos = {}
     for i in range(12):
         utos[f"T{i}"] = UTO(i, 1)
+        utos[f"T{i}M1"] = utos[f"T{i}"]
         utos[f"T{i}M5"] = UTO(i, 5)
+        utos[f"T{i}M"] = utos[f"T{i}M5"]
         utos[f"T{i}M7"] = UTO(i, 7)
+        utos[f"T{i}MI"] = utos[f"T{i}M7"]
         utos[f"T{i}M11"] = UTO(i, 11)
+        utos[f"T{i}I"] = utos[f"T{i}M11"]
     return utos
 
 
@@ -303,6 +317,7 @@ def get_utos24():
     utos = {}
     for i in range(24):
         utos[f"T{i}"] = UTO(i, 1)
+        utos[f"T{i}M1"] = utos[f"T{i}"]
         utos[f"T{i}M5"] = UTO(i, 5)
         utos[f"T{i}M7"] = UTO(i, 7)
         utos[f"T{i}M11"] = UTO(i, 11)
@@ -310,6 +325,7 @@ def get_utos24():
         utos[f"T{i}M17"] = UTO(i, 17)
         utos[f"T{i}M19"] = UTO(i, 19)
         utos[f"T{i}M23"] = UTO(i, 23)
+        utos[f"T{i}I"] = utos[f"T{i}M23"]
     return utos
 
 
@@ -346,6 +362,7 @@ def left_multiply_utos(*args, num_pcs=12):
 def make_uto_list(*args):
     """
     Makes a UTO list
+    :param args: One or more tuples or lists representing UTOs
     :return: A UTO list
     """
     uto_list = []
