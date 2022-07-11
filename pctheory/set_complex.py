@@ -35,7 +35,7 @@ def assert_k(s, t):
     return t.contains_abstract_subset(s) or \
            t_bar.contains_abstract_subset(s) or \
            s.contains_abstract_subset(t) or \
-           s_bar.contains_abstract_subset(t)
+           s.contains_abstract_subset(t_bar)
 
 
 def assert_kh(s, t):
@@ -48,7 +48,5 @@ def assert_kh(s, t):
     """
     s_bar = s.get_abstract_complement()
     t_bar = t.get_abstract_complement()
-    return (t.contains_abstract_subset(s) and t_bar.contains_abstract_subset(s)) or \
-           (s.contains_abstract_subset(t) and s_bar.contains_abstract_subset(t)) or \
-           (s_bar.contains_abstract_subset(t) and s_bar.contains_abstract_subset(t_bar)) or \
-           (t_bar.contains_abstract_subset(s) and t_bar.contains_abstract_subset(s_bar))
+    return (t.contains_abstract_subset(s) or s.contains_abstract_subset(t)) and \
+        (t_bar.contains_abstract_subset(s) or s.contains_abstract_subset(t_bar))
