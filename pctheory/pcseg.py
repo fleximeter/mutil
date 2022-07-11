@@ -192,45 +192,33 @@ def get_intervals(pcseg: list):
     return intervals
 
 
-def get_secondary_forms(pcseg: list, subseg: list):
+def find_otos(pcseg1: list, pcseg2: list):
     """
-    Gets all secondary forms that contain the provided ordered subseg
-    :param pcseg: A pcseg
-    :param subseg: A subseg
-    :return: A list of secondary forms that contain the subseg, as well as their RO transformations
+    Gets all OTO transformations of pcseg1 that contain pcseg2
+    :param pcseg1: A pcseg
+    :param pcseg2: A pcseg
+    :return: A set of OTOs that transform pcseg1 so that it contains pcseg2.
     """
-    secondary_forms = []
+    otos = transformations.get_otos12()
+    oto_set = set()
 
-    # Get different transformations
-    m5 = multiply(pcseg, 5)
-    m7 = multiply(pcseg, 7)
-    m11 = multiply(pcseg, 11)
-    r = retrograde(pcseg)
-    rm5 = retrograde(multiply(pcseg, 5))
-    rm7 = retrograde(multiply(pcseg, 7))
-    rm11 = retrograde(multiply(pcseg, 11))
-
-    # Exhaust all transformations and search them
-    for i in range(12):
-        t = [[transformations.OTO(i, 0, 1), transpose(pcseg, i)], [transformations.OTO(i, 0, 5), transpose(m5, i)],
-             [transformations.OTO(i, 0, 7), transpose(m7, i)], [transformations.OTO(i, 0, 11), transpose(m11, i)],
-             [transformations.OTO(i, 1, 1), transpose(r, i)], [transformations.OTO(i, 1, 5), transpose(rm5, i)],
-             [transformations.OTO(i, 1, 7), transpose(rm7, i)], [transformations.OTO(i, 1, 11), transpose(rm11, i)]]
-
+    for oto in otos:
+        pcseg3 = otos[oto].transform(pcseg1)
         # Search each transformation in t
-        for item in t:
-            is_valid = False
-            for i in range(len(item[1]) - len(subseg)):
-                for j in range(i, i + len(subseg)):
-                    if item[1][j] == subseg[j - i]:
-                        is_valid = True
-                    if not is_valid:
-                        break
-                if is_valid:
-                    secondary_forms.append(item)
+        done_searching = False
+        for i in range(len(pcseg3)):
+            if len(pcseg2) > len(pcseg3) - i:
+                break
+            done_searching = True
+            for j in range(i, i + len(pcseg2)):
+                if pcseg3[j] != pcseg2[j - i]:
+                    done_searching = False
                     break
+            if done_searching:
+                oto_set.add(otos[oto])
+                break
 
-    return secondary_forms
+    return oto_set
 
 
 def invert(pcseg: list):
