@@ -27,16 +27,18 @@ import pyvis
 from pctheory import pitch, tables, transformations
 
 
+name_tables = tables.create_tables_set()
+
+
 class SetClass12:
     """
     Represents a pc-set-class
     """
     NUM_PC = 12
 
-    def __init__(self, name_tables=None, pcset=None):
+    def __init__(self, pcset=None):
         """
         Creates a SetClass
-        :param name_tables: A list of name tables
         :param pcset: A pcset to initialize the SetClass
         """
         self._dsym = SetClass12.NUM_PC * 2
@@ -49,7 +51,6 @@ class SetClass12:
         self._num_forte = 0
         self._pcset = set()
         self._weight_right = True
-        self._tables = name_tables if name_tables is not None else tables.create_tables_set()
         if pcset is not None:
             self.pcset = pcset
 
@@ -83,8 +84,9 @@ class SetClass12:
         Gets derived core associations
         :return: The derived core associations (or None if not derived core)
         """
-        if self.name_prime in self._tables["carterDerivedCoreTable"]:
-            return [name for name in self._tables["carterDerivedCoreTable"][self.name_prime]]
+        global name_tables
+        if self.name_prime in name_tables["carterDerivedCoreTable"]:
+            return [name for name in name_tables["carterDerivedCoreTable"][self.name_prime]]
         else:
             return None
 
@@ -118,9 +120,10 @@ class SetClass12:
         Gets the IC vector as a string
         :return: The IC vector
         """
+        global name_tables
         s = "["
         for a in self._ic_vector:
-            s += self._tables["hexChars"][a]
+            s += name_tables["hexChars"][a]
         s += "]"
         return s
 
@@ -130,9 +133,10 @@ class SetClass12:
         Gets the IC vector in long format as a string
         :return: The IC vector in long format
         """
+        global name_tables
         s = "["
         for a in self._ic_vector_long:
-            s += self._tables["hexChars"][a]
+            s += name_tables["hexChars"][a]
         s += "]"
         return s
 
@@ -299,7 +303,7 @@ class SetClass12:
         Gets the abstract complement of the SetClass
         :return: The abstract complement SetClass
         """
-        csc = SetClass12(self._tables)
+        csc = SetClass12()
         csc.pcset = get_complement(self._pcset)
         return csc
 
@@ -329,7 +333,7 @@ class SetClass12:
         sub = subsets(self._pcset)
         subset_classes = set()
         for s in sub:
-            subset_classes.add(SetClass12(self._tables, s))
+            subset_classes.add(SetClass12(s))
         return subset_classes
 
     def get_partition2_subset_classes(self):
@@ -340,21 +344,36 @@ class SetClass12:
         p = partitions2(self._pcset)
         p_set = set()
         for part in p:
-            p_set.add((SetClass12(self._tables, part[0]), SetClass12(self._tables, part[1])))
+            p_set.add((SetClass12(part[0]), SetClass12(part[1])))
         return p_set
+
+    @staticmethod
+    def get_set_classes():
+        """
+        Gets all 224 chromatic set-classes
+        :return: A list of all 224 chromatic set-classes
+        """
+        scs = []
+        for name in name_tables["forteToSetNameTable"]:
+            sc = SetClass12()
+            sc.load_from_name(name)
+            scs.append(sc)
+        return scs
 
     def get_z_relation(self):
         """
         Gets the Z-relation of the SetClass
         :return: The Z-relation of the SetClass
         """
-        zset = SetClass12(self._tables)
+        global name_tables
+        zset = SetClass12()
         f = self.name_forte
         if "Z" in f:
-            zset.load_from_name(self._tables["zNameTable"][f])
+            zset.load_from_name(name_tables["zNameTable"][f])
         return zset
 
-    def is_valid_name(self, name: str):
+    @staticmethod
+    def is_valid_name(name: str):
         """
         Determines if a set-class name is valid. Validates prime form, Forte, and Morris names.
         Prime form name format: [xxxx]
@@ -363,15 +382,16 @@ class SetClass12:
         :param name: The name
         :return: A boolean
         """
+        global name_tables
         if "[" in name and "-" in name:
             name = name.split(")")
             name[0] = name[0].replace("(", "")
-            if name[0] in self._tables["forteToSetNameTable"] and name[1] in self._tables["setToForteNameTable"]:
+            if name[0] in name_tables["forteToSetNameTable"] and name[1] in name_tables["setToForteNameTable"]:
                 return True
         elif "-" in name:
-            if name in self._tables["forteToSetNameTable"]:
+            if name in name_tables["forteToSetNameTable"]:
                 return True
-        elif name in self._tables["setToForteNameTable"] or name in self._tables["setToForteNameTableLeftPacking"]:
+        elif name in name_tables["setToForteNameTable"] or name in name_tables["setToForteNameTableLeftPacking"]:
             return True
         return False
 
@@ -381,6 +401,7 @@ class SetClass12:
         :param name: The name
         :return:
         """
+        global name_tables
         valid = True
         pname = ""
         if "[" in name and "-" in name:
@@ -389,13 +410,13 @@ class SetClass12:
             # Allow Forte names without Z
             name2 = name.split('-')
             name2 = "-Z".join(name2)
-            if name in self._tables["forteToSetNameTable"]:
-                pname = self._tables["forteToSetNameTable"][name]
-            elif name2 in self._tables["forteToSetNameTable"]:
-                pname = self._tables["forteToSetNameTable"][name2]
+            if name in name_tables["forteToSetNameTable"]:
+                pname = name_tables["forteToSetNameTable"][name]
+            elif name2 in name_tables["forteToSetNameTable"]:
+                pname = name_tables["forteToSetNameTable"][name2]
             else:
                 valid = False
-        elif name in self._tables["setToForteNameTable"]:
+        elif name in name_tables["setToForteNameTable"]:
             pname = name
         else:
             valid = False
@@ -403,7 +424,7 @@ class SetClass12:
             pname = pname.replace("[", "")
             pname = pname.replace("]", "")
             pname = [c for c in pname]
-            pcset = set([pitch.PitchClass12(self._tables["hexToInt"][pn]) for pn in pname])
+            pcset = set([pitch.PitchClass12(name_tables["hexToInt"][pn]) for pn in pname])
             self.pcset = pcset
 
     @staticmethod
@@ -435,19 +456,20 @@ class SetClass12:
         Makes the names for the set-class
         :return:
         """
-        pc_name_list = [self._tables["hexChars"][pc.pc] for pc in self._pcset]
+        global name_tables
+        pc_name_list = [name_tables["hexChars"][pc.pc] for pc in self._pcset]
         pc_name_list.sort()
         self._name_prime = "[" + "".join(pc_name_list) + "]"
         if self._name_prime != "[]":
-            if self._name_prime in self._tables["setToForteNameTableLeftPacking"]:
-                self._name_forte = self._tables["setToForteNameTableLeftPacking"][self._name_prime]
+            if self._name_prime in name_tables["setToForteNameTableLeftPacking"]:
+                self._name_forte = name_tables["setToForteNameTableLeftPacking"][self._name_prime]
             else:
-                self._name_forte = self._tables["setToForteNameTable"][self._name_prime]
+                self._name_forte = name_tables["setToForteNameTable"][self._name_prime]
         else:
             self._name_forte = "0-1"
         self._name_carter = ""
-        if self._name_forte in self._tables["forteToCarterNameTable"]:
-            self._name_carter = self._tables["forteToCarterNameTable"][self._name_forte]
+        if self._name_forte in name_tables["forteToCarterNameTable"]:
+            self._name_carter = name_tables["forteToCarterNameTable"][self._name_forte]
         self._name_morris = "(" + self._name_forte + ")" + self._name_prime
         forte_num = self.name_forte.split('-')[1]
         forte_num = forte_num.strip('Z')
@@ -992,7 +1014,7 @@ def invert(pcset: set):
 def make_pcset12(*args):
     """
     Makes a pcset
-    :param *args: Pcs
+    :param args: Pcs
     :return: A pcset
     """
     if type(args[0]) == list:
@@ -1003,7 +1025,7 @@ def make_pcset12(*args):
 def make_pcset24(*args):
     """
     Makes a pcset
-    :param *args: Pcs
+    :param args: Pcs
     :return: A pcset
     """
     if type(args[0]) == list:

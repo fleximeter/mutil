@@ -21,6 +21,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import pcset
+
+
+set_classes12 = pcset.SetClass12.get_set_classes()
+
 
 def assert_k(s, t):
     """
@@ -30,7 +35,6 @@ def assert_k(s, t):
     :param t: A set-class
     :return: A boolean
     """
-    s_bar = s.get_abstract_complement()
     t_bar = t.get_abstract_complement()
     return t.contains_abstract_subset(s) or \
            t_bar.contains_abstract_subset(s) or \
@@ -46,7 +50,32 @@ def assert_kh(s, t):
     :param t: A set-class
     :return: A boolean
     """
-    s_bar = s.get_abstract_complement()
     t_bar = t.get_abstract_complement()
     return (t.contains_abstract_subset(s) or s.contains_abstract_subset(t)) and \
         (t_bar.contains_abstract_subset(s) or s.contains_abstract_subset(t_bar))
+
+
+def get_k12(nexus: pcset.SetClass12):
+    """
+    Gets a K-complex about a provided nexus set
+    :param nexus: A nexus set
+    :return: The K-complex
+    """
+    k = []
+    for sc in set_classes12:
+        if assert_k(nexus, sc):
+            k.append(sc)
+    return k
+
+
+def get_kh12(nexus: pcset.SetClass12):
+    """
+    Gets a Kh-complex about a provided nexus set
+    :param nexus: A nexus set
+    :return: The Kh-complex
+    """
+    kh = []
+    for sc in set_classes12:
+        if assert_kh(nexus, sc):
+            kh.append(sc)
+    return kh
