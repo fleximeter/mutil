@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import pcset
+from pctheory import pcset
 
 
 set_classes12 = pcset.SetClass12.get_set_classes()
