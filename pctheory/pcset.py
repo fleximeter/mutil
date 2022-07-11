@@ -935,6 +935,30 @@ class SetClass24:
         return pclists[0]
 
 
+def find_utos(pcset1: set, pcset2: set):
+    """
+    Finds all UTOs that produce a set that contains transformed_pcset as a proper or improper subset.
+    If the list of UTOs is empty, transformed_pcset is not an abstract subset of original_pcset.
+    :param pcset1: The original pcset
+    :param pcset2: The new pcset
+    :return: A list of UTOs
+    """
+    utos = None
+    utos_final = set()
+    if len(pcset1) == len(pcset2) == 0:
+        return utos
+    else:
+        t = type(next(iter(pcset1)))
+        if t == pitch.PitchClass12:
+            utos = transformations.get_utos12()
+        else:
+            utos = transformations.get_utos24()
+        for u in utos:
+            if pcset2.issubset(utos[u].transform(pcset1)):
+                utos_final.add(utos[u])
+        return utos_final
+
+
 def get_complement(pcset: set):
     """
     Gets the complement of a pcset
@@ -970,30 +994,6 @@ def get_corpus(pcset: set):
             pcsets.add(frozenset(uto[f"T{i}"].transform(pcset)))
             pcsets.add(frozenset(uto[f"T{i}M11"].transform(pcset)))
     return pcsets
-
-
-def find_utos(pcset1: set, pcset2: set):
-    """
-    Finds all UTOs that produce a set that contains transformed_pcset as a proper or improper subset.
-    If the list of UTOs is empty, transformed_pcset is not an abstract subset of original_pcset.
-    :param pcset1: The original pcset
-    :param pcset2: The new pcset
-    :return: A list of UTOs
-    """
-    utos = None
-    utos_final = {}
-    if len(pcset1) == len(pcset2) == 0:
-        return utos
-    else:
-        t = type(next(iter(pcset1)))
-        if t == pitch.PitchClass12:
-            utos = transformations.get_utos12()
-        else:
-            utos = transformations.get_utos24()
-        for u in utos:
-            if pcset2.issubset(utos[u].transform(pcset1)):
-                utos_final[u] = utos[u]
-        return utos_final
 
 
 def invert(pcset: set):

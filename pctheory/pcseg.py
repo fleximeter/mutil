@@ -57,6 +57,35 @@ def create_ormap(pcseg: list):
     return omap
 
 
+def find_otos(pcseg1: list, pcseg2: list):
+    """
+    Gets all OTO transformations of pcseg1 that contain pcseg2
+    :param pcseg1: A pcseg
+    :param pcseg2: A pcseg
+    :return: A set of OTOs that transform pcseg1 so that it contains pcseg2.
+    """
+    otos = transformations.get_otos12()
+    oto_set = set()
+
+    for oto in otos:
+        pcseg3 = otos[oto].transform(pcseg1)
+        # Search each transformation in t
+        done_searching = False
+        for i in range(len(pcseg3)):
+            if len(pcseg2) > len(pcseg3) - i:
+                break
+            done_searching = True
+            for j in range(i, i + len(pcseg2)):
+                if pcseg3[j] != pcseg2[j - i]:
+                    done_searching = False
+                    break
+            if done_searching:
+                oto_set.add(otos[oto])
+                break
+
+    return oto_set
+
+
 def generate_pcseg12_from_interval_list(interval_list: list, starting_pc=None):
     """
     Generates a pcseg from an interval list
@@ -190,35 +219,6 @@ def get_intervals(pcseg: list):
     for i in range(1, len(pcseg)):
         intervals.append(pcseg[i].pc - pcseg[i - 1].pc)
     return intervals
-
-
-def find_otos(pcseg1: list, pcseg2: list):
-    """
-    Gets all OTO transformations of pcseg1 that contain pcseg2
-    :param pcseg1: A pcseg
-    :param pcseg2: A pcseg
-    :return: A set of OTOs that transform pcseg1 so that it contains pcseg2.
-    """
-    otos = transformations.get_otos12()
-    oto_set = set()
-
-    for oto in otos:
-        pcseg3 = otos[oto].transform(pcseg1)
-        # Search each transformation in t
-        done_searching = False
-        for i in range(len(pcseg3)):
-            if len(pcseg2) > len(pcseg3) - i:
-                break
-            done_searching = True
-            for j in range(i, i + len(pcseg2)):
-                if pcseg3[j] != pcseg2[j - i]:
-                    done_searching = False
-                    break
-            if done_searching:
-                oto_set.add(otos[oto])
-                break
-
-    return oto_set
 
 
 def invert(pcseg: list):
