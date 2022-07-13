@@ -129,14 +129,29 @@ def generate_pcseg24_from_interval_list(interval_list: list, starting_pc=None):
 def generate_random_all_interval_row(starting_pc=None):
     """
     Generates a random all-interval row
-    :param name_tables: A dictionary of name tables
     :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
     :return: An all-interval row
     """
     global name_tables
     random.seed()
-    generator = name_tables["allIntervalRowGenerators"][random.randrange(len(name_tables["allIntervalRowGenerators"]))]
-    row = [pitch.PitchClass12(random.randrange(12) if starting_pc is None else starting_pc)]
+    row = []
+
+    # Establish the starting pitch of the row
+    if starting_pc is not None:
+        if type(starting_pc) == pitch.PitchClass12:
+            row.append(pitch.PitchClass12(starting_pc.pc))
+        else:
+            row.append(pitch.PitchClass12(starting_pc))
+    else:
+        row.append(pitch.PitchClass12(random.randrange(12)))
+    generator = name_tables["elevenIntervalRowGenerators"][random.randrange(
+        len(name_tables["elevenIntervalRowGenerators"]))]
+
+    # Randomly choose to invert the row generator
+    if random.randrange(1) == 1:
+        generator = [i * 11 % 12 for i in generator]
+
+    # Build the row
     for i in range(1, 12):
         row.append(pitch.PitchClass12(row[i - 1].pc + generator[i - 1]))
     return row
@@ -258,6 +273,30 @@ def imb_n(pcseg: list, n: int):
             scs.append(pcset.SetClass24(imb))
             imb.clear()
     return scs
+
+
+def is_all_interval_row(pcseg: list):
+    """
+    Determines if a pcseg is an all-interval row
+    :param pcseg: The pcseg
+    :return: Whether or not the pcseg is an all-interval row
+    """
+    pcs = set([pc.pc for pc in pcseg])
+    if type(pcseg[0]) == pitch.PitchClass12:
+        if len(pcs) != 12 or len(pcs) != len(pcseg):
+            return False
+        else:
+            ints = {(pcseg[i].pc - pcseg[i-1].pc) % 12 for i in range(1, len(pcseg))}
+            if len(ints) == 11:
+                return True
+    elif type(pcseg[0]) == pitch.PitchClass24:
+        if len(pcs) != 24 or len(pcs) != len(pcseg):
+            return False
+        else:
+            ints = {(pcseg[i].pc - pcseg[i-1].pc) % 24 for i in range(1, len(pcseg))}
+            if len(ints) == 23:
+                return True
+    return False
 
 
 def is_row(pcseg: list):

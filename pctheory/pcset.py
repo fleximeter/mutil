@@ -27,7 +27,7 @@ import pyvis
 from pctheory import pitch, tables, transformations
 
 
-name_tables = tables.create_tables_set()
+name_tables = tables.create_tables_sc12()
 
 
 class SetClass12:
