@@ -8,7 +8,7 @@ Copyright © 2022 by Jeff Martin. All rights reserved.
 
 from fractions import Fraction
 import music21
-from pctheory import pitch, pcseg, pcset
+from pctheory import pitch
 
 LEVELS = {-5: 0.2, -4: 0.28, -3: 0.36, -2: 0.44, -1: 0.52, 0: 0.6, 1: 0.68, 2: 0.76, 3: 0.84, 4: 0.92, 5: 1.0}
 MAP12 = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
