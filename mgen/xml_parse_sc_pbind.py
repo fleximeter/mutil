@@ -23,7 +23,7 @@ class PbindNote:
         """
         Creates a PbindNote
         """
-        self.midi = kwargs["note"] if "note" in kwargs else 60
+        self.midi = kwargs["midi"] if "midi" in kwargs else 60
         self.quarterLength = kwargs["quarterLength"] if "quarterLength" in kwargs else 1
 
 
@@ -136,13 +136,14 @@ def parse_parts(parts, part_indices=None):
         Level 2: Voice (for voices in a part)
         Level 3: Subvoice (for notes in chords). There is one subvoice for each note in a chord.
         """
-        new_parts.append([])
+        new_parts.append([[[]]])
         # Tracks the offset position in the part
         part_time_offset = 0
         current_meter = 0
         current_tempo = 0
         current_quarter_duration = 0
         unresolved_ties = []
+        transpose = 0
 
         for measure in parts[indices[i]]:
             if type(measure) == music21.stream.Measure:
@@ -151,6 +152,8 @@ def parse_parts(parts, part_indices=None):
                     current_tempo = Fraction(metronome_marks[measure.number])
                     current_quarter_duration = Fraction(60, current_tempo)
                 for item in measure:
+                    #if type(item) == music21.clef.Treble8vbClef:
+                    #    transpose = -12
                     # If there is a meter change, we need to update the meter
                     if type(item) == music21.meter.TimeSignature:
                         current_meter = Fraction(item.beatCount * item.beatDuration.quarterLength)
@@ -171,7 +174,7 @@ def parse_parts(parts, part_indices=None):
 
                                 # Parse each pitch in the chord
                                 for p in range(len(item2.pitches)):
-                                    n = PbindNote(midi=item2.pitches[p].midi, quarterLength=item2.duration.quarterLength)
+                                    n = PbindNote(midi=item2.pitches[p].midi + transpose, quarterLength=item2.duration.quarterLength)
                                     # If the note is tied, we need to keep track of it
                                     if item2.tie is not None:
                                         if item2.tie.type == "start":
@@ -197,7 +200,7 @@ def parse_parts(parts, part_indices=None):
 
                             elif type(item2) == music21.note.Note:
                                 # Catch special notes that represent nonstandard sounds
-                                n = PbindNote(midi=item2.pitch.midi, quarterLength=Fraction(item2.duration.quarterLength))
+                                n = PbindNote(midi=item2.pitch.midi + transpose, quarterLength=Fraction(item2.duration.quarterLength))
 
                                 # If the note is tied, we need to keep track of it
                                 if item2.tie is not None:
@@ -235,7 +238,7 @@ def parse_parts(parts, part_indices=None):
 
                         # Parse each pitch in the chord
                         for p in range(len(item.pitches)):
-                            n = PbindNote(midi=item.pitches[p].midi, quarterLength=Fraction(item.duration.quarterLength))
+                            n = PbindNote(midi=item.pitches[p].midi + transpose, quarterLength=Fraction(item.duration.quarterLength))
 
                             # If the note is tied, we need to keep track of it
                             if item.tie is not None:
@@ -260,7 +263,9 @@ def parse_parts(parts, part_indices=None):
                                 new_parts[i][0][p].append(n)
 
                     elif type(item) == music21.note.Note:
-                        n = PbindNote(midi=item.pitch.midi, quarterLength=Fraction(item.duration.quarterLength))
+                        if len(new_parts[i]) == 0:
+                            new_parts[i].append([[]])
+                        n = PbindNote(midi=item.pitch.midi + transpose, quarterLength=Fraction(item.duration.quarterLength))
 
                         # If the note is tied, we need to keep track of it
                         if item.tie is not None:
@@ -291,3 +296,17 @@ def parse_parts(parts, part_indices=None):
                 part_time_offset += current_meter * current_quarter_duration
 
     return new_parts
+
+
+def read_file(input_xml):
+    """
+    Opens a file and imports music21 data
+    :param input_xml:
+    :return: The parts in the file
+    """
+    stream = music21.converter.parse(input_xml)
+    parts = []
+    for item in stream:
+        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
+            parts.append(item)
+    return parts

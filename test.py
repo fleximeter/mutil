@@ -2,9 +2,8 @@ from pctheory import array, group, pcseg, pcset, pseg, pset, pitch, set_complex,
 from fractions import Fraction
 import json
 import importlib.resources
+import mgen.xml_parse_sc_pbind as sc
 
-
-pc1 = pcseg.generate_random_all_interval_row()
-print(pc1)
-print(pcseg.get_intervals(pc1))
-print(pcseg.is_all_interval_row(pc1))
+scf = sc.read_file("D:\\Documents\\Scores\\Choral\\Above all praise and majesty (Mendelssohn).xml")
+pp = sc.parse_parts(scf)
+sc.dump_sc_to_file("D:\\Desktop\\test.scd", pp)
