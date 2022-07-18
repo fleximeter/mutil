@@ -300,8 +300,8 @@ class SetClass12:
 
     def get_abstract_complement(self):
         """
-        Gets the abstract complement of the SetClass
-        :return: The abstract complement SetClass
+        Gets the abstract complement of the SetClass12
+        :return: The abstract complement SetClass12
         """
         csc = SetClass12()
         csc.pcset = get_complement(self._pcset)
@@ -309,7 +309,7 @@ class SetClass12:
 
     def get_invariance_vector(self):
         """
-        Gets the invariance vector of the SetClass
+        Gets the invariance vector of the SetClass12
         :return: The invariance vector
         """
         iv = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -327,7 +327,7 @@ class SetClass12:
 
     def get_abstract_subset_classes(self):
         """
-        Gets a set of subset-classes contained in this SetClass
+        Gets a set of subset-classes contained in this SetClass12
         :return:
         """
         sub = subsets(self._pcset)
@@ -338,7 +338,7 @@ class SetClass12:
 
     def get_partition2_subset_classes(self):
         """
-        Gets a set of set-class partitions of this SetClass
+        Gets a set of set-class partitions of this SetClass12
         :return:
         """
         p = partitions2(self._pcset)
@@ -362,8 +362,8 @@ class SetClass12:
 
     def get_z_relation(self):
         """
-        Gets the Z-relation of the SetClass
-        :return: The Z-relation of the SetClass
+        Gets the Z-relation of the SetClass12
+        :return: The Z-relation of the SetClass12
         """
         global name_tables
         zset = SetClass12()
@@ -371,6 +371,16 @@ class SetClass12:
         if "Z" in f:
             zset.load_from_name(name_tables["zNameTable"][f])
         return zset
+
+    def is_all_combinatorial_hexachord(self):
+        """
+        Whether or not the SetClass12 is an all-combinatorial hexachord
+        :return: True or False
+        """
+        if self._name_prime in name_tables["allCombinatorialHexachords"]:
+            return True
+        else:
+            return False
 
     @staticmethod
     def is_valid_name(name: str):
@@ -959,6 +969,17 @@ def find_utos(pcset1: set, pcset2: set):
         return utos_final
 
 
+def get_all_combinatorial_hexachord(name: str):
+    """
+    Gets an all-combinatorial hexachord (ACH) by name (A-F)
+    :param name: The name of the hexachord (A-F)
+    :return: The hexachord set-class
+    """
+    sc = SetClass12()
+    sc.load_from_name(name_tables["allCombinatorialHexachordNames"][name])
+    return sc
+
+
 def get_complement(pcset: set):
     """
     Gets the complement of a pcset
@@ -1009,6 +1030,19 @@ def invert(pcset: set):
         for pc in pcset:
             pcset2.add(t(pc.pc * -1))
     return pcset2
+
+
+def is_all_combinatorial_hexachord(pcset: set):
+    """
+    Whether or not a pcset is an all-combinatorial hexachord
+    :param pcset: A pcset
+    :return: True or False
+    """
+    sc = SetClass12(pcset)
+    if sc.name_prime in name_tables["allCombinatorialHexachords"]:
+        return True
+    else:
+        return False
 
 
 def make_pcset12(*args):
