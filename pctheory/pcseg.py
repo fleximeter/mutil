@@ -287,6 +287,31 @@ def get_intervals(pcseg: list):
     return intervals
 
 
+def get_row_class(row: list):
+    """
+    Gets all of the rows in a row-class
+    :param row: A row
+    :return: The row-class, as a set of rows
+    """
+    ros = transformations.get_otos12()
+    row_class = set()
+    for i in range(12):
+        row_class.add(ros[f"T{i}"].transform(row))
+        row_class.add(ros[f"T{i}I"].transform(row))
+        row_class.add(ros[f"T{i}R"].transform(row))
+        row_class.add(ros[f"T{i}RI"].transform(row))
+    return row_class
+
+
+def get_row_dsym(row: list):
+    """
+    Gets the degree of symmetry of a row
+    :param row: A row
+    :return: The degree of symmetry of the row
+    """
+    return 48 // len(get_row_class(row))
+
+
 def invert(pcseg: list):
     """
     Inverts a pcseg
