@@ -110,12 +110,17 @@ def create_ormap(pcseg: list):
 
 def find_otos(pcseg1: list, pcseg2: list):
     """
-    Gets all OTO transformations of pcseg1 that contain pcseg2
+    Gets all OTO transformations of pcseg1 that contain pcseg2 as an ordered subseg
     :param pcseg1: A pcseg
     :param pcseg2: A pcseg
     :return: A set of OTOs that transform pcseg1 so that it contains pcseg2.
     """
-    otos = transformations.get_otos12()
+    otos = None
+    t = type(next(iter(pcseg1)))
+    if t == pitch.PitchClass12:
+        otos = transformations.get_otos12()
+    else:
+        otos = transformations.get_otos24()
     oto_set = set()
 
     for oto in otos:
@@ -293,9 +298,16 @@ def get_row_class(row: list):
     :param row: A row
     :return: The row-class, as a set of rows
     """
-    ros = transformations.get_otos12()
+    t = type(next(iter(row)))
+    ros = None
+    n = 12
+    if t == pitch.PitchClass12:
+        ros = transformations.get_otos12()
+    else:
+        ros = transformations.get_otos24()
+        n = 24
     row_class = set()
-    for i in range(12):
+    for i in range(n):
         row_class.add(ros[f"T{i}"].transform(row))
         row_class.add(ros[f"T{i}I"].transform(row))
         row_class.add(ros[f"T{i}R"].transform(row))
@@ -309,22 +321,10 @@ def get_row_dsym(row: list):
     :param row: A row
     :return: The degree of symmetry of the row
     """
-    return 48 // len(get_row_class(row))
-
-
-def invert(pcseg: list):
-    """
-    Inverts a pcseg
-    :param pcseg: The pcseg
-    :return: The inverted pcseg
-    """
-    pcseg2 = []
-    if len(pcseg) > 0:
-        # Need to support both PitchClass12 and PitchClass24, so use a type alias
-        t = type(next(iter(pcseg)))
-        for pc in pcseg:
-            pcseg2.append(t(pc.pc * -1))
-    return pcseg2
+    if type(next(iter(row))) == pitch.PitchClass12:
+        return 48 // len(get_row_class(row))
+    else:
+        return 96 // len(get_row_class(row))
 
 
 def imb_n(pcseg: list, n: int):
@@ -349,6 +349,21 @@ def imb_n(pcseg: list, n: int):
             scs.append(pcset.SetClass24(imb))
             imb.clear()
     return scs
+
+
+def invert(pcseg: list):
+    """
+    Inverts a pcseg
+    :param pcseg: The pcseg
+    :return: The inverted pcseg
+    """
+    pcseg2 = []
+    if len(pcseg) > 0:
+        # Need to support both PitchClass12 and PitchClass24, so use a type alias
+        t = type(next(iter(pcseg)))
+        for pc in pcseg:
+            pcseg2.append(t(pc.pc * -1))
+    return pcseg2
 
 
 def is_all_interval_row(pcseg: list):
@@ -470,8 +485,9 @@ def multiply_order(pcseg: list, n: int):
     :return: The order-multiplied pcseg
     """
     pcseg2 = []
+    t = type(next(iter(pcseg)))
     for i in range(len(pcseg)):
-        pcseg2.append(pitch.PitchClass12(pcseg[(i * n) % len(pcseg)].pc))
+        pcseg2.append(t(pcseg[(i * n) % len(pcseg)].pc))
     return pcseg2
 
 
