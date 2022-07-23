@@ -109,23 +109,29 @@ class RotationalArray:
             self._array.append(rotate(transpose(self._pcseg, -self._pcseg[i].pc), len(self._pcseg) - i))
 
 
-def str_array(array):
+def str_simple_array(array, col_delimiter=" ", row_delimiter="\n"):
     """
     Converts an array of pcs to string
     :param array: The array to convert
+    :param col_delimiter: The column delimiter
+    :param row_delimiter: The row delimiter
     :return: The string
     """
     str_temp = ""
-    if type(array) == list:
-        for l in array:
-            for pc in l:
-                str_temp += f"{pc} "
-            str_temp += "\n"
-    elif type(array) == np.array:
-        for i in range(array.shape[0]):
-            for j in range(array.shape[1]):
-                str_temp += f"{array[i][j]} "
-            str_temp += "\n"
+    for i in range(len(array) - 1):
+        row = ""
+        for j in range(len(array[i]) - 1):
+            row += f"{array[i][j]}{col_delimiter}"
+        if len(array[i]) > 0:
+            row += f"{array[i][len(array[i]) - 1]}"
+        row += row_delimiter
+        str_temp += row
+    row = ""
+    for j in range(len(array[len(array) - 1]) - 1):
+        row += f"{array[len(array) - 1][j]}{col_delimiter}"
+    if len(array[len(array) - 1]) > 0:
+        row += f"{array[len(array) - 1][len(array[len(array) - 1]) - 1]}"
+    str_temp += row    
     return str_temp
 
 
@@ -168,8 +174,8 @@ def make_array_chain(array, length: int):
         # Get the row operator we need for the transformation, and transform the array
         r = transformations.OTO()
         transformation = transformations.find_utos(pcset_start, pcset_end_temp)
-        r.oto = [transformation[0][0], 0, transformation[0][1], transformation[0][2]]
-        m = transform_row_content(array1, r)
+        r.oto = [transformation[0][0], 0, transformation[0][1]]
+        m = r.transform(array1)
         m.reverse()
 
         # Add the transformed array content to the end of the large array
