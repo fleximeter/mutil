@@ -3,5 +3,9 @@ from fractions import Fraction
 import json
 import importlib.resources
 
-pcs = pcseg.generate_random_all_interval_row(0)
-print(pcs)
+pcs = pcset.make_pcset12(0, 1, 2, 3, 4, 5)
+print(type(next(iter(pcs))))
+t = pcset.get_self_map_utos(pcs)
+c = pcset.get_complement_map_utos(pcs)
+print(t)
+print(c)

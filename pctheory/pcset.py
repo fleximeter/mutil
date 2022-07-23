@@ -998,6 +998,60 @@ def get_complement(pcset: set):
     return universal - pcset
 
 
+def get_complement_map_utos(pcset: set):
+    """
+    Gets all UTOs that map a pcset into its complement
+    :param pcset: A pcset
+    :return: A set of UTOs
+    """
+    utos = set()
+    t = type(next(iter(pcset)))
+    c = get_complement(pcset)
+    if t == pitch.PitchClass12:
+        uto = transformations.get_utos12()
+        for i in range(12):
+            tx = uto[f"T{i}"].transform(pcset)
+            m5x = uto[f"T{i}M5"].transform(pcset)
+            m7x = uto[f"T{i}M7"].transform(pcset)
+            m11x = uto[f"T{i}M11"].transform(pcset)
+            if tx.issubset(c):
+                utos.add(uto[f"T{i}"])
+            if m5x.issubset(c):
+                utos.add(uto[f"T{i}M5"])
+            if m7x.issubset(c):
+                utos.add(uto[f"T{i}M7"])
+            if m11x.issubset(c):
+                utos.add(uto[f"T{i}M11"])
+    else:
+        uto = transformations.get_utos24()
+        for i in range(24):
+            tx = uto[f"T{i}"].transform(pcset)
+            m5x = uto[f"T{i}M5"].transform(pcset)
+            m7x = uto[f"T{i}M7"].transform(pcset)
+            m11x = uto[f"T{i}M11"].transform(pcset)
+            m13x = uto[f"T{i}M13"].transform(pcset)
+            m17x = uto[f"T{i}M17"].transform(pcset)
+            m19x = uto[f"T{i}M19"].transform(pcset)
+            m23x = uto[f"T{i}M23"].transform(pcset)
+            if tx.issubset(c):
+                utos.add(uto[f"T{i}"])
+            if m5x.issubset(c):
+                utos.add(uto[f"T{i}M5"])
+            if m7x.issubset(c):
+                utos.add(uto[f"T{i}M7"])
+            if m11x.issubset(c):
+                utos.add(uto[f"T{i}M11"])
+            if m13x.issubset(c):
+                utos.add(uto[f"T{i}M13"])
+            if m17x.issubset(c):
+                utos.add(uto[f"T{i}M17"])
+            if m19x.issubset(c):
+                utos.add(uto[f"T{i}M19"])
+            if m23x.issubset(c):
+                utos.add(uto[f"T{i}M23"])
+    return utos
+
+
 def get_corpus(pcset: set):
     """
     Gets all transformations of a provided pcset
@@ -1015,6 +1069,59 @@ def get_corpus(pcset: set):
             pcsets.add(frozenset(uto[f"T{i}"].transform(pcset)))
             pcsets.add(frozenset(uto[f"T{i}M11"].transform(pcset)))
     return pcsets
+
+
+def get_self_map_utos(pcset: set):
+    """
+    Gets all UTOs that map a pcset into itself
+    :param pcset: A pcset
+    :return: A set of UTOs
+    """
+    utos = set()
+    t = type(next(iter(pcset)))
+    if t == pitch.PitchClass12:
+        uto = transformations.get_utos12()
+        for i in range(12):
+            tx = uto[f"T{i}"].transform(pcset)
+            m5x = uto[f"T{i}M5"].transform(pcset)
+            m7x = uto[f"T{i}M7"].transform(pcset)
+            m11x = uto[f"T{i}M11"].transform(pcset)
+            if tx == pcset:
+                utos.add(uto[f"T{i}"])
+            if m5x == pcset:
+                utos.add(uto[f"T{i}M5"])
+            if m7x == pcset:
+                utos.add(uto[f"T{i}M7"])
+            if m11x == pcset:
+                utos.add(uto[f"T{i}M11"])
+    else:
+        uto = transformations.get_utos24()
+        for i in range(24):
+            tx = uto[f"T{i}"].transform(pcset)
+            m5x = uto[f"T{i}M5"].transform(pcset)
+            m7x = uto[f"T{i}M7"].transform(pcset)
+            m11x = uto[f"T{i}M11"].transform(pcset)
+            m13x = uto[f"T{i}M13"].transform(pcset)
+            m17x = uto[f"T{i}M17"].transform(pcset)
+            m19x = uto[f"T{i}M19"].transform(pcset)
+            m23x = uto[f"T{i}M23"].transform(pcset)
+            if tx == pcset:
+                utos.add(uto[f"T{i}"])
+            if m5x == pcset:
+                utos.add(uto[f"T{i}M5"])
+            if m7x == pcset:
+                utos.add(uto[f"T{i}M7"])
+            if m11x == pcset:
+                utos.add(uto[f"T{i}M11"])
+            if m13x == pcset:
+                utos.add(uto[f"T{i}M13"])
+            if m17x == pcset:
+                utos.add(uto[f"T{i}M17"])
+            if m19x == pcset:
+                utos.add(uto[f"T{i}M19"])
+            if m23x == pcset:
+                utos.add(uto[f"T{i}M23"])
+    return utos
 
 
 def invert(pcset: set):
@@ -1053,7 +1160,7 @@ def make_pcset12(*args):
     """
     if type(args[0]) == list:
         args = args[0]
-    return {pitch.PitchClass24(pc) for pc in args}
+    return {pitch.PitchClass12(pc) for pc in args}
 
 
 def make_pcset24(*args):
