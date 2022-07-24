@@ -306,12 +306,10 @@ def get_row_class(row: list):
     else:
         ros = transformations.get_otos24()
         n = 24
-    row_class = set()
-    for i in range(n):
-        row_class.add(ros[f"T{i}"].transform(row))
-        row_class.add(ros[f"T{i}I"].transform(row))
-        row_class.add(ros[f"T{i}R"].transform(row))
-        row_class.add(ros[f"T{i}RI"].transform(row))
+    row_class = []
+    for transform in ["", "I", "R", "RI"]:
+        for i in range(n):
+            row_class.append(ros[f"T{i}{transform}"].transform(row))
     return row_class
 
 
