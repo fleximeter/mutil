@@ -306,11 +306,17 @@ def get_row_class(row: list):
     else:
         ros = transformations.get_otos24()
         n = 24
-    row_class = []
+    row_class = {}
     for transform in ["", "I", "R", "RI"]:
         for i in range(n):
-            row_class.append(ros[f"T{i}{transform}"].transform(row))
-    return row_class
+            transform = ros[f"T{i}{transform}"].transform(row)
+            row_name = str(transform)
+            if row_name not in row_class:
+                row_class[row_name] = transform
+    row_class1 = []
+    for row_name in row_class:
+        row_class1.append(row_class[row_name])
+    return row_class1
 
 
 def get_row_dsym(row: list):
