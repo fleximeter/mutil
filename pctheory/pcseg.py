@@ -307,9 +307,9 @@ def get_row_class(row: list):
         ros = transformations.get_otos24()
         n = 24
     row_class = {}
-    for transform in ["", "I", "R", "RI"]:
+    for t in ["", "I", "R", "RI"]:
         for i in range(n):
-            transform = ros[f"T{i}{transform}"].transform(row)
+            transform = ros[f"T{i}{t}"].transform(row)
             row_name = str(transform)
             if row_name not in row_class:
                 row_class[row_name] = transform
