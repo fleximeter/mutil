@@ -433,6 +433,26 @@ def is_all_trichord_row(pcseg: list):
         return False
 
 
+def is_all_trichord_babbitt_row(pcseg: list):
+    """
+    Determines if a pcseg is an "all-trichord" row (after Babbitt). This kind of row
+    contains ten unique imbricated trichords, none of which are set-classes [036] or [048].
+    Rotation is not considered.
+    :param pcseg: The pcseg
+    :return: Whether or not the pcseg is an "all-trichord" row (after Babbitt)
+    """
+    if not is_row(pcseg):
+        return False
+    imb3 = imb_n(pcseg, 3)
+    if len(set(imb3)) == 10:
+        for sc in imb3:
+            if sc.name_prime == "[036]" or sc.name_prime == "[048]":
+                return False
+        return True
+    else:
+        return False
+
+
 def is_link_chord(pcseg: list):
     """
     Determines if a row is a Link chord (an all-interval row containing the all-trichord hexachord as a subset)
@@ -480,6 +500,22 @@ def is_row_generator(rgen: list):
             if rgen_sum % 12 == 0:
                 return False
     return True
+
+
+def is_ten_trichord_row(pcseg: list):
+    """
+    Determines if a pcseg is a ten-trichord row. This kind of row
+    contains ten unique imbricated trichords. Rotation is not considered.
+    :param pcseg: The pcseg
+    :return: Whether or not the pcseg is an "all-trichord" row (after Babbitt)
+    """
+    if not is_row(pcseg):
+        return False
+    imb3 = imb_n(pcseg, 3)
+    if len(set(imb3)) == 10:
+        return True
+    else:
+        return False
 
 
 def make_pcseg12(*args):
