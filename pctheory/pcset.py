@@ -349,16 +349,24 @@ class SetClass12:
         return p_set
 
     @staticmethod
-    def get_set_classes():
+    def get_set_classes(cardinalities: list=None):
         """
-        Gets all 224 chromatic set-classes
-        :return: A list of all 224 chromatic set-classes
+        Gets the chromatic set-classes
+        :param cardinalities: A list of cardinalities if you don't want the entire list of 224 set-classes
+        :return: A list of the chromatic set-classes
         """
         scs = []
         for name in name_tables["forteToSetNameTable"]:
-            sc = SetClass12()
-            sc.load_from_name(name)
-            scs.append(sc)
+            if cardinalities is not None:
+                split = name.split('-')
+                if int(split[0]) in cardinalities:
+                    sc = SetClass12()
+                    sc.load_from_name(name)
+                    scs.append(sc)
+            else:
+                sc = SetClass12()
+                sc.load_from_name(name)
+                scs.append(sc)
         return scs
 
     def get_z_relation(self):
