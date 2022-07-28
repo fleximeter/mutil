@@ -25,6 +25,7 @@ import networkx
 import pyvis
 
 from pctheory import pitch, tables, transformations
+import numpy as np
 
 
 name_tables = tables.create_tables_sc12()
@@ -1245,6 +1246,65 @@ def partitions2(pcset: set):
     for s in partitions_dict:
         partitions_list.append((set(s), set(partitions_dict[s])))
     return partitions_list
+
+
+def permutations(pcset: set):
+    """
+    Generates all permutations of a pcset. Uses a swapping notion derived from the Bauer-Mengelberg/Ferentz algorithm
+    for generating all-interval twelve-tone rows.
+    Note: The number of permutations will be n! where n is the length of the pcset. As the pcset grows in size, the number
+    of permutations grows enormously. You may not want to try generating all permutations of a twelve-note set.
+    You have been warned.
+    :param pcs: A pcset
+    :return: A list of pcsegs
+    """
+    current_permutation = [pc.pc for pc in pcset]
+    current_permutation.sort()
+    
+    # Determine the type of pitch-class, and the number of possible pitch-classes
+    t = type(next(iter(pcset)))
+    n = 12
+    if t == pitch.PitchClass24:
+        n = 24
+    
+    all_permutations = []  # This will hold the final list of permutations
+    critical_index = 0     # The index of the critical digit
+
+    # This array keeps track of all numbers we have found past the critical index.
+    flags = np.zeros((n), dtype=np.int8)
+    
+    while critical_index > -1:
+        all_permutations.append([t(pc) for pc in current_permutation])
+        critical_index = -1
+        next_higher_digit = 0
+        
+        # Examine the permutation to find the critical digit
+        for i in range(len(current_permutation) - 1, 0, -1):
+            flags[current_permutation[i]] = 1
+            
+            # If we've found the critical index
+            if current_permutation[i-1] < current_permutation[i]:
+                flags[current_permutation[i-1]] = 1
+                critical_index = i - 1
+                
+                # Find the next highest number so we can do the swap
+                for j in range(current_permutation[critical_index] + 1, n):
+                    if flags[j]:
+                        next_higher_digit = j
+                        flags[j] = 0
+                        break
+
+                # Swap the critical digit
+                current_permutation[critical_index] = next_higher_digit
+
+                # Repopulate the permutation
+                for j in range(n):
+                    if flags[j]:
+                        critical_index += 1
+                        current_permutation[critical_index] = j
+                        flags[j] = 0
+                break
+    return all_permutations
 
 
 def set_class_filter12(name: str, sets: list):
