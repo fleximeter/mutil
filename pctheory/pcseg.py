@@ -213,6 +213,29 @@ def generate_random_all_interval_row(starting_pc=None):
     return row
 
 
+def generate_random_all_trichord_row(starting_pc=None):
+    """
+    Generates a random all-trichord row
+    :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
+    :return: An all-trichord row
+    """
+    global name_tables
+    random.seed()
+    if starting_pc is not None:
+        if type(starting_pc) == pitch.PitchClass12:
+            starting_pc = starting_pc.pc
+    else:
+        starting_pc = 0
+    row = [pitch.PitchClass12(pc + starting_pc) for pc in name_tables["allTrichordRows"][random.randrange(
+        len(name_tables["allTrichordRows"]))]]
+
+    # Randomly choose to invert the row generator
+    if random.randrange(1) == 1:
+        row = invert(row)
+
+    return row
+
+
 def generate_random_pcseg12(length: int, non_duplicative=False, starting_pc=None):
     """
     Generates a random pcseg
@@ -392,6 +415,22 @@ def is_all_interval_row(pcseg: list):
             if len(ints) == 23:
                 return True
     return False
+
+
+def is_all_trichord_row(pcseg: list):
+    """
+    Determines if a pcseg is an all-trichord row
+    :param pcseg: The pcseg
+    :return: Whether or not the pcseg is an all-trichord row
+    """
+    if not is_row(pcseg):
+        return False
+    row1 = [pcseg[i % 12] for i in range(14)]
+    imb3 = imb_n(row1, 3)
+    if len(set(imb3)) == 12:
+        return True
+    else:
+        return False
 
 
 def is_link_chord(pcseg: list):

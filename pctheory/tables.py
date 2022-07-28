@@ -39,5 +39,5 @@ def create_tables_row():
     Creates tables for twelve-tone rows
     :return: Tables
     """
-    with importlib.resources.open_text("pctheory", "eleven_interval.json") as table_json:
+    with importlib.resources.open_text("pctheory", "row12.json") as table_json:
         return json.loads(table_json.read())
