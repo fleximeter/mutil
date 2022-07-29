@@ -25,9 +25,6 @@ from pctheory import pcset, pitch, tables, transformations
 import random
 
 
-name_tables = tables.create_tables_row()
-
-
 def are_combinatorial2(row1: list, row2: list):
     """
     Determines if two rows are hexachordally combinatorial
@@ -188,7 +185,7 @@ def generate_random_all_interval_row(starting_pc=None):
     :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
     :return: An all-interval row
     """
-    global name_tables
+    name_tables = tables.create_tables_eleven_interval()
     random.seed()
     row = []
 
@@ -219,7 +216,7 @@ def generate_random_all_trichord_row(starting_pc=None):
     :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
     :return: An all-trichord row
     """
-    global name_tables
+    name_tables = tables.create_tables_all_trichord()
     random.seed()
     if starting_pc is not None:
         if type(starting_pc) == pitch.PitchClass12:
@@ -228,6 +225,29 @@ def generate_random_all_trichord_row(starting_pc=None):
         starting_pc = 0
     row = [pitch.PitchClass12(pc + starting_pc) for pc in name_tables["allTrichordRows"][random.randrange(
         len(name_tables["allTrichordRows"]))]]
+
+    # Randomly choose to invert the row generator
+    if random.randrange(1) == 1:
+        row = invert(row)
+
+    return row
+
+
+def generate_random_all_trichord_babbitt_row(starting_pc=None):
+    """
+    Generates a random all-trichord (Babbitt) row
+    :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
+    :return: An all-trichord (Babbitt) row
+    """
+    name_tables = tables.create_tables_all_trichord_babbitt()
+    random.seed()
+    if starting_pc is not None:
+        if type(starting_pc) == pitch.PitchClass12:
+            starting_pc = starting_pc.pc
+    else:
+        starting_pc = 0
+    row = [pitch.PitchClass12(pc + starting_pc) for pc in name_tables["allTrichordBabbittRows"][random.randrange(
+        len(name_tables["allTrichordBabbittRows"]))]]
 
     # Randomly choose to invert the row generator
     if random.randrange(1) == 1:
@@ -301,6 +321,29 @@ def generate_random_pcseg_from_pcset(pcset: set):
         pcseg.append(t(setseg[j].pc))
         del setseg[j]
     return pcseg
+
+
+def generate_random_ten_trichord_row(starting_pc=None):
+    """
+    Generates a random ten-trichord row
+    :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
+    :return: A ten-trichord row
+    """
+    name_tables = tables.create_tables_ten_trichord()
+    random.seed()
+    if starting_pc is not None:
+        if type(starting_pc) == pitch.PitchClass12:
+            starting_pc = starting_pc.pc
+    else:
+        starting_pc = 0
+    row = [pitch.PitchClass12(pc + starting_pc) for pc in name_tables["tenTrichordRows"][random.randrange(
+        len(name_tables["tenTrichordRows"]))]]
+
+    # Randomly choose to invert the row generator
+    if random.randrange(1) == 1:
+        row = invert(row)
+
+    return row
 
 
 def get_intervals(pcseg: list):
