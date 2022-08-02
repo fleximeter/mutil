@@ -91,23 +91,38 @@ class OTO:
         """
         self._oto = value
 
-    def transform(self, pcseg: list):
+    def transform(self, item):
         """
-        Transforms a pcseg
-        :param pcseg: A pcseg
-        :return: The transformed pcseg
+        Transforms an item (can be a pitch-class, list, set, or any number of nestings of these objects)
+        :param item: An item
+        :return: The transformed item
         """
-        pcseg2 = list()
-        if len(pcseg) > 0:
-            if type(pcseg[0]) == pitch.PitchClass24:
-                for i in range(len(pcseg)):
-                    pcseg2.append(pitch.PitchClass24(pcseg[i].pc * self._oto[2] + self._oto[0]))
-            else:
-                for i in range(len(pcseg)):
-                    pcseg2.append(pitch.PitchClass12(pcseg[i].pc * self._oto[2] + self._oto[0]))
-        if self._oto[1]:
-            pcseg2.reverse()
-        return pcseg2
+        new_item = None
+        if type(item) == list:
+            new_item = []
+            for item2 in item:
+                t = type(item2)
+                if t == list:
+                    new_item.append(self.transform(item2))
+                elif t == set:
+                    new_item.append(self.transform(item2))
+                else:
+                    new_item.append(t(item2.pc * self._oto[2] + self._oto[0]))
+            if self._oto[1]:
+                new_item.reverse()
+        elif type(item) == set:
+            new_item = set()
+            for item2 in item:
+                t = type(item2)
+                if t == list:
+                    new_item.add(self.transform(item2))
+                elif t == set:
+                    new_item.add(self.transform(item2))
+                else:
+                    new_item.add(t(item2.pc * self._oto[2] + self._oto[0]))
+        else:
+            new_item = type(item)(item.pc * self._oto[2] + self._oto[0])
+        return new_item
 
 
 class UTO:
