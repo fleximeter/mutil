@@ -12,7 +12,7 @@ import random
 import time
 
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
-FILE = "Trombone Piece 0.2.1 - Full score - 01 Flow 1.xml"
+FILE = "Trombone Piece 0.2.2 - Full score - 01 Flow 1.xml"
 NUM_BUFFERS = 8
 NUM_BUSES = 40
 random.seed(time.time())
@@ -159,6 +159,6 @@ if __name__ == "__main__":
     ]]
     m_last = xml_parse_sc.get_highest_measure_no(parsed_parts)
     add_sc_data(parsed_parts)
-    add_dynamics(parsed_parts, dynamics)
+    # add_dynamics(parsed_parts, dynamics)
     xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
     xml_parse_sc.dump_parts(parsed_parts)

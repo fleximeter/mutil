@@ -193,6 +193,21 @@ def dump_sc(new_parts):
                                         f"d.put(\\synth, \\synth{v2[j].synth}_{v2[j].envlen});\n" + \
                                         f"d.put(\\type, \\Note);\n" + \
                                         f"~score[{cidx}].add(d);\n"
+                            elif type(v2[j]) == Sound:
+                                data += f"d = Dictionary.new;\n" + \
+                                        f"d.put(\\buf, {v2[j].buffer});\n" + \
+                                        f"d.put(\\duration, {float(v2[j].duration)});\n" + \
+                                        f"d.put(\\env, {v2[j].env});\n" + \
+                                        f"d.put(\\envlen, {v2[j].envlen});\n" + \
+                                        f"d.put(\\measure, {v2[j].measure});\n" + \
+                                        f"d.put(\\mul, 0.5);\n" + \
+                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
+                                        f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
+                                        f"d.put(\\rate, 1);\n" + \
+                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
+                                        f"d.put(\\synth, \\play_buf);\n" + \
+                                        f"d.put(\\type, \\Sound);\n" + \
+                                        f"~score[{cidx}].add(d);\n"
                             elif type(v2[j]) == Dynamic:
                                 data += f"d = Dictionary.new;\n" + \
                                         f"d.put(\\duration, {v2[j].duration});\n" + \
