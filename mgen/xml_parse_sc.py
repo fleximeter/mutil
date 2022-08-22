@@ -391,7 +391,7 @@ def parse_parts(parts, part_indices=None):
                                                     new_parts[t[0]][t[1]][t[2]][t[3]].duration += n.duration
                                                     break
                                         else:
-                                            delete = 0
+                                            delete = -1
                                             for t in range(len(unresolved_ties)):
                                                 prev = new_parts[unresolved_ties[t][0]][unresolved_ties[t][1]][unresolved_ties[t][2]][unresolved_ties[t][3]]
                                                 if prev.pitch == n.pitch:
@@ -399,7 +399,8 @@ def parse_parts(parts, part_indices=None):
                                                     prev.end_time = prev.start_time + prev.duration
                                                     delete = t
                                                     break
-                                            del unresolved_ties[delete]
+                                            if delete > -1:
+                                                del unresolved_ties[delete]
                                     else:
                                         n.end_time = n.start_time + n.duration
                                         new_parts[i][int(item.id) - 1][p].append(n)

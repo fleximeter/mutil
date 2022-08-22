@@ -12,7 +12,7 @@ import random
 import time
 
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
-FILE = "Trombone Piece 0.2.2 - Full score - 01 Flow 1.xml"
+FILE = "Trombone Piece 0.2.4 - Full score - 01 Flow 1.xml"
 NUM_BUFFERS = 8
 NUM_BUSES = 40
 random.seed(time.time())
