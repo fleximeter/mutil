@@ -24,10 +24,14 @@ class Dynamic:
     def __init__(self, **kwargs):
         self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
         self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0     # the synth to use
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
         self.duration = kwargs["duration"] if "duration" in kwargs else 0           # dynamic duration
         self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0        # end volume index
+        self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0           # end note
+        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
+        self.index_insert = kwargs["index_insert"] if "index_insert" in kwargs else 0   # index at which to insert
         self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0  # start volume index
+        self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
         if "start_note" in kwargs:
             self.start_time = kwargs["start_note"].start_time
@@ -42,9 +46,13 @@ class Effect:
     def __init__(self, **kwargs):
         self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
         self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
+        self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0           # end note
+        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
         self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
         self.duration = kwargs["duration"] if "duration" in kwargs else 0           # effect duration
+        self.index_insert = kwargs["index_insert"] if "index_insert" in kwargs else 0   # index at which to insert
         self.start_index = kwargs["start_index"] if "start_index" in kwargs else 0  # start index
+        self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
 
 
@@ -127,24 +135,25 @@ def dump_parts(new_parts):
     :param new_parts: New (parsed) parts
     :return:
     """
-    for p in new_parts:
-        for v in range(len(p)):
-            for v2 in range(len(p[v])):
-                print(f"Voice {v + 1}.{v2 + 1}")
-                print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format("m", "i", "p", "mul", "dur",
-                                                                                   "start", "end", "index"))
-                for i in range(len(p[v][v2])):
-                    if type(p[v][v2][i]) == Note:
-                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(p[v][v2][i].measure,
-                              i, p[v][v2][i].pitch.p, p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
-                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4),
-                              f"[{v}][{v2}][{i}]"))
-                    if type(p[v][v2][i]) == Sound:
-                        print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(p[v][v2][i].measure,
-                              i, "sound", p[v][v2][i].mul, round(float(p[v][v2][i].duration), 4),
-                              round(float(p[v][v2][i].start_time), 4), round(float(p[v][v2][i].end_time), 4),
-                              f"[{v}][{v2}][{i}]"))
-                print()
+    current_voice_index = 0
+    for part in new_parts:
+        for voice in part:
+            print(f"Voice {current_voice_index + 1}")
+            print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format("m", "i", "p", "mul", "dur",
+                                                                               "start", "end", "index"))
+            for i in range(len(voice)):
+                if type(voice[i]) == Note:
+                    print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(voice[i].measure,
+                          i, voice[i].pitch.p, voice[i].mul, round(float(voice[i].duration), 4),
+                          round(float(voice[i].start_time), 4), round(float(voice[i].end_time), 4),
+                          f"[{current_voice_index}][{i}]"))
+                if type(voice[i]) == Sound:
+                    print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(voice[i].measure,
+                          i, "sound", voice[i].mul, round(float(voice[i].duration), 4),
+                          round(float(voice[i].start_time), 4), round(float(voice[i].end_time), 4),
+                          f"[{current_voice_index}][{i}]"))
+            print()
+            current_voice_index += 1
 
 
 def dump_sc(new_parts):
@@ -158,80 +167,88 @@ def dump_sc(new_parts):
 
     # Get the number of voices
     num_voices = 0
-    for p in new_parts:
-        for v in p:
-            num_voices += len(v)
+    for part in new_parts:
+        num_voices += len(part)
 
     data += "~score = Array.fill({0}, {1});\n".format(num_voices, "{List.new}")
 
+    # A list of current starting indices. We add each measure of each voice, then move on to the
+    # next measure and add the contents of each voice in that measure
     idx = [0 for i in range(num_voices)]
-    for i in range(num_measures + 1):
-        cidx = 0
-        for p in new_parts:
-            for v in p:
-                for v2 in v:
-                    data += f"// Measure {i}, Voice {cidx}\n"
-                    for j in range(idx[cidx], len(v2)):
-                        flag = False
-                        if type(v2[j]) == Dynamic:
-                            if v2[j + 1].measure == i:
-                                flag = True
-                        elif v2[j].measure == i:
+
+    # Iterate through all of the measures in the piece
+    for measure_no in range(num_measures + 1):
+        current_voice_index = 0  # The current voice index
+        for part in new_parts:
+            for voice in part:
+                data += f"// Measure {measure_no}, Voice {current_voice_index}\n"
+                # For each item in the current measure for the current voice
+                for i in range(idx[current_voice_index], len(voice)):
+                    # If the flag is false, we have to stop adding things and record the current index
+                    # as the starting point for the next measure's iteration
+                    flag = False
+                    if type(voice[i]) == Dynamic:
+                        if voice[i + 1].measure == measure_no:
                             flag = True
-                        if flag:
-                            if type(v2[j]) == Note:
-                                data += f"d = Dictionary.new;\n" + \
-                                        f"d.put(\\buf, {v2[j].buffer});\n" + \
-                                        f"d.put(\\duration, {float(v2[j].duration)});\n" + \
-                                        f"d.put(\\env, {v2[j].env});\n" + \
-                                        f"d.put(\\envlen, {v2[j].envlen});\n" + \
-                                        f"d.put(\\measure, {v2[j].measure});\n" + \
-                                        f"d.put(\\mul, {equal_loudness(v2[j])});\n" + \
-                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
-                                        f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
-                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
-                                        f"d.put(\\synth, \\synth{v2[j].synth}_{v2[j].envlen});\n" + \
-                                        f"d.put(\\type, \\Note);\n" + \
-                                        f"~score[{cidx}].add(d);\n"
-                            elif type(v2[j]) == Sound:
-                                data += f"d = Dictionary.new;\n" + \
-                                        f"d.put(\\buf, {v2[j].buffer});\n" + \
-                                        f"d.put(\\duration, {float(v2[j].duration)});\n" + \
-                                        f"d.put(\\env, {v2[j].env});\n" + \
-                                        f"d.put(\\envlen, {v2[j].envlen});\n" + \
-                                        f"d.put(\\measure, {v2[j].measure});\n" + \
-                                        f"d.put(\\mul, 0.5);\n" + \
-                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
-                                        f"d.put(\\pitch, {v2[j].pitch.p});\n" + \
-                                        f"d.put(\\rate, 1);\n" + \
-                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
-                                        f"d.put(\\synth, \\play_buf);\n" + \
-                                        f"d.put(\\type, \\Sound);\n" + \
-                                        f"~score[{cidx}].add(d);\n"
-                            elif type(v2[j]) == Dynamic:
-                                data += f"d = Dictionary.new;\n" + \
-                                        f"d.put(\\duration, {v2[j].duration});\n" + \
-                                        f"d.put(\\end_level, {v2[j].end_level});\n" + \
-                                        f"d.put(\\in, {v2[j].bus_in});\n" + \
-                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
-                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
-                                        f"d.put(\\start_level, {v2[j].start_level});\n" + \
-                                        f"d.put(\\synth, \\dynamic{v2[j].synth});\n" + \
-                                        f"d.put(\\type, \\Dynamic);\n" + \
-                                        f"~score[{cidx}].add(d);\n"
-                            elif type(v2[j]) == Effect:
-                                data += f"d = Dictionary.new;\n" + \
-                                        f"d.put(\\duration, {v2[j].duration});\n" + \
-                                        f"d.put(\\in, {v2[j].bus_in});\n" + \
-                                        f"d.put(\\out, {v2[j].bus_out});\n" + \
-                                        f"d.put(\\start, {float(v2[j].start_time)});\n" + \
-                                        f"d.put(\\synth, \\effect{v2[j].synth});\n" + \
-                                        f"d.put(\\type, \\Effect);\n" + \
-                                        f"~score[{cidx}].add(d);\n"
-                        else:
-                            idx[cidx] = j
-                            break
-                    cidx += 1
+                    elif voice[i].measure == measure_no:
+                        flag = True
+                    # Provided that we can still add the current item, we continue and add it.
+                    if flag:
+                        if type(voice[i]) == Note:
+                            data += f"d = Dictionary.new;\n" + \
+                                    f"d.put(\\buf, {voice[i].buffer});\n" + \
+                                    f"d.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"d.put(\\env, {voice[i].env});\n" + \
+                                    f"d.put(\\envlen, {voice[i].envlen});\n" + \
+                                    f"d.put(\\measure, {voice[i].measure});\n" + \
+                                    f"d.put(\\mul, {equal_loudness(voice[i])});\n" + \
+                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"d.put(\\pitch, {voice[i].pitch.p});\n" + \
+                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"d.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
+                                    f"d.put(\\type, \\Note);\n" + \
+                                    f"~score[{current_voice_index}].add(d);\n"
+                        elif type(voice[i]) == Sound:
+                            data += f"d = Dictionary.new;\n" + \
+                                    f"d.put(\\buf, {voice[i].buffer});\n" + \
+                                    f"d.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"d.put(\\env, {voice[i].env});\n" + \
+                                    f"d.put(\\envlen, {voice[i].envlen});\n" + \
+                                    f"d.put(\\measure, {voice[i].measure});\n" + \
+                                    f"d.put(\\mul, 0.5);\n" + \
+                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"d.put(\\pitch, {voice[i].pitch.p});\n" + \
+                                    f"d.put(\\rate, 1);\n" + \
+                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"d.put(\\synth, \\play_buf);\n" + \
+                                    f"d.put(\\type, \\Sound);\n" + \
+                                    f"~score[{current_voice_index}].add(d);\n"
+                        elif type(voice[i]) == Dynamic:
+                            data += f"d = Dictionary.new;\n" + \
+                                    f"d.put(\\duration, {voice[i].duration});\n" + \
+                                    f"d.put(\\end_level, {voice[i].end_level});\n" + \
+                                    f"d.put(\\in, {voice[i].bus_in});\n" + \
+                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"d.put(\\start_level, {voice[i].start_level});\n" + \
+                                    f"d.put(\\synth, \\dynamic{voice[i].synth});\n" + \
+                                    f"d.put(\\type, \\Dynamic);\n" + \
+                                    f"~score[{current_voice_index}].add(d);\n"
+                        elif type(voice[i]) == Effect:
+                            data += f"d = Dictionary.new;\n" + \
+                                    f"d.put(\\duration, {voice[i].duration});\n" + \
+                                    f"d.put(\\in, {voice[i].bus_in});\n" + \
+                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"d.put(\\synth, \\effect{voice[i].synth});\n" + \
+                                    f"d.put(\\type, \\Effect);\n" + \
+                                    f"~score[{current_voice_index}].add(d);\n"
+
+                    # If the flag test failed, we will stop adding notes, etc.
+                    else:
+                        idx[current_voice_index] = i
+                        break
+                current_voice_index += 1
 
     data += ")\n"
     return data
@@ -280,13 +297,12 @@ def get_highest_measure_no(parsed_parts):
     :return: The highest measure number
     """
     num_measures = 0
-    for p in parsed_parts:
-        for v in p:
-            for v1 in v:
-                for n in v1:
-                    if type(n) == Note:
-                        if n.measure > num_measures:
-                            num_measures = n.measure
+    for part in parsed_parts:
+        for voice in part:
+            for note in voice:
+                if type(note) == Note:
+                    if note.measure > num_measures:
+                        num_measures = note.measure
     return num_measures
 
 
@@ -528,7 +544,15 @@ def parse_parts(parts, part_indices=None):
                 # Update how far we've moved
                 part_time_offset += current_meter * current_quarter_duration
 
-    return new_parts
+    # We need to collapse subvoices into voices to make things clearer
+    new_parts2 = []
+    for part in new_parts:
+        part2 = []
+        for voice in part:
+            for subvoice in voice:
+                part2.append(subvoice)
+        new_parts2.append(part2)
+    return new_parts2
 
 
 def read_file(input_xml):
