@@ -29,14 +29,10 @@ class Dynamic:
         self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0        # end volume index
         self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0           # end note
         self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
-        self.index_insert = kwargs["index_insert"] if "index_insert" in kwargs else 0   # index at which to insert
+        self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
         self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0  # start volume index
         self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
-        if "start_note" in kwargs:
-            self.start_time = kwargs["start_note"].start_time
-        if "end_note" in kwargs:
-            self.duration = kwargs["end_note"].end_time - self.start_time
 
 
 class Effect:
@@ -48,9 +44,9 @@ class Effect:
         self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
         self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0           # end note
         self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
+        self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
         self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
         self.duration = kwargs["duration"] if "duration" in kwargs else 0           # effect duration
-        self.index_insert = kwargs["index_insert"] if "index_insert" in kwargs else 0   # index at which to insert
         self.start_index = kwargs["start_index"] if "start_index" in kwargs else 0  # start index
         self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
@@ -187,10 +183,7 @@ def dump_sc(new_parts):
                     # If the flag is false, we have to stop adding things and record the current index
                     # as the starting point for the next measure's iteration
                     flag = False
-                    if type(voice[i]) == Dynamic:
-                        if voice[i + 1].measure == measure_no:
-                            flag = True
-                    elif voice[i].measure == measure_no:
+                    if voice[i].measure == measure_no:
                         flag = True
                     # Provided that we can still add the current item, we continue and add it.
                     if flag:
