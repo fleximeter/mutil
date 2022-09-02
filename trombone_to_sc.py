@@ -33,7 +33,7 @@ def add_sc_data(new_parts):
                 add_buf(note)
                 add_env(note)
                 note.mul = 5
-                note.bus_out = NUM_BUSES - 20 + i
+                note.bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
             i += 1
 
 
@@ -159,13 +159,12 @@ def collapse_voices(new_parts):
 if __name__ == "__main__":
     parsed_parts = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE}", 1)
     dynamics = [
-        Dynamic(synth=0, start_level=-4, end_level=-1, start_note=(0, 0, 5), end_note=(0, 0, 7)),
-        Dynamic(synth=0, start_level=-4, end_level=-1, start_note=(0, 0, 0), end_note=(0, 0, 0))
+        Dynamic(synth=0, level1=1, level2=0.1, start_note=(0, 0, 0), end_note=(0, 0, 0)),
+        Dynamic(synth=0, level1=1, level2=0.1, start_note=(0, 5, 0), end_note=(0, 5, 0))
     ]
     m_last = xml_parse_sc.get_highest_measure_no(parsed_parts)
     add_sc_data(parsed_parts)
     xml_parse_sc.dump_parts(parsed_parts)
-    add_effects(parsed_parts, dynamics)
-    collapse_voices(parsed_parts)
-    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
-    xml_parse_sc.dump_parts(parsed_parts)
+#    add_effects(parsed_parts, dynamics)
+#    collapse_voices(parsed_parts)
+#    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)

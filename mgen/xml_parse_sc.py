@@ -24,15 +24,16 @@ class Dynamic:
     def __init__(self, **kwargs):
         self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
         self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
+        self.curves = kwargs["curves"] if "curves" in kwargs else 0                 # curves for the envelope
         self.duration = kwargs["duration"] if "duration" in kwargs else 0           # dynamic duration
-        self.end_level = kwargs["end_level"] if "end_level" in kwargs else 0        # end volume index
         self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0           # end note
         self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
+        self.levels = kwargs["level"] if "levels" in kwargs else 0                  # levels for the envelope
         self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
-        self.start_level = kwargs["start_level"] if "start_level" in kwargs else 0  # start volume index
         self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
+        self.times = kwargs["times"] if "times" in kwargs else 0                    # times for the envelope
 
 
 class Effect:
@@ -67,7 +68,7 @@ class Note:
         self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
 
 
 class Pan:
@@ -76,10 +77,12 @@ class Pan:
     """
     def __init__(self, **kwargs):
         self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
         self.duration = kwargs["duration"] if "duration" in kwargs else 0           # effect duration
+        self.end_time = kwargs["end_time"] if "end_time" in kwargs else -1          # end time
+        self.pan_loc = kwargs["pan_loc"] if "pan_loc" in kwargs else 0              # pan
         self.start_index = kwargs["start_index"] if "start_index" in kwargs else 0  # start index
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
 
 
 class Sound:
@@ -219,11 +222,11 @@ def dump_sc(new_parts):
                         elif type(voice[i]) == Dynamic:
                             data += f"d = Dictionary.new;\n" + \
                                     f"d.put(\\duration, {voice[i].duration});\n" + \
-                                    f"d.put(\\end_level, {voice[i].end_level});\n" + \
                                     f"d.put(\\in, {voice[i].bus_in});\n" + \
+                                    f"d.put(\\level1, {voice[i].level1});\n" + \
+                                    f"d.put(\\level2, {voice[i].level2});\n" + \
                                     f"d.put(\\out, {voice[i].bus_out});\n" + \
                                     f"d.put(\\start, {float(voice[i].start_time)});\n" + \
-                                    f"d.put(\\start_level, {voice[i].start_level});\n" + \
                                     f"d.put(\\synth, \\dynamic{voice[i].synth});\n" + \
                                     f"d.put(\\type, \\Dynamic);\n" + \
                                     f"~score[{current_voice_index}].add(d);\n"
