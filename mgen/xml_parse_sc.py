@@ -28,7 +28,7 @@ class Dynamic:
         self.duration = kwargs["duration"] if "duration" in kwargs else 0           # dynamic duration
         self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0           # end note
         self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
-        self.levels = kwargs["level"] if "levels" in kwargs else 0                  # levels for the envelope
+        self.levels = kwargs["levels"] if "levels" in kwargs else 0                  # levels for the envelope
         self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
         self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
@@ -221,13 +221,14 @@ def dump_sc(new_parts):
                                     f"~score[{current_voice_index}].add(d);\n"
                         elif type(voice[i]) == Dynamic:
                             data += f"d = Dictionary.new;\n" + \
+                                    f"d.put(\\curves, {voice[i].curves});\n" + \
                                     f"d.put(\\duration, {voice[i].duration});\n" + \
                                     f"d.put(\\in, {voice[i].bus_in});\n" + \
-                                    f"d.put(\\level1, {voice[i].level1});\n" + \
-                                    f"d.put(\\level2, {voice[i].level2});\n" + \
+                                    f"d.put(\\levels, {voice[i].levels});\n" + \
                                     f"d.put(\\out, {voice[i].bus_out});\n" + \
                                     f"d.put(\\start, {float(voice[i].start_time)});\n" + \
                                     f"d.put(\\synth, \\dynamic{voice[i].synth});\n" + \
+                                    f"d.put(\\times, {voice[i].times});\n" + \
                                     f"d.put(\\type, \\Dynamic);\n" + \
                                     f"~score[{current_voice_index}].add(d);\n"
                         elif type(voice[i]) == Effect:

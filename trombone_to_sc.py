@@ -12,7 +12,7 @@ import random
 import time
 
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
-FILE = "Trombone Piece 0.2.4 - Full score - 01 Flow 1.xml"
+FILE = "Trombone Piece 0.2.4 - Full score - 01 erudition I.xml"
 NUM_BUFFERS = 8
 NUM_BUSES = 80
 CHANGE_BUS_CONSTANT = 20
@@ -159,12 +159,15 @@ def collapse_voices(new_parts):
 if __name__ == "__main__":
     parsed_parts = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE}", 1)
     dynamics = [
-        Dynamic(synth=0, level1=1, level2=0.1, start_note=(0, 0, 0), end_note=(0, 0, 0)),
-        Dynamic(synth=0, level1=1, level2=0.1, start_note=(0, 5, 0), end_note=(0, 5, 0))
+        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 0, 0), end_note=(0, 0, 0)),
+        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0), end_note=(0, 5, 0))
+    ]
+    effects = [
+        Effect()
     ]
     m_last = xml_parse_sc.get_highest_measure_no(parsed_parts)
     add_sc_data(parsed_parts)
     xml_parse_sc.dump_parts(parsed_parts)
-#    add_effects(parsed_parts, dynamics)
-#    collapse_voices(parsed_parts)
-#    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
+    add_effects(parsed_parts, dynamics)
+    collapse_voices(parsed_parts)
+    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
