@@ -134,6 +134,67 @@ def add_env(note):
         note.envlen = 4
 
 
+def batch_synth_update(new_parts, updates):
+    """
+    Performs a batch update of synth indices
+    :param new_parts: A list of parts
+    :param updates: A tuple (or list). Index 1 is a tuple/list containing the index of the node to update.
+    Index 2 is the new synth index.
+    :return:
+    """
+    for item in updates:
+        dur = new_parts[item[0][0]][item[0][1]][item[0][2]].duration
+        new_parts[item[0][0]][item[0][1]][item[0][2]].synth = item[1] + len(item[2])
+        new_parts[item[0][0]][item[0][1]][item[0][2]].mod_levels = item[2]
+        new_parts[item[0][0]][item[0][1]][item[0][2]].mod_curves = item[4]
+        new_parts[item[0][0]][item[0][1]][item[0][2]].mod_times = [float(dur * n) for n in item[3]]
+
+
+def build_score():
+    """
+    Builds the SuperCollider score
+    :return:
+    """
+    parsed_parts = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE}", 1)
+
+    # Data structures that hold score updates
+    # Dynamics to insert into the score
+    dynamics = [
+        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 0, 0),
+                end_note=(0, 0, 0)),
+        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0),
+                end_note=(0, 5, 0))
+    ]
+    # A data structure that holds conversion information for FM synths. Index 1 holds the synth index in the score,
+    # Index 2 is the new synth index, Index 3 is the dynamic values for the envelope, Index 4 is the time points
+    # (excluding start) where dynamic peaks and valleys are, and Index 5 is the list of envelope curves.
+    # The envelope times will be calculated automatically from Index 4. The values in Index 4 must sum to 1.
+    synth_updates = [
+        [[0, 0, 0], 10, [0.2, 1], [1], [0]], # time is 1 because it takes the entire duration of the synth to get from beginning to end of the timbre envelope
+        [[0, 0, 1], 10, [0.2, 1], [1], [0]],
+        [[0, 0, 2], 10, [0.2, 1], [1], [0]],
+        [[0, 0, 3], 10, [0.2, 1], [1], [0]],
+        [[0, 0, 4], 10, [0.2, 1], [1], [0]],
+        [[0, 5, 0], 10, [0.2, 1], [1], [0]],
+        [[0, 5, 1], 10, [0.2, 1], [1], [0]],
+        [[0, 5, 2], 10, [0.2, 1], [1], [0]],
+        [[0, 5, 3], 10, [0.2, 1], [1], [0]],
+        [[0, 5, 4], 10, [0.2, 1], [1], [0]]
+    ]
+
+    # Output the score for manual edit planning
+    xml_parse_sc.dump_parts(parsed_parts)
+
+    # Add data
+    add_sc_data(parsed_parts)
+    batch_synth_update(parsed_parts, synth_updates)
+    add_effects(parsed_parts, dynamics)
+    collapse_voices(parsed_parts)
+
+    # Create the SuperCollider score
+    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
+
+
 def collapse_voices(new_parts):
     """
     Collapses separately chained notes in a list of parts
@@ -157,17 +218,4 @@ def collapse_voices(new_parts):
 
 
 if __name__ == "__main__":
-    parsed_parts = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE}", 1)
-    dynamics = [
-        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 0, 0), end_note=(0, 0, 0)),
-        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0), end_note=(0, 5, 0))
-    ]
-    effects = [
-        Effect()
-    ]
-    m_last = xml_parse_sc.get_highest_measure_no(parsed_parts)
-    add_sc_data(parsed_parts)
-    xml_parse_sc.dump_parts(parsed_parts)
-    add_effects(parsed_parts, dynamics)
-    collapse_voices(parsed_parts)
-    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
+    build_score()

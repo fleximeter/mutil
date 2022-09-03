@@ -190,7 +190,7 @@ def dump_sc(new_parts):
                         flag = True
                     # Provided that we can still add the current item, we continue and add it.
                     if flag:
-                        if type(voice[i]) == Note:
+                        if type(voice[i]) == Note and voice[i].synth == 0:
                             data += f"d = Dictionary.new;\n" + \
                                     f"d.put(\\buf, {voice[i].buffer});\n" + \
                                     f"d.put(\\duration, {float(voice[i].duration)});\n" + \
@@ -202,7 +202,24 @@ def dump_sc(new_parts):
                                     f"d.put(\\pitch, {voice[i].pitch.p});\n" + \
                                     f"d.put(\\start, {float(voice[i].start_time)});\n" + \
                                     f"d.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
-                                    f"d.put(\\type, \\Note);\n" + \
+                                    f"d.put(\\type, \\Granular);\n" + \
+                                    f"~score[{current_voice_index}].add(d);\n"
+                        elif type(voice[i]) == Note and voice[i].synth >= 10:
+                            data += f"d = Dictionary.new;\n" + \
+                                    f"d.put(\\buf, {voice[i].buffer});\n" + \
+                                    f"d.put(\\mod_curves, {voice[i].mod_curves});\n" + \
+                                    f"d.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"d.put(\\env, {voice[i].env});\n" + \
+                                    f"d.put(\\envlen, {voice[i].envlen});\n" + \
+                                    f"d.put(\\mod_levels, {voice[i].mod_levels});\n" + \
+                                    f"d.put(\\measure, {voice[i].measure});\n" + \
+                                    f"d.put(\\mul, {equal_loudness(voice[i])});\n" + \
+                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"d.put(\\pitch, {voice[i].pitch.p});\n" + \
+                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"d.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
+                                    f"d.put(\\mod_times, {voice[i].mod_times});\n" + \
+                                    f"d.put(\\type, \\FM);\n" + \
                                     f"~score[{current_voice_index}].add(d);\n"
                         elif type(voice[i]) == Sound:
                             data += f"d = Dictionary.new;\n" + \
