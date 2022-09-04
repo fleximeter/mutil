@@ -32,7 +32,7 @@ def add_sc_data(new_parts):
             for note in voice:
                 add_buf(note)
                 add_env(note)
-                note.mul = 5
+                note.mul = 1
                 note.bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
             i += 1
 
@@ -134,7 +134,7 @@ def add_env(note):
         note.envlen = 4
 
 
-def batch_synth_update(new_parts, updates):
+def batch_fm_synth_update(new_parts, updates):
     """
     Performs a batch update of synth indices
     :param new_parts: A list of parts
@@ -150,6 +150,21 @@ def batch_synth_update(new_parts, updates):
         new_parts[item[0][0]][item[0][1]][item[0][2]].mod_times = [float(dur * n) for n in item[3]]
 
 
+def batch_dynamic_synth_update(new_parts):
+    """
+    Performs a batch update of dynamic synths
+    :param new_parts: A list of parts
+    :return:
+    """
+    for part in new_parts:
+        for voice in part:
+            for item in voice:
+                if type(item) == list:
+                    for item2 in item:
+                        if type(item2) == Dynamic:
+                            item2.times = [float(n * item2.duration) for n in item2.times]
+
+
 def build_score():
     """
     Builds the SuperCollider score
@@ -160,9 +175,9 @@ def build_score():
     # Data structures that hold score updates
     # Dynamics to insert into the score
     dynamics = [
-        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 0, 0),
+        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1/3, 2/3, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 0, 0),
                 end_note=(0, 0, 0)),
-        Dynamic(synth=0, levels=[1, 0.1, 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0),
+        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1/3, 2/3, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0),
                 end_note=(0, 5, 0))
     ]
     # A data structure that holds conversion information for FM synths. Index 1 holds the synth index in the score,
@@ -170,16 +185,16 @@ def build_score():
     # (excluding start) where dynamic peaks and valleys are, and Index 5 is the list of envelope curves.
     # The envelope times will be calculated automatically from Index 4. The values in Index 4 must sum to 1.
     synth_updates = [
-        [[0, 0, 0], 10, [0.2, 1], [1], [0]], # time is 1 because it takes the entire duration of the synth to get from beginning to end of the timbre envelope
-        [[0, 0, 1], 10, [0.2, 1], [1], [0]],
-        [[0, 0, 2], 10, [0.2, 1], [1], [0]],
-        [[0, 0, 3], 10, [0.2, 1], [1], [0]],
-        [[0, 0, 4], 10, [0.2, 1], [1], [0]],
-        [[0, 5, 0], 10, [0.2, 1], [1], [0]],
-        [[0, 5, 1], 10, [0.2, 1], [1], [0]],
-        [[0, 5, 2], 10, [0.2, 1], [1], [0]],
-        [[0, 5, 3], 10, [0.2, 1], [1], [0]],
-        [[0, 5, 4], 10, [0.2, 1], [1], [0]]
+        [[0, 0, 0], 10, [0.2, 0.5], [1], [0]], # time is 1 because it takes the entire duration of the synth to get from beginning to end of the timbre envelope
+        [[0, 0, 1], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 2], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 3], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 4], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 0], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 1], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 2], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 3], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 4], 10, [0.2, 0.5], [1], [0]]
     ]
 
     # Output the score for manual edit planning
@@ -187,8 +202,9 @@ def build_score():
 
     # Add data
     add_sc_data(parsed_parts)
-    batch_synth_update(parsed_parts, synth_updates)
+    batch_fm_synth_update(parsed_parts, synth_updates)
     add_effects(parsed_parts, dynamics)
+    batch_dynamic_synth_update(parsed_parts)
     collapse_voices(parsed_parts)
 
     # Create the SuperCollider score

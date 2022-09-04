@@ -10,7 +10,6 @@ from fractions import Fraction
 import music21
 from pctheory import pitch
 
-LEVELS = {-5: 0.2, -4: 0.28, -3: 0.36, -2: 0.44, -1: 0.52, 0: 0.6, 1: 0.68, 2: 0.76, 3: 0.84, 4: 0.92, 5: 1.0}
 MAP12 = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 MAP24 = {"C": 0, "D": 4, "E": 8, "F": 10, "G": 14, "A": 18, "B": 22}
 PC12 = 12
@@ -295,13 +294,22 @@ def equal_loudness(note):
     # 2000, 0
     # 5000, 5
     # 10000, 15
-    level = LEVELS[note.mul]
-    frequency = 440.0 * 2 ** ((note.pitch.p - 18) / 24)
-    if frequency < 2000:
-        level *= (8 * 10 ** -15) * ((-frequency + 2000) ** 4.5) + 1
+    note_level = 1
+    note_frequency = 440.0 * 2 ** ((note.pitch.p - 18) / 24)
+
+    # apply the equal loudness contour
+    if note_frequency < 2000:
+        note_level *= (8 * 10 ** -15) * ((-note_frequency + 2000) ** 4.5) + 1
     else:
-        level *= (1.5 * 10 ** -8) * ((frequency - 2000) ** 2) + 1
-    return level
+        note_level *= (1.5 * 10 ** -8) * ((note_frequency - 2000) ** 2) + 1
+
+    # if this is a FM note, decrease the volume
+    if note.synth >= 10:
+        note_level *= 0.05
+    else:
+        note_level *= 1
+
+    return note_level
 
 
 def get_highest_measure_no(parsed_parts):
