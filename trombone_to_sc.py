@@ -14,7 +14,7 @@ import time
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
 OUTPUT = "D:\\SuperCollider\\erudition_i"
 FILE = "Trombone Piece 0.2.4 - Full score - 01 erudition I.xml"
-NUM_BUFFERS = 8
+NUM_BUFFERS = 24
 NUM_BUSES = 80
 CHANGE_BUS_CONSTANT = 20
 random.seed(time.time())
@@ -44,27 +44,22 @@ def add_buf(note):
     :param note: A Note
     :return:
     """
+    buf_map = [-48, -44, -40, -38, -34, -30, -26, -24, -20, -16, -14, -10, -6, -2, 0, 4, 8, 10, 14, 18, 22, 24, 28, 32]
+
     # Choose a sensible buffer for long notes
-    if note.duration >= 1:
-        if -200 <= note.pitch.p < -51:
+    if note.duration > 0.5:
+        if note.pitch.p < buf_map[0]:
             note.buffer = 0
-        elif -51 <= note.pitch.p < -39:
-            note.buffer = 4
-        elif -39 <= note.pitch.p < -27:
-            note.buffer = 1
-        elif -27 <= note.pitch.p < -15:
-            note.buffer = 5
-        elif -15 <= note.pitch.p < -3:
-            note.buffer = 2
-        elif -3 <= note.pitch.p < 9:
-            note.buffer = 6
-        elif 9 <= note.pitch.p < 21:
-            note.buffer = 3
-        elif 21 <= note.pitch.p:
-            note.buffer = 7
+        elif note.pitch.p > buf_map[len(buf_map) - 1]:
+            note.buffer = len(buf_map)
+        else:
+            for i in range(len(buf_map)):
+                if abs(note.pitch.p - buf_map[i]) <= 2:
+                    note.buffer = i
+
     # For short notes, choose a random buffer
     else:
-        note.buffer = random.randrange(0, NUM_BUFFERS, 1)
+        note.buffer = random.randrange(0, NUM_BUFFERS - 1, 1)
 
 
 def add_effects(new_parts, effect_parts):
