@@ -191,7 +191,8 @@ def dump_sc(new_parts):
                     if flag:
                         if type(voice[i]) == Note and voice[i].synth == 0:
                             data += f"d = Dictionary.new;\n" + \
-                                    f"d.put(\\buf, {voice[i].buffer});\n" + \
+                                    f"d.put(\\buf0, {voice[i].buffer});\n" + \
+                                    f"d.put(\\buf1, 1);\n" + \
                                     f"d.put(\\duration, {float(voice[i].duration)});\n" + \
                                     f"d.put(\\env, {voice[i].env});\n" + \
                                     f"d.put(\\envlen, {voice[i].envlen});\n" + \

@@ -12,6 +12,7 @@ import random
 import time
 
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
+OUTPUT = "D:\\SuperCollider\\erudition_i"
 FILE = "Trombone Piece 0.2.4 - Full score - 01 erudition I.xml"
 NUM_BUFFERS = 8
 NUM_BUSES = 80
@@ -208,7 +209,7 @@ def build_score():
     collapse_voices(parsed_parts)
 
     # Create the SuperCollider score
-    xml_parse_sc.dump_sc_to_file(f"{FOLDER}\\SuperCollider\\score.scd", parsed_parts)
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score.scd", parsed_parts)
 
 
 def collapse_voices(new_parts):
