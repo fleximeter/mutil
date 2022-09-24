@@ -13,7 +13,9 @@ import time
 
 FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
 OUTPUT = "D:\\SuperCollider\\erudition_i"
-FILE = "Trombone Piece 0.2.4 - Full score - 01 erudition I.xml"
+FILE1 = "Trombone Piece 0.2.4.1a - Full score - 01 erudition I.xml"
+FILE2 = "Trombone Piece 0.2.4.1b - Full score - 01 erudition I.xml"
+
 NUM_BUFFERS = 24
 NUM_BUSES = 80
 CHANGE_BUS_CONSTANT = 20
@@ -51,7 +53,7 @@ def add_buf(note):
         if note.pitch.p < buf_map[0]:
             note.buffer = 0
         elif note.pitch.p > buf_map[len(buf_map) - 1]:
-            note.buffer = len(buf_map)
+            note.buffer = len(buf_map) - 1
         else:
             for i in range(len(buf_map)):
                 if abs(note.pitch.p - buf_map[i]) <= 2:
@@ -166,11 +168,12 @@ def build_score():
     Builds the SuperCollider score
     :return:
     """
-    parsed_parts = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE}", 1)
+    parsed_parts1 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE1}")
+    parsed_parts2 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE2}")
 
     # Data structures that hold score updates
     # Dynamics to insert into the score
-    dynamics = [
+    dynamics1 = [
         Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1/3, 2/3, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 0, 0),
                 end_note=(0, 0, 0)),
         Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1/3, 2/3, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0),
@@ -180,7 +183,7 @@ def build_score():
     # Index 2 is the new synth index, Index 3 is the dynamic values for the envelope, Index 4 is the time points
     # (excluding start) where dynamic peaks and valleys are, and Index 5 is the list of envelope curves.
     # The envelope times will be calculated automatically from Index 4. The values in Index 4 must sum to 1.
-    synth_updates = [
+    synth_updates1 = [
         [[0, 0, 0], 10, [0.2, 0.5], [1], [0]], # time is 1 because it takes the entire duration of the synth to get from beginning to end of the timbre envelope
         [[0, 0, 1], 10, [0.2, 0.5], [1], [0]],
         [[0, 0, 2], 10, [0.2, 0.5], [1], [0]],
@@ -190,21 +193,123 @@ def build_score():
         [[0, 5, 1], 10, [0.2, 0.5], [1], [0]],
         [[0, 5, 2], 10, [0.2, 0.5], [1], [0]],
         [[0, 5, 3], 10, [0.2, 0.5], [1], [0]],
-        [[0, 5, 4], 10, [0.2, 0.5], [1], [0]]
+        [[0, 5, 4], 10, [0.2, 0.5], [1], [0]],
+
+        # m13
+        [[0, 0, 19], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 5], 10, [0.2, 0.5], [1], [0]],
+
+        # m15
+        [[0, 0, 20], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 6], 10, [0.2, 0.5], [1], [0]],
+
+        # m16
+        [[0, 5, 7], 10, [0.2, 0.5], [1], [0]],
+
+        # m21
+        [[0, 0, 21], 10, [0.2, 0.5], [1], [0]],
+        [[0, 3, 0], 10, [0.2, 0.5], [1], [0]],
+        [[0, 4, 0], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 12], 10, [0.2, 0.5], [1], [0]],
+
+        # m23
+        [[0, 0, 22], 10, [0.2, 0.5], [1], [0]],
+        [[0, 3, 1], 10, [0.2, 0.5], [1], [0]],
+        [[0, 4, 1], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 13], 10, [0.2, 0.5], [1], [0]],
+
+        # m29
+        [[0, 0, 36], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 16], 10, [0.2, 0.5], [1], [0]],
+
+        # m30
+        [[0, 0, 39], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 18], 10, [0.2, 0.5], [1], [0]],
+
+        # m33
+        [[0, 0, 49], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 51], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 19], 10, [0.2, 0.5], [1], [0]],
+
+        # m41-48
+        [[0, 0, 90], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 91], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 92], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 93], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 96], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 97], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 98], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 23], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 24], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 25], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 26], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 28], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 30], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 31], 10, [0.2, 0.5], [1], [0]],
+        [[0, 7, 0], 10, [0.2, 0.5], [1], [0]],
+
+        # m48-55
+        [[0, 0, 112], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 114], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 115], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 116], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 117], 10, [0.2, 0.5], [1], [0]],
+        [[0, 3, 7], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 90], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 32], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 33], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 35], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 38], 10, [0.2, 0.5], [1], [0]],
+        [[0, 7, 1], 10, [0.2, 0.5], [1], [0]],
+
+        # m58
+        [[0, 0, 135], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 49], 10, [0.2, 0.5], [1], [0]],
+
+        # m68-75
+        [[0, 0, 147], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 150], 10, [0.2, 0.5], [1], [0]],
+        [[0, 0, 151], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 75], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 76], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 82], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 85], 10, [0.2, 0.5], [1], [0]],
+
+        # m76-78
+        [[0, 5, 86], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 90], 10, [0.2, 0.5], [1], [0]],
+        [[0, 7, 4], 10, [0.2, 0.5], [1], [0]],
+
+        # m79-81
+        [[0, 5, 93], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 94], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 95], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 96], 10, [0.2, 0.5], [1], [0]],
+
+        # m87-89
+        [[0, 0, 207], 10, [0.2, 0.5], [1], [0]],
+        [[0, 1, 16], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 97], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 98], 10, [0.2, 0.5], [1], [0]],
+        [[0, 6, 2], 10, [0.2, 0.5], [1], [0]],
+        [[0, 6, 3], 10, [0.2, 0.5], [1], [0]],
+
     ]
 
     # Output the score for manual edit planning
-    xml_parse_sc.dump_parts(parsed_parts)
+    xml_parse_sc.dump_parts(parsed_parts1)
 
     # Add data
-    add_sc_data(parsed_parts)
-    batch_fm_synth_update(parsed_parts, synth_updates)
-    add_effects(parsed_parts, dynamics)
-    batch_dynamic_synth_update(parsed_parts)
-    collapse_voices(parsed_parts)
+    add_sc_data(parsed_parts1)
+    add_sc_data(parsed_parts2)
+    batch_fm_synth_update(parsed_parts1, synth_updates1)
+    add_effects(parsed_parts1, dynamics1)
+    batch_dynamic_synth_update(parsed_parts1)
+    collapse_voices(parsed_parts1)
 
     # Create the SuperCollider score
-    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score.scd", parsed_parts)
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score1.scd", parsed_parts1, "score_1_maker")
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score2.scd", parsed_parts2, "score_2_maker")
 
 
 def collapse_voices(new_parts):

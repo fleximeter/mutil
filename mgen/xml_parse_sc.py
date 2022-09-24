@@ -154,13 +154,14 @@ def dump_parts(new_parts):
             current_voice_index += 1
 
 
-def dump_sc(new_parts):
+def dump_sc(new_parts, func_name):
     """
     Dumps the new part data in SuperCollider format
     :param new_parts: New (parsed) parts
+    :param func_name: The name of the score loading function in the SC file
     :return:
     """
-    data = "(\n"
+    data = f"(\n~{func_name} = " + "{\n    var score, dict;\n"
     num_measures = get_highest_measure_no(new_parts)
 
     # Get the number of voices
@@ -168,7 +169,7 @@ def dump_sc(new_parts):
     for part in new_parts:
         num_voices += len(part)
 
-    data += "~score = Array.fill({0}, {1});\n".format(num_voices, "{List.new}")
+    data += "    score = Array.fill({0}, {1});\n".format(num_voices, "{List.new}")
 
     # A list of current starting indices. We add each measure of each voice, then move on to the
     # next measure and add the contents of each voice in that measure
@@ -179,7 +180,7 @@ def dump_sc(new_parts):
         current_voice_index = 0  # The current voice index
         for part in new_parts:
             for voice in part:
-                data += f"// Measure {measure_no}, Voice {current_voice_index}\n"
+                data += f"    // Measure {measure_no}, Voice {current_voice_index}\n"
                 # For each item in the current measure for the current voice
                 for i in range(idx[current_voice_index], len(voice)):
                     # If the flag is false, we have to stop adding things and record the current index
@@ -190,73 +191,79 @@ def dump_sc(new_parts):
                     # Provided that we can still add the current item, we continue and add it.
                     if flag:
                         if type(voice[i]) == Note and voice[i].synth == 0:
-                            data += f"d = Dictionary.new;\n" + \
-                                    f"d.put(\\buf0, {voice[i].buffer});\n" + \
-                                    f"d.put(\\buf1, 1);\n" + \
-                                    f"d.put(\\duration, {float(voice[i].duration)});\n" + \
-                                    f"d.put(\\env, {voice[i].env});\n" + \
-                                    f"d.put(\\envlen, {voice[i].envlen});\n" + \
-                                    f"d.put(\\measure, {voice[i].measure});\n" + \
-                                    f"d.put(\\mul, {equal_loudness(voice[i])});\n" + \
-                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
-                                    f"d.put(\\pitch, {voice[i].pitch.p});\n" + \
-                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
-                                    f"d.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
-                                    f"d.put(\\type, \\Granular);\n" + \
-                                    f"~score[{current_voice_index}].add(d);\n"
+                            data += f"    dict = Dictionary.new;\n" + \
+                                    f"    dict.put(\\i0, {current_voice_index});\n" + \
+                                    f"    dict.put(\\i1, {i});\n" + \
+                                    f"    dict.put(\\buf0, {voice[i].buffer});\n" + \
+                                    f"    dict.put(\\buf1, 1);\n" + \
+                                    f"    dict.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"    dict.put(\\env, {voice[i].env});\n" + \
+                                    f"    dict.put(\\envlen, {voice[i].envlen});\n" + \
+                                    f"    dict.put(\\measure, {voice[i].measure});\n" + \
+                                    f"    dict.put(\\mul, {equal_loudness(voice[i])});\n" + \
+                                    f"    dict.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"    dict.put(\\pitch, {voice[i].pitch.p});\n" + \
+                                    f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"    dict.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
+                                    f"    dict.put(\\type, \\Granular);\n" + \
+                                    f"    score[{current_voice_index}].add(dict);\n"
                         elif type(voice[i]) == Note and voice[i].synth >= 10:
-                            data += f"d = Dictionary.new;\n" + \
-                                    f"d.put(\\buf, {voice[i].buffer});\n" + \
-                                    f"d.put(\\mod_curves, {voice[i].mod_curves});\n" + \
-                                    f"d.put(\\duration, {float(voice[i].duration)});\n" + \
-                                    f"d.put(\\env, {voice[i].env});\n" + \
-                                    f"d.put(\\envlen, {voice[i].envlen});\n" + \
-                                    f"d.put(\\mod_levels, {voice[i].mod_levels});\n" + \
-                                    f"d.put(\\measure, {voice[i].measure});\n" + \
-                                    f"d.put(\\mul, {equal_loudness(voice[i])});\n" + \
-                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
-                                    f"d.put(\\pitch, {voice[i].pitch.p});\n" + \
-                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
-                                    f"d.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
-                                    f"d.put(\\mod_times, {voice[i].mod_times});\n" + \
-                                    f"d.put(\\type, \\FM);\n" + \
-                                    f"~score[{current_voice_index}].add(d);\n"
+                            data += f"    dict = Dictionary.new;\n" + \
+                                    f"    dict.put(\\i0, {current_voice_index});\n" + \
+                                    f"    dict.put(\\i1, {i});\n" + \
+                                    f"    dict.put(\\buf, {voice[i].buffer});\n" + \
+                                    f"    dict.put(\\mod_curves, {voice[i].mod_curves});\n" + \
+                                    f"    dict.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"    dict.put(\\env, {voice[i].env});\n" + \
+                                    f"    dict.put(\\envlen, {voice[i].envlen});\n" + \
+                                    f"    dict.put(\\mod_levels, {voice[i].mod_levels});\n" + \
+                                    f"    dict.put(\\measure, {voice[i].measure});\n" + \
+                                    f"    dict.put(\\mul, {equal_loudness(voice[i])});\n" + \
+                                    f"    dict.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"    dict.put(\\pitch, {voice[i].pitch.p});\n" + \
+                                    f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"    dict.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
+                                    f"    dict.put(\\mod_times, {voice[i].mod_times});\n" + \
+                                    f"    dict.put(\\type, \\FM);\n" + \
+                                    f"    score[{current_voice_index}].add(dict);\n"
                         elif type(voice[i]) == Sound:
-                            data += f"d = Dictionary.new;\n" + \
-                                    f"d.put(\\buf, {voice[i].buffer});\n" + \
-                                    f"d.put(\\duration, {float(voice[i].duration)});\n" + \
-                                    f"d.put(\\env, {voice[i].env});\n" + \
-                                    f"d.put(\\envlen, {voice[i].envlen});\n" + \
-                                    f"d.put(\\measure, {voice[i].measure});\n" + \
-                                    f"d.put(\\mul, 0.5);\n" + \
-                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
-                                    f"d.put(\\pitch, {voice[i].pitch.p});\n" + \
-                                    f"d.put(\\rate, 1);\n" + \
-                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
-                                    f"d.put(\\synth, \\play_buf);\n" + \
-                                    f"d.put(\\type, \\Sound);\n" + \
-                                    f"~score[{current_voice_index}].add(d);\n"
+                            data += f"    dict = Dictionary.new;\n" + \
+                                    f"    dict.put(\\i0, {current_voice_index});\n" + \
+                                    f"    dict.put(\\i1, {i});\n" + \
+                                    f"    dict.put(\\buf, {voice[i].buffer});\n" + \
+                                    f"    dict.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"    dict.put(\\env, {voice[i].env});\n" + \
+                                    f"    dict.put(\\envlen, {voice[i].envlen});\n" + \
+                                    f"    dict.put(\\measure, {voice[i].measure});\n" + \
+                                    f"    dict.put(\\mul, 0.5);\n" + \
+                                    f"    dict.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"    dict.put(\\pitch, {voice[i].pitch.p});\n" + \
+                                    f"    dict.put(\\rate, 1);\n" + \
+                                    f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"    dict.put(\\synth, \\play_buf);\n" + \
+                                    f"    dict.put(\\type, \\Sound);\n" + \
+                                    f"    score[{current_voice_index}].add(dict);\n"
                         elif type(voice[i]) == Dynamic:
-                            data += f"d = Dictionary.new;\n" + \
-                                    f"d.put(\\curves, {voice[i].curves});\n" + \
-                                    f"d.put(\\duration, {voice[i].duration});\n" + \
-                                    f"d.put(\\in, {voice[i].bus_in});\n" + \
-                                    f"d.put(\\levels, {voice[i].levels});\n" + \
-                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
-                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
-                                    f"d.put(\\synth, \\dynamic{voice[i].synth});\n" + \
-                                    f"d.put(\\times, {voice[i].times});\n" + \
-                                    f"d.put(\\type, \\Dynamic);\n" + \
-                                    f"~score[{current_voice_index}].add(d);\n"
+                            data += f"    dict = Dictionary.new;\n" + \
+                                    f"    dict.put(\\curves, {voice[i].curves});\n" + \
+                                    f"    dict.put(\\duration, {voice[i].duration});\n" + \
+                                    f"    dict.put(\\in, {voice[i].bus_in});\n" + \
+                                    f"    dict.put(\\levels, {voice[i].levels});\n" + \
+                                    f"    dict.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"    dict.put(\\synth, \\dynamic{voice[i].synth});\n" + \
+                                    f"    dict.put(\\times, {voice[i].times});\n" + \
+                                    f"    dict.put(\\type, \\Dynamic);\n" + \
+                                    f"    score[{current_voice_index}].add(dict);\n"
                         elif type(voice[i]) == Effect:
-                            data += f"d = Dictionary.new;\n" + \
-                                    f"d.put(\\duration, {voice[i].duration});\n" + \
-                                    f"d.put(\\in, {voice[i].bus_in});\n" + \
-                                    f"d.put(\\out, {voice[i].bus_out});\n" + \
-                                    f"d.put(\\start, {float(voice[i].start_time)});\n" + \
-                                    f"d.put(\\synth, \\effect{voice[i].synth});\n" + \
-                                    f"d.put(\\type, \\Effect);\n" + \
-                                    f"~score[{current_voice_index}].add(d);\n"
+                            data += f"    dict = Dictionary.new;\n" + \
+                                    f"    dict.put(\\duration, {voice[i].duration});\n" + \
+                                    f"    dict.put(\\in, {voice[i].bus_in});\n" + \
+                                    f"    dict.put(\\out, {voice[i].bus_out});\n" + \
+                                    f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"    dict.put(\\synth, \\effect{voice[i].synth});\n" + \
+                                    f"    dict.put(\\type, \\Effect);\n" + \
+                                    f"    score[{current_voice_index}].add(dict);\n"
 
                     # If the flag test failed, we will stop adding notes, etc.
                     else:
@@ -264,21 +271,20 @@ def dump_sc(new_parts):
                         break
                 current_voice_index += 1
 
-    data += ")\n"
+    data += "    score;\n};\n)\n"
     return data
 
 
-def dump_sc_to_file(file, new_parts):
+def dump_sc_to_file(file, new_parts, func_name):
     """
     Writes dumped SC data to a file
     :param file: The file name
     :param new_parts: New (parsed) parts
-    :param num_measures: The highest numbered measure
-    :return:
+    :param func_name: The highest numbered measure
     :return:
     """
     with open(file, "w") as f:
-        f.write(dump_sc(new_parts))
+        f.write(dump_sc(new_parts, func_name))
 
 
 def equal_loudness(note):
