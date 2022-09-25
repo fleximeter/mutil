@@ -15,6 +15,7 @@ FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
 OUTPUT = "D:\\SuperCollider\\erudition_i"
 FILE1 = "Trombone Piece 0.2.4.1a - Full score - 01 erudition I.xml"
 FILE2 = "Trombone Piece 0.2.4.1b - Full score - 01 erudition I.xml"
+FILE1_debug = "Trombone Piece 0.2.4.1a_debug - Full score - 01 erudition I.xml"
 
 NUM_BUFFERS = 24
 NUM_BUSES = 80
@@ -32,11 +33,15 @@ def add_sc_data(new_parts):
     i = 0
     for part in new_parts:
         for voice in part:
-            for note in voice:
-                add_buf(note)
-                add_env(note)
-                note.mul = 1
-                note.bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
+            for j in range(len(voice)):
+                add_buf(voice[j])
+                add_env(voice[j])
+                voice[j].mul = 1
+                voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
+                if j < len(voice) - 1:
+                    voice[j].wait = float(voice[j+1].start_time - voice[j].start_time)
+                else:
+                    voice[j].wait = 0
             i += 1
 
 
@@ -169,7 +174,7 @@ def build_score():
     :return:
     """
     parsed_parts1 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE1}")
-    parsed_parts2 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE2}")
+    parsed_parts2 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE1_debug}")
 
     # Data structures that hold score updates
     # Dynamics to insert into the score

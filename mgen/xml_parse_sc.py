@@ -68,6 +68,7 @@ class Note:
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
         self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
+        self.wait = kwargs["wait"] if "wait" in kwargs else 0                       # the time to wait until next note
 
 
 class Pan:
@@ -100,6 +101,7 @@ class Sound:
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
         self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
+        self.wait = kwargs["wait"] if "wait" in kwargs else 0                       # the time to wait until next note
 
 
 def analyze_xml(xml_name, part_indices=None):
@@ -206,6 +208,7 @@ def dump_sc(new_parts, func_name):
                                     f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
                                     f"    dict.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
                                     f"    dict.put(\\type, \\Granular);\n" + \
+                                    f"    dict.put(\\wait, {voice[i].wait});\n" + \
                                     f"    score[{current_voice_index}].add(dict);\n"
                         elif type(voice[i]) == Note and voice[i].synth >= 10:
                             data += f"    dict = Dictionary.new;\n" + \
@@ -225,6 +228,7 @@ def dump_sc(new_parts, func_name):
                                     f"    dict.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
                                     f"    dict.put(\\mod_times, {voice[i].mod_times});\n" + \
                                     f"    dict.put(\\type, \\FM);\n" + \
+                                    f"    dict.put(\\wait, {voice[i].wait});\n" + \
                                     f"    score[{current_voice_index}].add(dict);\n"
                         elif type(voice[i]) == Sound:
                             data += f"    dict = Dictionary.new;\n" + \
@@ -242,6 +246,7 @@ def dump_sc(new_parts, func_name):
                                     f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
                                     f"    dict.put(\\synth, \\play_buf);\n" + \
                                     f"    dict.put(\\type, \\Sound);\n" + \
+                                    f"    dict.put(\\wait, {voice[i].wait});\n" + \
                                     f"    score[{current_voice_index}].add(dict);\n"
                         elif type(voice[i]) == Dynamic:
                             data += f"    dict = Dictionary.new;\n" + \
