@@ -91,7 +91,7 @@ class Sound:
     """
     def __init__(self, **kwargs):
         self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
-        self.buffer = kwargs["buffer"] if "buffer" in kwargs else 0                 # buffer index for granulation
+        self.buffer = kwargs["buffer"] if "buffer" in kwargs else "\"k\""           # buffer index for granulation
         self.duration = kwargs["duration"] if "duration" in kwargs else 0           # duration
         self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
         self.env = kwargs["env"] if "env" in kwargs else "[[][][]]"                 # envelope specification
@@ -100,7 +100,7 @@ class Sound:
         self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0  # the synth to use
+        self.synth = kwargs["synth"] if "synth" in kwargs else "\\play_buf"  # the synth to use
         self.wait = kwargs["wait"] if "wait" in kwargs else 0                       # the time to wait until next note
 
 
@@ -236,15 +236,13 @@ def dump_sc(new_parts, func_name):
                                     f"    dict.put(\\i1, {i});\n" + \
                                     f"    dict.put(\\buf, {voice[i].buffer});\n" + \
                                     f"    dict.put(\\duration, {float(voice[i].duration)});\n" + \
-                                    f"    dict.put(\\env, {voice[i].env});\n" + \
-                                    f"    dict.put(\\envlen, {voice[i].envlen});\n" + \
                                     f"    dict.put(\\measure, {voice[i].measure});\n" + \
                                     f"    dict.put(\\mul, 0.5);\n" + \
                                     f"    dict.put(\\out, {voice[i].bus_out});\n" + \
                                     f"    dict.put(\\pitch, {voice[i].pitch.p});\n" + \
                                     f"    dict.put(\\rate, 1);\n" + \
                                     f"    dict.put(\\start, {float(voice[i].start_time)});\n" + \
-                                    f"    dict.put(\\synth, \\play_buf);\n" + \
+                                    f"    dict.put(\\synth, {voice[i].synth});\n" + \
                                     f"    dict.put(\\type, \\Sound);\n" + \
                                     f"    dict.put(\\wait, {voice[i].wait});\n" + \
                                     f"    score[{current_voice_index}].add(dict);\n"
