@@ -19,7 +19,7 @@ FILE1_debug = "Trombone Piece 0.2.4.1a_debug - Full score - 01 erudition I.xml"
 
 NUM_BUFFERS = 24
 NUM_BUSES = 80
-CHANGE_BUS_CONSTANT = 20
+CHANGE_BUS_CONSTANT = 10
 random.seed(time.time())
 
 
@@ -185,6 +185,11 @@ def build_score():
         Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1/3, 2/3, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0),
                 end_note=(0, 5, 0))
     ]
+
+    dynamics2 = [
+
+    ]
+
     # A data structure that holds conversion information for FM synths. Index 1 holds the synth index in the score,
     # Index 2 is the new synth index, Index 3 is the dynamic values for the envelope, Index 4 is the time points
     # (excluding start) where dynamic peaks and valleys are, and Index 5 is the list of envelope curves.
