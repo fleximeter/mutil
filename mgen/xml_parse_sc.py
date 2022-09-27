@@ -33,6 +33,7 @@ class Dynamic:
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
         self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
         self.times = kwargs["times"] if "times" in kwargs else 0                    # times for the envelope
+        self.voice_index = kwargs["voice_index"] if "voice_index" in kwargs else (0, 0)  # the index of the affected voice
 
 
 class Effect:

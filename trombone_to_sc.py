@@ -40,7 +40,7 @@ def add_sc_data(new_parts):
                 voice[j].mul = 1
                 voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
                 if j < len(voice) - 1:
-                    voice[j].wait = float(voice[j+1].start_time - voice[j].start_time)
+                    voice[j].wait = float(voice[j + 1].start_time - voice[j].start_time)
                 else:
                     voice[j].wait = 0
             i += 1
@@ -99,16 +99,50 @@ def add_effects(new_parts, effect_parts):
         effect.measure = start_note.measure
         effect.duration = effect.end_time - effect.start_time
 
-        # Update bus of effect, as well as buses of affected notes
-        effect.bus_out = start_note.bus_out
+        bus = -1  # The bus for the effect
+        first_idx = 0  # The index of the first note affected by the effect
+
+        # Get the appropriate bus to use for the effect
+        for i in range(len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
+            done = False
+            # If we've encountered separate chaining, look inside the list
+            if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
+                for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
+                    if (type(item) == Note or type(item) == Sound) and item.start_time >= effect.start_time and \
+                            item.end_time <= effect.end_time:
+                        bus = item.bus_out
+                        first_idx = i
+                        done = True
+                        break
+            elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time >= effect.start_time and \
+                    new_parts[effect.voice_index[0]][effect.voice_index[1]][i].end_time <= effect.end_time:
+                bus = new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out
+                first_idx = i
+                done = True
+            if done:
+                break
+
+        # Update bus of effect
+        effect.bus_out = bus
         effect.bus_in = effect.bus_out - CHANGE_BUS_CONSTANT
-        for i in range(effect.start_note[2], effect.end_note[2] + 1):
-            if type(new_parts[effect.start_note[0]][effect.start_note[1]][i]) == list:
-                for item in new_parts[effect.start_note[0]][effect.start_note[1]][i]:
-                    if type(item) == Note or type(item) == Sound:
+
+        # Update buses of affected notes
+        for i in range(first_idx, len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
+            done = False
+            # If we're doing separate chaining
+            if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
+                for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
+                    if (type(item) == Note or type(item) == Sound) and item.end_time > effect.end_time:
+                        done = True
+                        break
+                    elif type(item) == Note or type(item) == Sound:
                         item.bus_out = effect.bus_in
+            elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].end_time > effect.end_time:
+                done = True
             else:
-                new_parts[effect.start_note[0]][effect.start_note[1]][i].bus_out = effect.bus_in
+                new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out = effect.bus_in
+            if done:
+                break
 
         # When adding effects, we use separate chaining. That is, we create a list containing the effect
         # and starting note, and put that list into the voice where the starting note used to be.
@@ -180,10 +214,25 @@ def build_score():
     # Data structures that hold score updates
     # Dynamics to insert into the score
     dynamics1 = [
-        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1/3, 2/3, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 0, 0),
-                end_note=(0, 0, 0)),
-        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1/3, 2/3, 0, 0, 0], curves=[0, 0, 0, 0], start_note=(0, 5, 0),
-                end_note=(0, 5, 0))
+        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 0),
+                end_note=(0, 0, 0), voice_index=(0, 0)),
+        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 0),
+                end_note=(0, 0, 0), voice_index=(0, 5)),
+        Dynamic(synth=3, levels=[2, 2, 0, 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 1),
+                end_note=(0, 5, 1), voice_index=(0, 0)),
+        Dynamic(synth=3, levels=[2, 2, 0, 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 1),
+                end_note=(0, 5, 1), voice_index=(0, 5)),
+        Dynamic(synth=3, levels=[3, 4, 2, 0, 0], times=[1 / 4, 3 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 2),
+                end_note=(0, 0, 2), voice_index=(0, 0)),
+        Dynamic(synth=3, levels=[6, 3, 2, 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 2),
+                end_note=(0, 0, 2), voice_index=(0, 5))
+
     ]
 
     dynamics2 = [
@@ -195,12 +244,13 @@ def build_score():
     # (excluding start) where dynamic peaks and valleys are, and Index 5 is the list of envelope curves.
     # The envelope times will be calculated automatically from Index 4. The values in Index 4 must sum to 1.
     synth_updates1 = [
-        [[0, 0, 0], 10, [0.2, 0.5], [1], [0]], # time is 1 because it takes the entire duration of the synth to get from beginning to end of the timbre envelope
+        [[0, 0, 0], 10, [0.2, 0.2], [1], [0]],
+        # time is 1 because it takes the entire duration of the synth to get from beginning to end of the timbre envelope
         [[0, 0, 1], 10, [0.2, 0.5], [1], [0]],
         [[0, 0, 2], 10, [0.2, 0.5], [1], [0]],
         [[0, 0, 3], 10, [0.2, 0.5], [1], [0]],
         [[0, 0, 4], 10, [0.2, 0.5], [1], [0]],
-        [[0, 5, 0], 10, [0.2, 0.5], [1], [0]],
+        [[0, 5, 0], 10, [0.2, 0.2], [1], [0]],
         [[0, 5, 1], 10, [0.2, 0.5], [1], [0]],
         [[0, 5, 2], 10, [0.2, 0.5], [1], [0]],
         [[0, 5, 3], 10, [0.2, 0.5], [1], [0]],
