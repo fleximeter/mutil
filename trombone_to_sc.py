@@ -22,6 +22,9 @@ NUM_BUSES = 80
 CHANGE_BUS_CONSTANT = 10
 random.seed(time.time())
 
+# this represents dynamic levels from 0-9. it allows easy adjusting project-wide.
+d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
 
 def add_sc_data(new_parts):
     """
@@ -38,6 +41,7 @@ def add_sc_data(new_parts):
                     add_buf(voice[j])
                     add_env(voice[j])
                 voice[j].mul = 1
+                voice[j].mul = xml_parse_sc.equal_loudness(voice[j])
                 voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
                 if j < len(voice) - 1:
                     voice[j].wait = float(voice[j + 1].start_time - voice[j].start_time)
@@ -211,28 +215,34 @@ def build_score():
     parsed_parts1 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE1}")
     parsed_parts2 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE2}")
 
+    # Output the score for manual edit planning
+    xml_parse_sc.dump_parts(parsed_parts2)
+
+    # Add data
+    add_sc_data(parsed_parts1)
+    add_sc_data(parsed_parts2)
+
     # Data structures that hold score updates
     # Dynamics to insert into the score
     dynamics1 = [
-        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
+        Dynamic(synth=3, levels=[d[2], d[5], d[1], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 0),
                 end_note=(0, 0, 0), voice_index=(0, 0)),
-        Dynamic(synth=3, levels=[2, 5, 1, 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
+        Dynamic(synth=3, levels=[d[2], d[5], d[1], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 0),
                 end_note=(0, 0, 0), voice_index=(0, 5)),
-        Dynamic(synth=3, levels=[2, 2, 0, 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
+        Dynamic(synth=3, levels=[d[2], d[2], d[0], 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 1),
                 end_note=(0, 5, 1), voice_index=(0, 0)),
-        Dynamic(synth=3, levels=[2, 2, 0, 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
+        Dynamic(synth=3, levels=[d[2], d[2], d[0], 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 1),
                 end_note=(0, 5, 1), voice_index=(0, 5)),
-        Dynamic(synth=3, levels=[3, 4, 2, 0, 0], times=[1 / 4, 3 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
+        Dynamic(synth=3, levels=[d[3], d[4], d[2], 0, 0], times=[1 / 4, 3 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 2),
                 end_note=(0, 0, 2), voice_index=(0, 0)),
-        Dynamic(synth=3, levels=[6, 3, 2, 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
+        Dynamic(synth=3, levels=[d[6], d[3], d[2], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 2),
                 end_note=(0, 0, 2), voice_index=(0, 5))
-
     ]
 
     dynamics2 = [
@@ -405,14 +415,12 @@ def build_score():
         [[0, 6, 1], 10, [0.2, 0.5], [1], [0]],
     ]
 
-    # Output the score for manual edit planning
-    xml_parse_sc.dump_parts(parsed_parts2)
-
-    # Add data
-    add_sc_data(parsed_parts1)
-    add_sc_data(parsed_parts2)
     batch_fm_synth_update(parsed_parts1, synth_updates1)
     batch_fm_synth_update(parsed_parts2, synth_updates2)
+
+    # adjust dynamics of individual notes
+    parsed_parts1[0][0][20].mul *= 5
+
     add_effects(parsed_parts1, dynamics1)
     batch_dynamic_synth_update(parsed_parts1)
     collapse_voices(parsed_parts1)
