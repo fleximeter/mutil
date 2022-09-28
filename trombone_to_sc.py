@@ -41,7 +41,8 @@ def add_sc_data(new_parts):
                     add_buf(voice[j])
                     add_env(voice[j])
                 voice[j].mul = 1
-                voice[j].mul = xml_parse_sc.equal_loudness(voice[j])
+                if type(voice[j]) == Note:
+                    voice[j].mul = xml_parse_sc.equal_loudness(voice[j])
                 voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
                 if j < len(voice) - 1:
                     voice[j].wait = float(voice[j + 1].start_time - voice[j].start_time)
@@ -242,7 +243,46 @@ def build_score():
                 end_note=(0, 0, 2), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[6], d[3], d[2], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 2),
-                end_note=(0, 0, 2), voice_index=(0, 5))
+                end_note=(0, 0, 2), voice_index=(0, 5)),
+        Dynamic(synth=2, levels=[d[2], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 3),
+                end_note=(0, 5, 3), voice_index=(0, 0)),
+        Dynamic(synth=2, levels=[d[2], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 3),
+                end_note=(0, 5, 3), voice_index=(0, 5)),
+        Dynamic(synth=3, levels=[d[2], d[3], d[3], 0, 0], times=[5 / 6, 1 / 6, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 4),
+                end_note=(0, 5, 4), voice_index=(0, 0)),
+        Dynamic(synth=3, levels=[d[2], d[3], d[3], 0, 0], times=[5 / 6, 1 / 6, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 4),
+                end_note=(0, 5, 4), voice_index=(0, 5)),
+        Dynamic(synth=2, levels=[d[6], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 5),
+                end_note=(0, 0, 18), voice_index=(0, 0)),
+        Dynamic(synth=2, levels=[d[1], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 19),
+                end_note=(0, 5, 5), voice_index=(0, 0)),
+        Dynamic(synth=2, levels=[d[1], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 19),
+                end_note=(0, 5, 5), voice_index=(0, 5)),
+        Dynamic(synth=4, levels=[d[6], d[6], d[2], d[1], 0], times=[1/4, 5/8, 1/8, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 6),
+                end_note=(0, 0, 20), voice_index=(0, 0)),
+        Dynamic(synth=4, levels=[d[6], d[6], d[2], d[1], 0], times=[1/4, 5/8, 1/8, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 6),
+                end_note=(0, 0, 20), voice_index=(0, 5)),
+        Dynamic(synth=3, levels=[d[5], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 12),
+                end_note=(0, 3, 0), voice_index=(0, 0)),
+        Dynamic(synth=3, levels=[d[3], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 12),
+                end_note=(0, 3, 0), voice_index=(0, 3)),
+        Dynamic(synth=3, levels=[d[3], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 12),
+                end_note=(0, 3, 0), voice_index=(0, 4)),
+        Dynamic(synth=3, levels=[d[3], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 12),
+                end_note=(0, 3, 0), voice_index=(0, 5))
     ]
 
     dynamics2 = [
@@ -419,7 +459,97 @@ def build_score():
     batch_fm_synth_update(parsed_parts2, synth_updates2)
 
     # adjust dynamics of individual notes
-    parsed_parts1[0][0][20].mul *= 5
+    parsed_parts1[0][0][23].mul *= 2
+    parsed_parts1[0][0][24].mul *= 4
+    parsed_parts1[0][0][25].mul *= 2
+    parsed_parts1[0][0][26].mul *= 2
+    parsed_parts1[0][0][27].mul *= 4
+    parsed_parts1[0][0][28].mul *= 4
+    parsed_parts1[0][0][29].mul *= 2
+    parsed_parts1[0][0][30].mul *= 3
+    parsed_parts1[0][0][31].mul *= 4
+    parsed_parts1[0][0][32].mul *= 4
+    parsed_parts1[0][0][33].mul *= 3
+    parsed_parts1[0][0][34].mul *= 5
+    parsed_parts1[0][0][35].mul *= 4
+    parsed_parts1[0][0][36].mul *= 4
+    parsed_parts1[0][0][37].mul *= 5
+    parsed_parts1[0][0][38].mul *= 6
+    parsed_parts1[0][0][39].mul *= 6
+    parsed_parts1[0][0][40].mul *= 2
+    parsed_parts1[0][0][41].mul *= 3
+    parsed_parts1[0][0][42].mul *= 4
+    parsed_parts1[0][0][43].mul *= 5
+    parsed_parts1[0][0][44].mul *= 3
+    parsed_parts1[0][0][45].mul *= 5
+    parsed_parts1[0][0][46].mul *= 6
+
+    parsed_parts1[0][0][52].mul *= 6
+    parsed_parts1[0][0][53].mul *= 7
+    parsed_parts1[0][0][54].mul *= 7
+    parsed_parts1[0][0][55].mul *= 8
+    parsed_parts1[0][0][56].mul *= 8
+    parsed_parts1[0][0][57].mul *= 8
+    parsed_parts1[0][0][58].mul *= 8
+    parsed_parts1[0][0][59].mul *= 6
+    parsed_parts1[0][0][60].mul *= 6
+    parsed_parts1[0][0][61].mul *= 6
+    parsed_parts1[0][0][62].mul *= 6
+    parsed_parts1[0][0][63].mul *= 7
+    parsed_parts1[0][0][64].mul *= 7
+    parsed_parts1[0][0][65].mul *= 7
+
+    parsed_parts1[0][0][67].mul *= 5
+    parsed_parts1[0][0][68].mul *= 5
+    parsed_parts1[0][0][69].mul *= 6
+    parsed_parts1[0][0][70].mul *= 4
+    parsed_parts1[0][0][71].mul *= 4
+    parsed_parts1[0][0][72].mul *= 6
+    parsed_parts1[0][0][73].mul *= 5
+    parsed_parts1[0][0][74].mul *= 5
+    parsed_parts1[0][0][75].mul *= 5
+    parsed_parts1[0][0][76].mul *= 6
+    parsed_parts1[0][0][77].mul *= 7
+    parsed_parts1[0][0][78].mul *= 6
+    parsed_parts1[0][0][79].mul *= 7
+    parsed_parts1[0][0][80].mul *= 8
+    parsed_parts1[0][0][81].mul *= 7
+    parsed_parts1[0][0][82].mul *= 8
+    parsed_parts1[0][0][83].mul *= 9
+    parsed_parts1[0][0][84].mul *= 8
+    parsed_parts1[0][0][85].mul *= 8
+    parsed_parts1[0][0][86].mul *= 8
+    parsed_parts1[0][0][87].mul *= 9
+    parsed_parts1[0][0][88].mul *= 9
+    parsed_parts1[0][0][89].mul *= 9
+
+    parsed_parts1[0][3][2].mul *= 7
+    parsed_parts1[0][3][3].mul *= 7
+    parsed_parts1[0][3][4].mul *= 7
+
+    parsed_parts1[0][5][8].mul *= 5
+    parsed_parts1[0][5][9].mul *= 3
+    parsed_parts1[0][5][10].mul *= 5
+    parsed_parts1[0][5][11].mul *= 3
+
+    parsed_parts1[0][5][14].mul *= 5
+    parsed_parts1[0][5][15].mul *= 6
+    parsed_parts1[0][5][16].mul *= 4
+    parsed_parts1[0][5][17].mul *= 7
+    parsed_parts1[0][5][18].mul *= 6
+
+    parsed_parts1[0][5][20].mul *= 7
+    parsed_parts1[0][5][21].mul *= 7
+    parsed_parts1[0][5][22].mul *= 7
+    parsed_parts1[0][5][23].mul *= 6
+    parsed_parts1[0][5][24].mul *= 6
+
+    parsed_parts1[0][5][29].mul *= 4
+
+
+
+
+
 
     add_effects(parsed_parts1, dynamics1)
     batch_dynamic_synth_update(parsed_parts1)
