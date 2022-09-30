@@ -82,6 +82,7 @@ def add_effects(new_parts, effect_parts):
     :param effect_parts: A list of dynamic parts
     :return:
     """
+    note1 = new_parts[0][0][0]
     # Iterate through each effect entry for the current voice
     for effect in effect_parts:
         start_note = new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]
@@ -140,23 +141,30 @@ def add_effects(new_parts, effect_parts):
             effect.bus_out = bus
             effect.bus_in = effect.bus_out - CHANGE_BUS_CONSTANT
 
+            if effect.bus_in < 60:
+                print(effect.start_note)
+
             # Update buses of affected notes
             for i in range(first_idx, len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
                 done = False
                 # If we're doing separate chaining
                 if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
                     for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
-                        if (type(item) == Note or type(item) == Sound) and item.start_time < effect.end_time:
-                            done = True
+                        if done:
                             break
-                        elif type(item) == Note or type(item) == Sound:
-                            item.bus_out = effect.bus_in
-                elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time < effect.end_time:
+                        if type(item) == Note or type(item) == Sound:
+                            if item.start_time > effect.end_time:
+                                done = True
+                            else:
+                                item.bus_out = effect.bus_in
+                elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time > effect.end_time:
                     done = True
                 else:
                     new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out = effect.bus_in
                 if done:
                     break
+
+
 
         # When adding effects, we use separate chaining. That is, we create a list containing the effect
         # and starting note, and put that list into the voice where the starting note used to be.
@@ -394,12 +402,12 @@ def build_score():
         # m66
         Dynamic(synth=2, levels=[d[2], d[3], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 64),
-                end_note=(0, 5, 68), voice_index=(0, 0)),
+                end_note=(0, 5, 68), voice_index=(0, 5)),
 
         # m67
         Dynamic(synth=2, levels=[d[4], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 70),
-                end_note=(0, 5, 76), voice_index=(0, 0)),
+                end_note=(0, 5, 76), voice_index=(0, 5)),
 
         # m70
         Dynamic(synth=2, levels=[d[1], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
@@ -591,7 +599,7 @@ def build_score():
 
         # m127
         Dynamic(synth=2, levels=[d[6], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 231),
+                start_note=(0, 5, 231),
                 end_note=(0, 5, 231), voice_index=(0, 5)),
 
         # m128
