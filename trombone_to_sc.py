@@ -7,7 +7,7 @@ Copyright © 2022 by Jeff Martin. All rights reserved.
 """
 
 from mgen import xml_parse_sc, sc_data_gen
-from mgen.xml_parse_sc import Dynamic, Effect, Note, Sound
+from mgen.xml_parse_sc import Dynamic, Effect, Note, Sound, Pan
 import random
 import time
 
@@ -84,70 +84,79 @@ def add_effects(new_parts, effect_parts):
     """
     # Iterate through each effect entry for the current voice
     for effect in effect_parts:
-        # Identify the starting and ending notes
         start_note = new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]
-        end_note = new_parts[effect.end_note[0]][effect.end_note[1]][effect.end_note[2]]
         if type(start_note) == list:
             for item in start_note:
                 if type(item) == Note or type(item) == Sound:
                     start_note = item
                     break
-        if type(end_note) == list:
-            for item in end_note:
-                if type(item) == Note or type(item) == Sound:
-                    end_note = item
+
+        if type(effect) == Pan:
+            effect.bus_in = start_note.bus_out
+            effect.duration = start_note.duration
+            effect.measure = start_note.measure
+            effect.start_time = start_note.start_time
+
+        else:
+            # Identify the starting and ending notes
+            end_note = new_parts[effect.end_note[0]][effect.end_note[1]][effect.end_note[2]]
+
+            if type(end_note) == list:
+                for item in end_note:
+                    if type(item) == Note or type(item) == Sound:
+                        end_note = item
+                        break
+
+            # Set times and duration
+            effect.start_time = start_note.start_time
+            effect.end_time = end_note.start_time + end_note.duration
+            effect.measure = start_note.measure
+            effect.duration = effect.end_time - effect.start_time
+
+            bus = -1  # The bus for the effect
+            first_idx = 0  # The index of the first note affected by the effect
+
+            # Get the appropriate bus to use for the effect
+            for i in range(len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
+                done = False
+                # If we've encountered separate chaining, look inside the list
+                if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
+                    for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
+                        if (type(item) == Note or type(item) == Sound) and item.start_time >= effect.start_time and \
+                                item.end_time <= effect.end_time:
+                            bus = item.bus_out
+                            first_idx = i
+                            done = True
+                            break
+                elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time >= effect.start_time and \
+                        new_parts[effect.voice_index[0]][effect.voice_index[1]][i].end_time <= effect.end_time:
+                    bus = new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out
+                    first_idx = i
+                    done = True
+                if done:
                     break
 
-        # Set times and duration
-        effect.start_time = start_note.start_time
-        effect.end_time = end_note.start_time + end_note.duration
-        effect.measure = start_note.measure
-        effect.duration = effect.end_time - effect.start_time
+            # Update bus of effect
+            effect.bus_out = bus
+            effect.bus_in = effect.bus_out - CHANGE_BUS_CONSTANT
 
-        bus = -1  # The bus for the effect
-        first_idx = 0  # The index of the first note affected by the effect
-
-        # Get the appropriate bus to use for the effect
-        for i in range(len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
-            done = False
-            # If we've encountered separate chaining, look inside the list
-            if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
-                for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
-                    if (type(item) == Note or type(item) == Sound) and item.start_time >= effect.start_time and \
-                            item.end_time <= effect.end_time:
-                        bus = item.bus_out
-                        first_idx = i
-                        done = True
-                        break
-            elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time >= effect.start_time and \
-                    new_parts[effect.voice_index[0]][effect.voice_index[1]][i].end_time <= effect.end_time:
-                bus = new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out
-                first_idx = i
-                done = True
-            if done:
-                break
-
-        # Update bus of effect
-        effect.bus_out = bus
-        effect.bus_in = effect.bus_out - CHANGE_BUS_CONSTANT
-
-        # Update buses of affected notes
-        for i in range(first_idx, len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
-            done = False
-            # If we're doing separate chaining
-            if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
-                for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
-                    if (type(item) == Note or type(item) == Sound) and item.start_time < effect.end_time:
-                        done = True
-                        break
-                    elif type(item) == Note or type(item) == Sound:
-                        item.bus_out = effect.bus_in
-            elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time < effect.end_time:
-                done = True
-            else:
-                new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out = effect.bus_in
-            if done:
-                break
+            # Update buses of affected notes
+            for i in range(first_idx, len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
+                done = False
+                # If we're doing separate chaining
+                if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
+                    for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
+                        if (type(item) == Note or type(item) == Sound) and item.start_time < effect.end_time:
+                            done = True
+                            break
+                        elif type(item) == Note or type(item) == Sound:
+                            item.bus_out = effect.bus_in
+                elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time < effect.end_time:
+                    done = True
+                else:
+                    new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out = effect.bus_in
+                if done:
+                    break
 
         # When adding effects, we use separate chaining. That is, we create a list containing the effect
         # and starting note, and put that list into the voice where the starting note used to be.
@@ -225,6 +234,17 @@ def build_score():
 
     # Data structures that hold score updates
     # Dynamics to insert into the score
+    pan1 = []
+    pan2 = []
+
+    for i in range(len(parsed_parts1[0])):
+        for j in range(len(parsed_parts1[0][i])):
+            pan1.append(Pan(start_note=(0, i, j), pan2=0, panx=0))
+
+    for i in range(len(parsed_parts2[0])):
+        for j in range(len(parsed_parts2[0][i])):
+            pan2.append(Pan(start_note=(0, i, j), pan2=0, panx=0))
+
     dynamics1 = [
         Dynamic(synth=3, levels=[d[2], d[5], d[1], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 0),
@@ -1291,17 +1311,19 @@ def build_score():
     parsed_parts2[0][7][6].mul *= d[2]
     parsed_parts2[0][7][7].mul *= d[3]
 
+    add_effects(parsed_parts1, pan1)
     add_effects(parsed_parts1, dynamics1)
     batch_dynamic_synth_update(parsed_parts1)
     collapse_voices(parsed_parts1)
 
+    add_effects(parsed_parts2, pan2)
     add_effects(parsed_parts2, dynamics2)
     batch_dynamic_synth_update(parsed_parts2)
     collapse_voices(parsed_parts2)
 
     # Create the SuperCollider score
-    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score1.scd", parsed_parts1, "score_1_maker")
-    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score2.scd", parsed_parts2, "score_2_maker")
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score1", parsed_parts1, "score1")
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score2", parsed_parts2, "score2")
 
 
 def collapse_voices(new_parts):
