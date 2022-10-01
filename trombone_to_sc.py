@@ -49,7 +49,8 @@ def add_sc_data(new_parts):
                     voice[j].mul = xml_parse_sc.equal_loudness(voice[j])
                     voice[j].legato = 4
                 if type(voice[j]) == Sound:
-                    voice[j].mul *= 4
+                    voice[j].mul *= 25
+                    add_env_sound(voice[j])
                 voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
                 if j < len(voice) - 1:
                     voice[j].wait = float(voice[j + 1].start_time - voice[j].start_time)
@@ -197,6 +198,16 @@ def add_env(note):
     else:
         note.env = sc_data_gen.env4_strong_atk(note.duration)
         note.envlen = 4
+
+
+def add_env_sound(sound):
+    """
+    Adds an envelope to a Sound
+    :param sound: A Sound
+    :return:
+    """
+    sound.env = [[1, 1, 0], [sound.duration - 0.1, 0.1], [0, -2]]
+    sound.envlen = 3
 
 
 def batch_fm_synth_update(new_parts, updates):
@@ -732,18 +743,18 @@ def build_score():
         [[0, 7, 0], 10, [0.3, 0.45], [1], [0]],
 
         # m48-55
-        [[0, 0, 112], 10, [3.75, 1.5], [1], [0]],
+        [[0, 0, 112], 10, [0.375, 0.15], [1], [0]],
         [[0, 0, 114], 10, [0.02, 0.02], [1], [0]],
         [[0, 0, 115], 10, [0.02, 0.02], [1], [0]],
         [[0, 0, 116], 10, [0.02, 0.02], [1], [0]],
         [[0, 0, 117], 10, [0.02, 0.02], [1], [0]],
-        [[0, 3, 5], 10, [3.65, 1.75], [1], [0]],
+        [[0, 3, 5], 10, [0.365, 0.175], [1], [0]],
         [[0, 0, 90], 10, [0.2, 0.5], [1], [0]],
-        [[0, 5, 34], 10, [5, 3], [1], [0]],
+        [[0, 5, 34], 10, [0.5, 0.3], [1], [0]],
         [[0, 5, 35], 10, [0.02, 0.02], [1], [0]],
         [[0, 5, 37], 10, [0.02, 0.02], [1], [0]],
         [[0, 5, 40], 10, [0.02, 0.02], [1], [0]],
-        [[0, 7, 1], 10, [5, 3], [1], [0]],
+        [[0, 7, 1], 10, [0.5, 0.3], [1], [0]],
 
         # m58
         [[0, 0, 135], 10, [0.175, 0.2], [1], [0]],
@@ -1325,6 +1336,20 @@ def build_score():
     parsed_parts2[0][7][5].mul *= d[2]
     parsed_parts2[0][7][6].mul *= d[2]
     parsed_parts2[0][7][7].mul *= d[3]
+
+    parsed_parts1[0][0][76].buffer = "\"j\""
+    parsed_parts1[0][0][78].buffer = "\"d\""
+    parsed_parts1[0][0][81].buffer = "\"ks-002\""
+    parsed_parts1[0][0][84].buffer = "\"bah\""
+    parsed_parts1[0][0][86].buffer = "\"h\""
+    parsed_parts1[0][0][89].buffer = "\"gu\""
+    parsed_parts1[0][0][219].buffer = "\"m\""
+    parsed_parts1[0][0][221].buffer = "\"pak-002\""
+    parsed_parts1[0][0][224].buffer = "\"t\""
+    parsed_parts1[0][0][229].buffer = "\"uh\""
+    parsed_parts1[0][0][230].buffer = "\"zh\""
+    parsed_parts1[0][0][231].buffer = "\"k\""
+    parsed_parts1[0][0][235].buffer = "\"v\""
 
     add_effects(parsed_parts1, pan1)
     add_effects(parsed_parts1, dynamics1)
