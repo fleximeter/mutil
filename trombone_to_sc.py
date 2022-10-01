@@ -43,6 +43,9 @@ def add_sc_data(new_parts):
                 voice[j].mul = 1
                 if type(voice[j]) == Note:
                     voice[j].mul = xml_parse_sc.equal_loudness(voice[j])
+                    voice[j].legato = 4
+                if type(voice[j]) == Sound:
+                    voice[j].mul *= 4
                 voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
                 if j < len(voice) - 1:
                     voice[j].wait = float(voice[j + 1].start_time - voice[j].start_time)
@@ -60,19 +63,19 @@ def add_buf(note):
     buf_map = [-48, -44, -40, -38, -34, -30, -26, -24, -20, -16, -14, -10, -6, -2, 0, 4, 8, 10, 14, 18, 22, 24, 28, 32]
 
     # Choose a sensible buffer for long notes
-    if note.duration > 0.5:
-        if note.pitch.p < buf_map[0]:
-            note.buffer = 0
-        elif note.pitch.p > buf_map[len(buf_map) - 1]:
-            note.buffer = len(buf_map) - 1
-        else:
-            for i in range(len(buf_map)):
-                if abs(note.pitch.p - buf_map[i]) <= 2:
-                    note.buffer = i
-
-    # For short notes, choose a random buffer
+    if note.pitch.p < buf_map[0]:
+        note.buffer = 0
+    elif note.pitch.p > buf_map[len(buf_map) - 1]:
+        note.buffer = len(buf_map) - 1
     else:
-        note.buffer = random.randrange(0, NUM_BUFFERS - 1, 1)
+        for i in range(len(buf_map)):
+            if abs(note.pitch.p - buf_map[i]) <= 2:
+                note.buffer = i
+
+    # For short notes, choose a random buffer, but don't go too low
+    if note.duration < 0.5:
+        lower_limit = max(0, note.buffer - 3)
+        note.buffer = random.randrange(lower_limit, NUM_BUFFERS - 1, 1)
 
 
 def add_effects(new_parts, effect_parts):

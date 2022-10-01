@@ -64,6 +64,7 @@ class Note:
         self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
         self.env = kwargs["env"] if "env" in kwargs else "[[][][]]"                 # envelope specification
         self.envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"        # number of points in envelope
+        self.legato = kwargs["legato"] if "legato" in kwargs else 0                 # legato index (0 is no legato, 1 is some legato, etc.)
         self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
         self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
@@ -209,6 +210,7 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\duration, {float(voice[i].duration)});\n" + \
                                     f"~dict.put(\\env, {voice[i].env});\n" + \
                                     f"~dict.put(\\envlen, {voice[i].envlen});\n" + \
+                                    f"~dict.put(\\legato, {voice[i].legato});\n" + \
                                     f"~dict.put(\\measure, {voice[i].measure});\n" + \
                                     f"~dict.put(\\mul, {voice[i].mul});\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
@@ -228,6 +230,7 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\env, {voice[i].env});\n" + \
                                     f"~dict.put(\\envlen, {voice[i].envlen});\n" + \
                                     f"~dict.put(\\mod_levels, {voice[i].mod_levels});\n" + \
+                                    f"~dict.put(\\legato, {voice[i].legato});\n" + \
                                     f"~dict.put(\\measure, {voice[i].measure});\n" + \
                                     f"~dict.put(\\mul, {voice[i].mul});\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
