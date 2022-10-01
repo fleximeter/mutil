@@ -37,6 +37,10 @@ def add_sc_data(new_parts):
     for part in new_parts:
         for voice in part:
             for j in range(len(voice)):
+                voice[j].duration = float(voice[j].duration)
+                voice[j].start_time = float(voice[j].start_time)
+                voice[j].end_time = float(voice[j].end_time)
+
                 if type(voice[j]) != Sound:
                     add_buf(voice[j])
                     add_env(voice[j])
@@ -167,8 +171,6 @@ def add_effects(new_parts, effect_parts):
                 if done:
                     break
 
-
-
         # When adding effects, we use separate chaining. That is, we create a list containing the effect
         # and starting note, and put that list into the voice where the starting note used to be.
         # We will go through the voice and flatten it out later, after all dynamics and effects are added.
@@ -236,12 +238,12 @@ def build_score():
     parsed_parts1 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE1}")
     parsed_parts2 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE2}")
 
-    # Output the score for manual edit planning
-    xml_parse_sc.dump_parts(parsed_parts2)
-
     # Add data
     add_sc_data(parsed_parts1)
     add_sc_data(parsed_parts2)
+
+    # Output the score for manual edit planning
+    xml_parse_sc.dump_parts(parsed_parts1)
 
     # Data structures that hold score updates
     # Dynamics to insert into the score

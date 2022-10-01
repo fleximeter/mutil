@@ -145,13 +145,13 @@ def dump_parts(new_parts):
             for i in range(len(voice)):
                 if type(voice[i]) == Note:
                     print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(voice[i].measure,
-                          i, voice[i].pitch.p, voice[i].mul, round(float(voice[i].duration), 4),
-                          round(float(voice[i].start_time), 4), round(float(voice[i].end_time), 4),
+                          i, voice[i].pitch.p, voice[i].mul, round(voice[i].duration, 4),
+                          round(voice[i].start_time, 4), round(voice[i].end_time, 4),
                           f"[{current_voice_index}][{i}]"))
                 if type(voice[i]) == Sound:
                     print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(voice[i].measure,
-                          i, "sound", voice[i].mul, round(float(voice[i].duration), 4),
-                          round(float(voice[i].start_time), 4), round(float(voice[i].end_time), 4),
+                          i, "sound", voice[i].mul, round(voice[i].duration, 4),
+                          round(voice[i].start_time, 4), round(voice[i].end_time, 4),
                           f"[{current_voice_index}][{i}]"))
             print()
             current_voice_index += 1
@@ -207,15 +207,14 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\i1, {i});\n" + \
                                     f"~dict.put(\\buf0, {voice[i].buffer});\n" + \
                                     f"~dict.put(\\buf1, 1);\n" + \
-                                    f"~dict.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"~dict.put(\\duration, {voice[i].duration});\n" + \
                                     f"~dict.put(\\env, {voice[i].env});\n" + \
                                     f"~dict.put(\\envlen, {voice[i].envlen});\n" + \
-                                    f"~dict.put(\\legato, {voice[i].legato});\n" + \
                                     f"~dict.put(\\measure, {voice[i].measure});\n" + \
                                     f"~dict.put(\\mul, {voice[i].mul});\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
                                     f"~dict.put(\\pitch, {voice[i].pitch.p});\n" + \
-                                    f"~dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"~dict.put(\\start, {voice[i].start_time});\n" + \
                                     f"~dict.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
                                     f"~dict.put(\\type, \\Granular);\n" + \
                                     f"~dict.put(\\wait, {voice[i].wait});\n" + \
@@ -226,16 +225,15 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\i1, {i});\n" + \
                                     f"~dict.put(\\buf, {voice[i].buffer});\n" + \
                                     f"~dict.put(\\mod_curves, {voice[i].mod_curves});\n" + \
-                                    f"~dict.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"~dict.put(\\duration, {voice[i].duration});\n" + \
                                     f"~dict.put(\\env, {voice[i].env});\n" + \
                                     f"~dict.put(\\envlen, {voice[i].envlen});\n" + \
                                     f"~dict.put(\\mod_levels, {voice[i].mod_levels});\n" + \
-                                    f"~dict.put(\\legato, {voice[i].legato});\n" + \
                                     f"~dict.put(\\measure, {voice[i].measure});\n" + \
                                     f"~dict.put(\\mul, {voice[i].mul});\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
                                     f"~dict.put(\\pitch, {voice[i].pitch.p});\n" + \
-                                    f"~dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"~dict.put(\\start, {voice[i].start_time});\n" + \
                                     f"~dict.put(\\synth, \\synth{voice[i].synth}_{voice[i].envlen});\n" + \
                                     f"~dict.put(\\mod_times, {voice[i].mod_times});\n" + \
                                     f"~dict.put(\\type, \\FM);\n" + \
@@ -246,13 +244,13 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\i0, {current_voice_index});\n" + \
                                     f"~dict.put(\\i1, {i});\n" + \
                                     f"~dict.put(\\buf, {voice[i].buffer});\n" + \
-                                    f"~dict.put(\\duration, {float(voice[i].duration)});\n" + \
+                                    f"~dict.put(\\duration, {voice[i].duration});\n" + \
                                     f"~dict.put(\\measure, {voice[i].measure});\n" + \
                                     f"~dict.put(\\mul, 0.5);\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
                                     f"~dict.put(\\pitch, {voice[i].pitch.p});\n" + \
                                     f"~dict.put(\\rate, 1);\n" + \
-                                    f"~dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"~dict.put(\\start, {voice[i].start_time});\n" + \
                                     f"~dict.put(\\synth, {voice[i].synth});\n" + \
                                     f"~dict.put(\\type, \\Sound);\n" + \
                                     f"~dict.put(\\wait, {voice[i].wait});\n" + \
@@ -264,7 +262,7 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\in, {voice[i].bus_in});\n" + \
                                     f"~dict.put(\\levels, {voice[i].levels});\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
-                                    f"~dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"~dict.put(\\start, {voice[i].start_time});\n" + \
                                     f"~dict.put(\\synth, \\dynamic{voice[i].synth});\n" + \
                                     f"~dict.put(\\times, {voice[i].times});\n" + \
                                     f"~dict.put(\\type, \\Dynamic);\n" + \
@@ -274,7 +272,7 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\duration, {voice[i].duration});\n" + \
                                     f"~dict.put(\\in, {voice[i].bus_in});\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
-                                    f"~dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"~dict.put(\\start, {voice[i].start_time});\n" + \
                                     f"~dict.put(\\synth, \\effect{voice[i].synth});\n" + \
                                     f"~dict.put(\\type, \\Effect);\n" + \
                                     f"~{score_name}[{current_voice_index}].add(~dict);\n"
@@ -284,7 +282,7 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\in, {voice[i].bus_in});\n" + \
                                     f"~dict.put(\\pan2, {voice[i].pan2});\n" + \
                                     f"~dict.put(\\panx, {voice[i].panx});\n" + \
-                                    f"~dict.put(\\start, {float(voice[i].start_time)});\n" + \
+                                    f"~dict.put(\\start, {voice[i].start_time});\n" + \
                                     f"~dict.put(\\type, \\Pan);\n" + \
                                     f"~{score_name}[{current_voice_index}].add(~dict);\n"
 
