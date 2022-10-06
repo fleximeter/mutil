@@ -26,7 +26,7 @@ CHANGE_BUS_CONSTANT = 20
 random.seed(time.time())
 
 # this represents dynamic levels from 0-9. it allows easy adjusting project-wide.
-d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+d = [0, 1, 2, 4, 6, 8, 10, 12, 14, 16]
 
 
 def add_sc_data(new_parts):
@@ -52,7 +52,7 @@ def add_sc_data(new_parts):
                     add_buf(voice[j])
                     add_env(voice[j])
                 elif type(voice[j]) == Sound:
-                    voice[j].mul = 8
+                    voice[j].mul = 0.3
                     add_env_sound(voice[j])
 
                 # The bus allocation formula. Adjacent notes alternate buses to allow legato.
@@ -501,16 +501,30 @@ def build_score():
     add_legato(legato, 0.04)
 
     # Data structures that hold score updates for panning
-    pan1 = []
-    pan2 = []
+    pan1 = {
+        "0,0,1": Pan(start_note=(0, 0, 1), pan2=0, panx=2.5, panw=2.0),
+        "0,5,1": Pan(start_note=(0, 5, 1), pan2=0, panx=2.5, panw=2.0),
+    }
+    pan2 = {
+
+    }
+    pan1l = []
+    pan2l = []
 
     for i in range(len(parsed_parts1[0])):
         for j in range(len(parsed_parts1[0][i])):
-            pan1.append(Pan(start_note=(0, i, j), pan2=0, panx=0))
+            if f"{0},{i},{j}" not in pan1:
+                pan1[f"{0},{i},{j}"] = Pan(start_note=(0, i, j), pan2=0, panx=0)
 
     for i in range(len(parsed_parts2[0])):
         for j in range(len(parsed_parts2[0][i])):
-            pan2.append(Pan(start_note=(0, i, j), pan2=0, panx=0))
+            if f"{0},{i},{j}" not in pan2:
+                pan2[f"{0},{i},{j}"] = Pan(start_note=(0, i, j), pan2=0, panx=0)
+
+    for panner in pan1:
+        pan1l.append(pan1[panner])
+    for panner in pan2:
+        pan2l.append(pan2[panner])
 
     # Dynamics to insert into the score
     dynamics1 = [
@@ -545,7 +559,7 @@ def build_score():
                 start_note=(0, 0, 4), end_note=(0, 5, 4), voice_index=(0, 5)),
 
         # m10
-        Dynamic(synth=2, levels=[d[6], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+        Dynamic(synth=2, levels=[d[4], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 5), end_note=(0, 0, 18), voice_index=(0, 0)),
 
         # m13
@@ -1497,10 +1511,10 @@ def build_score():
 
     parsed_parts1[0][0][76].buffer = "\"j\""
     parsed_parts1[0][0][78].buffer = "\"d\""
-    parsed_parts1[0][0][81].buffer = "\"ks-002\""
-    parsed_parts1[0][0][84].buffer = "\"bah\""
-    parsed_parts1[0][0][86].buffer = "\"h\""
-    parsed_parts1[0][0][89].buffer = "\"gu\""
+    parsed_parts1[0][0][81].buffer = "\"t\""
+    parsed_parts1[0][0][84].buffer = "\"b\""
+    parsed_parts1[0][0][86].buffer = "\"k\""
+    parsed_parts1[0][0][89].buffer = "\"t\""
     parsed_parts1[0][0][219].buffer = "\"m\""
     parsed_parts1[0][0][221].buffer = "\"pak-002\""
     parsed_parts1[0][0][224].buffer = "\"t\""
@@ -1509,12 +1523,12 @@ def build_score():
     parsed_parts1[0][0][231].buffer = "\"k\""
     parsed_parts1[0][0][235].buffer = "\"v\""
 
-    add_effects(parsed_parts1, pan1)
+    add_effects(parsed_parts1, pan1l)
     add_effects(parsed_parts1, dynamics1)
     batch_dynamic_synth_update(parsed_parts1)
     collapse_voices(parsed_parts1)
 
-    add_effects(parsed_parts2, pan2)
+    add_effects(parsed_parts2, pan2l)
     add_effects(parsed_parts2, dynamics2)
     batch_dynamic_synth_update(parsed_parts2)
     collapse_voices(parsed_parts2)

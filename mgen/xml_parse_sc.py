@@ -80,7 +80,8 @@ class Pan:
         self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
         self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
         self.pan2 = kwargs["pan2"] if "pan2" in kwargs else 0                       # pan stereo
-        self.panx = kwargs["panx"] if "panx" in kwargs else 0                       # pan multichannel
+        self.panx = kwargs["panx"] if "panx" in kwargs else 0.5                     # pan multichannel
+        self.panw = kwargs["panw"] if "panw" in kwargs else 2.0                     # pan multichannel width
         self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
 
@@ -283,6 +284,7 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\in, {voice[i].bus_in});\n" + \
                                     f"~dict.put(\\pan2, {voice[i].pan2});\n" + \
                                     f"~dict.put(\\panx, {voice[i].panx});\n" + \
+                                    f"~dict.put(\\panw, {voice[i].panw});\n" + \
                                     f"~dict.put(\\start, {voice[i].start_time});\n" + \
                                     f"~dict.put(\\type, \\Pan);\n" + \
                                     f"~{score_name}[{current_voice_index}].add(~dict);\n"
@@ -336,15 +338,9 @@ def equal_loudness(note):
 
     # apply the equal loudness contour
     if note_frequency < 2000:
-        note_level *= (8 * 10 ** -15) * ((-note_frequency + 2000) ** 4.5) + 1
+        note_level *= ((8 * 10 ** -15) * ((-note_frequency + 2000) ** 4.5) + 1) / 40
     else:
-        note_level *= (1.5 * 10 ** -8) * ((note_frequency - 2000) ** 2) + 1
-
-    # if this is a FM note, decrease the volume
-    if note.synth >= 10:
-        note_level *= 0.05
-    else:
-        note_level *= 1
+        note_level *= ((1.5 * 10 ** -8) * ((note_frequency - 2000) ** 2) + 1) / 40
 
     return note_level
 
