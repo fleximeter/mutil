@@ -247,7 +247,7 @@ def dump_sc(new_parts, score_name):
                                     f"~dict.put(\\env, {voice[i].env});\n" + \
                                     f"~dict.put(\\envlen, {voice[i].envlen});\n" + \
                                     f"~dict.put(\\measure, {voice[i].measure});\n" + \
-                                    f"~dict.put(\\mul, 0.5);\n" + \
+                                    f"~dict.put(\\mul, {voice[i].mul});\n" + \
                                     f"~dict.put(\\out, {voice[i].bus_out});\n" + \
                                     f"~dict.put(\\pitch, {voice[i].pitch.p});\n" + \
                                     f"~dict.put(\\rate, 1);\n" + \

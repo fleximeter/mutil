@@ -52,7 +52,7 @@ def add_sc_data(new_parts):
                     add_buf(voice[j])
                     add_env(voice[j])
                 elif type(voice[j]) == Sound:
-                    voice[j].mul *= 25
+                    voice[j].mul = 8
                     add_env_sound(voice[j])
 
                 # The bus allocation formula. Adjacent notes alternate buses to allow legato.
