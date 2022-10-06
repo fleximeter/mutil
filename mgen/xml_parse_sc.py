@@ -21,19 +21,19 @@ class Dynamic:
     Represents a dynamic object (crescendo, decrescendo, etc.
     """
     def __init__(self, **kwargs):
-        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                 # input bus index
-        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0              # output bus index
-        self.curves = kwargs["curves"] if "curves" in kwargs else 0                 # curves for the envelope
-        self.duration = kwargs["duration"] if "duration" in kwargs else 0           # dynamic duration
-        self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0           # end note
-        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
-        self.levels = kwargs["levels"] if "levels" in kwargs else 0                  # levels for the envelope
-        self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
-        self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0     # start note
-        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1    # start time
-        self.synth = kwargs["synth"] if "synth" in kwargs else 0                    # the synth to use
-        self.times = kwargs["times"] if "times" in kwargs else 0                    # times for the envelope
-        self.voice_index = kwargs["voice_index"] if "voice_index" in kwargs else (0, 0)  # the index of the affected voice
+        self.bus_in = kwargs["bus_in"] if "bus_in" in kwargs else 0                      # input bus index
+        self.bus_out = kwargs["bus_out"] if "bus_out" in kwargs else 0                   # output bus index
+        self.curves = kwargs["curves"] if "curves" in kwargs else 0                      # curves for the envelope
+        self.duration = kwargs["duration"] if "duration" in kwargs else 0                # dynamic duration
+        self.end_note = kwargs["end_note"] if "end_note" in kwargs else 0                # end note
+        self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0                # end time
+        self.levels = kwargs["levels"] if "levels" in kwargs else 0                      # levels for the envelope
+        self.measure = kwargs["measure"] if "measure" in kwargs else 0                   # measure number
+        self.start_note = kwargs["start_note"] if "start_note" in kwargs else 0          # start note
+        self.start_time = kwargs["start_time"] if "start_time" in kwargs else -1         # start time
+        self.synth = kwargs["synth"] if "synth" in kwargs else 0                         # the synth to use
+        self.times = kwargs["times"] if "times" in kwargs else 0                         # times for the envelope
+        self.voice_index = kwargs["voice_index"] if "voice_index" in kwargs else (0, 0)  # index of the affected voice
 
 
 class Effect:
@@ -64,7 +64,6 @@ class Note:
         self.end_time = kwargs["end_time"] if "end_time" in kwargs else 0           # end time
         self.env = kwargs["env"] if "env" in kwargs else "[[][][]]"                 # envelope specification
         self.envlen = kwargs["envlen"] if "envlen" in kwargs else "[[][][]]"        # number of points in envelope
-        self.legato = kwargs["legato"] if "legato" in kwargs else 0                 # legato index (0 is no legato, 1 is some legato, etc.)
         self.measure = kwargs["measure"] if "measure" in kwargs else 0              # measure number
         self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
@@ -101,7 +100,7 @@ class Sound:
         self.mul = kwargs["mul"] if "mul" in kwargs else 1                          # mul value
         self.pitch = kwargs["pitch"] if "pitch" in kwargs else None                 # pitch integer
         self.start_time = kwargs["start_time"] if "start_time" in kwargs else 0     # start time
-        self.synth = kwargs["synth"] if "synth" in kwargs else "\\play_buf"  # the synth to use
+        self.synth = kwargs["synth"] if "synth" in kwargs else "\\play_buf"         # the synth to use
         self.wait = kwargs["wait"] if "wait" in kwargs else 0                       # the time to wait until next note
 
 
@@ -132,7 +131,7 @@ def convert_pitch24(pitch21):
 
 def dump_parts(new_parts):
     """
-    Dumps the new part data
+    Dumps the new part data for visual inspection
     :param new_parts: New (parsed) parts
     :return:
     """
@@ -141,7 +140,7 @@ def dump_parts(new_parts):
         for voice in part:
             print(f"Voice {current_voice_index + 1}")
             print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format("m", "i", "p", "mul", "dur",
-                                                                               "start", "end", "index"))
+                                                                                       "start", "end", "index"))
             for i in range(len(voice)):
                 if type(voice[i]) == Note:
                     print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(voice[i].measure,
@@ -162,7 +161,7 @@ def dump_sc(new_parts, score_name):
     Dumps the new part data in SuperCollider format
     :param new_parts: New (parsed) parts
     :param score_name: The name of the score loading function in the SC file
-    :return:
+    :return: A list of SuperCollider score files
     """
     score_list = []
     data = f"(\n"
@@ -408,12 +407,10 @@ def parse_parts(parts, part_indices=None):
 
     # Extract each part separately
     for i in range(len(indices)):
-        """
-        new_parts is a 3D list of lists. Hierarchy of new_parts:
-        Level 1: Part
-        Level 2: Voice (for voices in a part)
-        Level 3: Subvoice (for notes in chords). There is one subvoice for each note in a chord.
-        """
+        # new_parts is a 3D list of lists. Hierarchy of new_parts:
+        # Level 1: Part
+        # Level 2: Voice (for voices in a part)
+        # Level 3: Subvoice (for notes in chords). There is one subvoice for each note in a chord.
         new_parts.append([])
         # Tracks the offset position in the part
         part_time_offset = 0
@@ -486,16 +483,19 @@ def parse_parts(parts, part_indices=None):
                                 # Catch special notes that represent nonstandard sounds
                                 if item2.notehead == "x":
                                     n = Sound(pitch=convert_pitch24(item2.pitch),
-                                             duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
-                                             measure=measure.number,
-                                             quarter_duration=Fraction(item2.duration.quarterLength),
-                                             start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
+                                              duration=Fraction(item2.duration.quarterLength) *
+                                                       current_quarter_duration,
+                                              measure=measure.number,
+                                              quarter_duration=Fraction(item2.duration.quarterLength),
+                                              start_time=Fraction(part_time_offset + item2.offset *
+                                                                  current_quarter_duration))
                                 else:
                                     n = Note(pitch=convert_pitch24(item2.pitch),
                                              duration=Fraction(item2.duration.quarterLength) * current_quarter_duration,
                                              measure=measure.number,
                                              quarter_duration=Fraction(item2.duration.quarterLength),
-                                             start_time=Fraction(part_time_offset + item2.offset * current_quarter_duration))
+                                             start_time=Fraction(part_time_offset + item2.offset *
+                                                                 current_quarter_duration))
 
                                 # If the note is tied, we need to keep track of it
                                 if item2.tie is not None:

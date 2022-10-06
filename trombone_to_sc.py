@@ -7,19 +7,21 @@ Copyright © 2022 by Jeff Martin. All rights reserved.
 """
 
 from mgen import xml_parse_sc, sc_data_gen
-from mgen.xml_parse_sc import Dynamic, Effect, Note, Sound, Pan
+from mgen.xml_parse_sc import Dynamic, Note, Sound, Pan
 import random
 import time
 
-FOLDER = "H:\\My Drive\\Composition\\Compositions\\Trombone Piece"
-OUTPUT = "D:\\SuperCollider\\erudition_i"
+# File names and locations
+OUTPUT_DESKTOP = "D:\\SuperCollider\\erudition_i"
+OUTPUT_LAPTOP = "C:\\Users\\Jeffrey Martin\\Source\\erudition_i"
 FILE1 = "Trombone Piece 0.2.4.1a - Full score - 01 erudition I.xml"
 FILE2 = "Trombone Piece 0.2.4.1b - Full score - 01 erudition I.xml"
 FILE1_debug = "Trombone Piece 0.2.4.1a_debug - Full score - 01 erudition I.xml"
 
+# Constants
 NUM_BUFFERS = 24
 NUM_BUSES = 80
-CHANGE_BUS_CONSTANT = 10
+CHANGE_BUS_CONSTANT = 20
 random.seed(time.time())
 
 # this represents dynamic levels from 0-9. it allows easy adjusting project-wide.
@@ -32,26 +34,30 @@ def add_sc_data(new_parts):
     :param new_parts: A list of new parts
     :return:
     """
-    # A variable to give an absolute number to the current voice
+    # The current voice
     i = 0
     for part in new_parts:
         for voice in part:
             for j in range(len(voice)):
-                voice[j].duration = float(voice[j].duration)  # + 0.02  # add a little legato
+                # Convert the times to floats
+                voice[j].duration = float(voice[j].duration)
                 voice[j].start_time = float(voice[j].start_time)
                 voice[j].end_time = float(voice[j].end_time)
 
-                if type(voice[j]) != Sound:
-                    add_buf(voice[j])
-                    add_env(voice[j])
-                voice[j].mul = 1
+                # Adjust volume and add buffers and envelopes
                 if type(voice[j]) == Note:
                     voice[j].mul = xml_parse_sc.equal_loudness(voice[j])
                     voice[j].legato = 4
-                if type(voice[j]) == Sound:
+                    add_buf(voice[j])
+                    add_env(voice[j])
+                elif type(voice[j]) == Sound:
                     voice[j].mul *= 25
                     add_env_sound(voice[j])
-                voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + i
+
+                # The bus allocation formula. Adjacent notes alternate buses to allow legato.
+                voice[j].bus_out = NUM_BUSES - CHANGE_BUS_CONSTANT + (2 * i) + (j % 2)
+
+                # Set the wait time until the next note in the current voice
                 if j < len(voice) - 1:
                     voice[j].wait = float(voice[j + 1].start_time - voice[j].start_time)
                 else:
@@ -65,6 +71,7 @@ def add_buf(note):
     :param note: A Note
     :return:
     """
+    # A map that lists the pitch integer for each buffer. This is microtonal pitch with pcs from 0-23.
     buf_map = [-48, -44, -40, -38, -34, -30, -26, -24, -20, -16, -14, -10, -6, -2, 0, 4, 8, 10, 14, 18, 22, 24, 28, 32]
 
     # Choose a sensible buffer for long notes
@@ -77,7 +84,7 @@ def add_buf(note):
             if abs(note.pitch.p - buf_map[i]) <= 2:
                 note.buffer = i
 
-    # For short notes, choose a random buffer, but don't go too low
+    # For short notes, choose a random buffer, but don't go too low. Otherwise we'll have too much snazz.
     if note.duration < 0.5:
         lower_limit = max(0, note.buffer - 3)
         note.buffer = random.randrange(lower_limit, NUM_BUFFERS - 1, 1)
@@ -90,9 +97,9 @@ def add_effects(new_parts, effect_parts):
     :param effect_parts: A list of dynamic parts
     :return:
     """
-    note1 = new_parts[0][0][0]
     # Iterate through each effect entry for the current voice
     for effect in effect_parts:
+        # Identify the starting note
         start_note = new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]
         if type(start_note) == list:
             for item in start_note:
@@ -100,16 +107,17 @@ def add_effects(new_parts, effect_parts):
                     start_note = item
                     break
 
+        # Pan effects are easy to add
         if type(effect) == Pan:
             effect.bus_in = start_note.bus_out
             effect.duration = start_note.duration
             effect.measure = start_note.measure
             effect.start_time = start_note.start_time
 
+        # For normal effects, we need to update buses, etc.
         else:
-            # Identify the starting and ending notes
+            # Identify the ending note
             end_note = new_parts[effect.end_note[0]][effect.end_note[1]][effect.end_note[2]]
-
             if type(end_note) == list:
                 for item in end_note:
                     if type(item) == Note or type(item) == Sound:
@@ -125,7 +133,7 @@ def add_effects(new_parts, effect_parts):
             bus = -1  # The bus for the effect
             first_idx = 0  # The index of the first note affected by the effect
 
-            # Get the appropriate bus to use for the effect
+            # Get the appropriate bus to use for the effect, and record the index of the first note affected
             for i in range(len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
                 done = False
                 # If we've encountered separate chaining, look inside the list
@@ -145,14 +153,11 @@ def add_effects(new_parts, effect_parts):
                 if done:
                     break
 
-            # Update bus of effect
+            # Update the buses of the effect
             effect.bus_out = bus
             effect.bus_in = effect.bus_out - CHANGE_BUS_CONSTANT
 
-            if effect.bus_in < 60:
-                print(effect.start_note)
-
-            # Update buses of affected notes
+            # Update the buses of affected notes
             for i in range(first_idx, len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
                 done = False
                 # If we're doing separate chaining
@@ -164,23 +169,47 @@ def add_effects(new_parts, effect_parts):
                             if item.start_time > effect.end_time:
                                 done = True
                             else:
-                                item.bus_out = effect.bus_in
+                                item.bus_out -= CHANGE_BUS_CONSTANT
                 elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time > effect.end_time:
                     done = True
                 else:
-                    new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out = effect.bus_in
+                    new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out -= CHANGE_BUS_CONSTANT
                 if done:
                     break
+
+        # Now we need to duplicate the effect to deal with the alternating buses in adjacent notes,
+        # a feature we implemented to allow legato. At this point, only dynamics are implemented, because
+        # Effect objects are not used in this piece
+        effect2 = None
+        if type(effect) == Dynamic:
+            effect2 = Dynamic(synth=effect.synth, start_note=effect.start_note, end_note=effect.end_note,
+                              voice_index=effect.voice_index, levels=effect.levels, times=effect.times,
+                              curves=effect.curves, duration=effect.duration, start_time=effect.start_time,
+                              end_time=effect.end_time, measure=effect.measure)
+            if effect.bus_in % 2 == 0:
+                effect2.bus_in = effect.bus_in + 1
+                effect2.bus_out = effect.bus_out + 1
+            else:
+                effect2.bus_in = effect.bus_in - 1
+                effect2.bus_out = effect.bus_out - 1
 
         # When adding effects, we use separate chaining. That is, we create a list containing the effect
         # and starting note, and put that list into the voice where the starting note used to be.
         # We will go through the voice and flatten it out later, after all dynamics and effects are added.
         # This allows us to easily add dynamics and effects by index.
-        if type(new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]) != list:
-            item_list = [effect, new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]]
-            new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]] = item_list
+        if effect2 is not None:
+            if type(new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]) != list:
+                item_list = [effect, effect2, new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]]
+                new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]] = item_list
+            else:
+                new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]].insert(0, effect2)
+                new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]].insert(0, effect)
         else:
-            new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]].insert(0, effect)
+            if type(new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]) != list:
+                item_list = [effect, new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]]]
+                new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]] = item_list
+            else:
+                new_parts[effect.start_note[0]][effect.start_note[1]][effect.start_note[2]].insert(0, effect)
 
 
 def add_env(note):
@@ -208,6 +237,17 @@ def add_env_sound(sound):
     """
     sound.env = [[1, 1, 0], [sound.duration - 0.1, 0.1], [0, -2]]
     sound.envlen = 3
+
+
+def add_legato(notes, legato_dur):
+    """
+    Adds legato to a list of notes. Legato is added by lengthening the duration of the note.
+    :param notes: A list of notes
+    :param legato_dur: The duration of the legato in seconds (this will be a small number like 0.02)
+    :return:
+    """
+    for note in notes:
+        note.duration += legato_dur
 
 
 def batch_fm_synth_update(new_parts, updates):
@@ -246,8 +286,8 @@ def build_score():
     Builds the SuperCollider score
     :return:
     """
-    parsed_parts1 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE1}")
-    parsed_parts2 = xml_parse_sc.analyze_xml(f"{FOLDER}\\{FILE2}")
+    parsed_parts1 = xml_parse_sc.analyze_xml(FILE1)
+    parsed_parts2 = xml_parse_sc.analyze_xml(FILE2)
 
     # Add data
     add_sc_data(parsed_parts1)
@@ -256,8 +296,7 @@ def build_score():
     # Output the score for manual edit planning
     xml_parse_sc.dump_parts(parsed_parts1)
 
-    # Data structures that hold score updates
-    # Dynamics to insert into the score
+    # Data structures that hold score updates for panning
     pan1 = []
     pan2 = []
 
@@ -269,406 +308,321 @@ def build_score():
         for j in range(len(parsed_parts2[0][i])):
             pan2.append(Pan(start_note=(0, i, j), pan2=0, panx=0))
 
+    # Dynamics to insert into the score
     dynamics1 = [
+        # m1
         Dynamic(synth=3, levels=[d[2], d[5], d[1], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 0),
-                end_note=(0, 0, 0), voice_index=(0, 0)),
+                start_note=(0, 5, 0), end_note=(0, 0, 0), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[2], d[5], d[1], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 0),
-                end_note=(0, 0, 0), voice_index=(0, 5)),
+                start_note=(0, 5, 0), end_note=(0, 0, 0), voice_index=(0, 5)),
+
+        # m3
         Dynamic(synth=3, levels=[d[2], d[2], d[0], 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 1),
-                end_note=(0, 5, 1), voice_index=(0, 0)),
+                start_note=(0, 0, 1), end_note=(0, 5, 1), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[2], d[2], d[0], 0, 0], times=[3 / 4, 1 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 1),
-                end_note=(0, 5, 1), voice_index=(0, 5)),
+                start_note=(0, 0, 1), end_note=(0, 5, 1), voice_index=(0, 5)),
+
+        # m5
         Dynamic(synth=3, levels=[d[3], d[4], d[2], 0, 0], times=[1 / 4, 3 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 2),
-                end_note=(0, 0, 2), voice_index=(0, 0)),
+                start_note=(0, 0, 2), end_note=(0, 0, 2), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[6], d[3], d[2], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 2),
-                end_note=(0, 0, 2), voice_index=(0, 5)),
+                start_note=(0, 5, 2), end_note=(0, 0, 2), voice_index=(0, 5)),
+
+        # m7
         Dynamic(synth=2, levels=[d[2], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 3),
-                end_note=(0, 5, 3), voice_index=(0, 0)),
+                start_note=(0, 0, 3), end_note=(0, 5, 3), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[2], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 3),
-                end_note=(0, 5, 3), voice_index=(0, 5)),
+                start_note=(0, 0, 3), end_note=(0, 5, 3), voice_index=(0, 5)),
+
+        # m9
         Dynamic(synth=3, levels=[d[2], d[3], d[3], 0, 0], times=[5 / 6, 1 / 6, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 4),
-                end_note=(0, 5, 4), voice_index=(0, 0)),
+                start_note=(0, 0, 4), end_note=(0, 5, 4), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[2], d[3], d[3], 0, 0], times=[5 / 6, 1 / 6, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 4),
-                end_note=(0, 5, 4), voice_index=(0, 5)),
+                start_note=(0, 0, 4), end_note=(0, 5, 4), voice_index=(0, 5)),
+
+        # m10
         Dynamic(synth=2, levels=[d[6], d[1], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 5),
-                end_note=(0, 0, 18), voice_index=(0, 0)),
+                start_note=(0, 0, 5), end_note=(0, 0, 18), voice_index=(0, 0)),
+
+        # m13
         Dynamic(synth=2, levels=[d[1], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 19),
-                end_note=(0, 5, 5), voice_index=(0, 0)),
+                start_note=(0, 0, 19), end_note=(0, 5, 5), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[1], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 19),
-                end_note=(0, 5, 5), voice_index=(0, 5)),
+                start_note=(0, 0, 19), end_note=(0, 5, 5), voice_index=(0, 5)),
+
+        # m15
         Dynamic(synth=4, levels=[d[6], d[6], d[2], d[1], 0], times=[1/4, 5/8, 1/8, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 6),
-                end_note=(0, 0, 20), voice_index=(0, 0)),
+                start_note=(0, 5, 6), end_note=(0, 0, 20), voice_index=(0, 0)),
         Dynamic(synth=4, levels=[d[6], d[6], d[2], d[1], 0], times=[1/4, 5/8, 1/8, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 6),
-                end_note=(0, 0, 20), voice_index=(0, 5)),
+                start_note=(0, 5, 6), end_note=(0, 0, 20), voice_index=(0, 5)),
 
         # m21
         Dynamic(synth=3, levels=[d[5], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 12),
-                end_note=(0, 3, 0), voice_index=(0, 0)),
+                start_note=(0, 5, 12), end_note=(0, 3, 0), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[3], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 12),
-                end_note=(0, 3, 0), voice_index=(0, 3)),
+                start_note=(0, 5, 12), end_note=(0, 3, 0), voice_index=(0, 3)),
         Dynamic(synth=3, levels=[d[3], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 12),
-                end_note=(0, 3, 0), voice_index=(0, 4)),
+                start_note=(0, 5, 12), end_note=(0, 3, 0), voice_index=(0, 4)),
         Dynamic(synth=3, levels=[d[3], d[1], d[1], 0, 0], times=[4/5, 1/5, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 12),
-                end_note=(0, 3, 0), voice_index=(0, 5)),
+                start_note=(0, 5, 12), end_note=(0, 3, 0), voice_index=(0, 5)),
 
         # m23
         Dynamic(synth=4, levels=[d[1], d[3], d[3], d[1], 0], times=[3/10, 2/5, 3/10, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 13),
-                end_note=(0, 3, 1), voice_index=(0, 0)),
+                start_note=(0, 5, 13), end_note=(0, 3, 1), voice_index=(0, 0)),
         Dynamic(synth=4, levels=[d[1], d[3], d[3], d[1], 0], times=[3/10, 2/5, 3/10, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 13),
-                end_note=(0, 3, 1), voice_index=(0, 3)),
+                start_note=(0, 5, 13), end_note=(0, 3, 1), voice_index=(0, 3)),
         Dynamic(synth=4, levels=[d[1], d[3], d[3], d[1], 0], times=[3/10, 2/5, 3/10, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 13),
-                end_note=(0, 3, 1), voice_index=(0, 4)),
-        Dynamic(synth=5, levels=[d[1], d[3], d[3], d[2], d[1]], times=[69/410, 46/205, 69/410, 18/41, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 13),
-                end_note=(0, 5, 13), voice_index=(0, 5)),
+                start_note=(0, 5, 13), end_note=(0, 3, 1), voice_index=(0, 4)),
+        Dynamic(synth=5, levels=[d[1], d[3], d[3], d[2], d[1]], times=[69/410, 46/205, 69/410, 18/41, 0],
+                curves=[0, 0, 0, 0], start_note=(0, 5, 13), end_note=(0, 5, 13), voice_index=(0, 5)),
 
         # m30
         Dynamic(synth=2, levels=[d[6], d[2], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 39),
-                end_note=(0, 0, 39), voice_index=(0, 0)),
+                start_note=(0, 0, 39), end_note=(0, 0, 39), voice_index=(0, 0)),
 
         # m33
         Dynamic(synth=2, levels=[d[4], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 47),
-                end_note=(0, 0, 51), voice_index=(0, 0)),
+                start_note=(0, 0, 47), end_note=(0, 0, 51), voice_index=(0, 0)),
 
         # m36
         Dynamic(synth=2, levels=[d[8], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 66),
-                end_note=(0, 0, 66), voice_index=(0, 0)),
+                start_note=(0, 0, 66), end_note=(0, 0, 66), voice_index=(0, 0)),
 
         # m44
         Dynamic(synth=3, levels=[d[4], d[1], d[5], 0, 0], times=[3/8, 5/8, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 30),
-                end_note=(0, 5, 32), voice_index=(0, 0)),
+                start_note=(0, 5, 30), end_note=(0, 5, 32), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[4], d[1], d[5], 0, 0], times=[3/8, 5/8, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 30),
-                end_note=(0, 5, 32), voice_index=(0, 5)),
+                start_note=(0, 5, 30), end_note=(0, 5, 32), voice_index=(0, 5)),
 
         # m47
         Dynamic(synth=2, levels=[d[4], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 99),
-                end_note=(0, 0, 111), voice_index=(0, 0)),
+                start_note=(0, 0, 99), end_note=(0, 0, 111), voice_index=(0, 0)),
 
         # m48
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34),
-                end_note=(0, 0, 112), voice_index=(0, 0)),
+                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34),
-                end_note=(0, 0, 112), voice_index=(0, 3)),
+                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 3)),
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34),
-                end_note=(0, 0, 112), voice_index=(0, 5)),
+                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 5)),
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34),
-                end_note=(0, 0, 112), voice_index=(0, 7)),
+                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 7)),
 
         # m51
         Dynamic(synth=4, levels=[d[2], d[4], d[7], d[5], 0], times=[11/32, 149/32, 3/8, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 114),
-                end_note=(0, 0, 116), voice_index=(0, 0)),
+                start_note=(0, 0, 114), end_note=(0, 0, 116), voice_index=(0, 0)),
         Dynamic(synth=4, levels=[d[2], d[4], d[7], d[5], 0], times=[11/32, 149/32, 3/8, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 114),
-                end_note=(0, 0, 116), voice_index=(0, 5)),
+                start_note=(0, 0, 114), end_note=(0, 0, 116), voice_index=(0, 5)),
 
         # m55
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 40),
-                end_note=(0, 5, 41), voice_index=(0, 0)),
+                start_note=(0, 5, 40), end_note=(0, 5, 41), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 40),
-                end_note=(0, 5, 41), voice_index=(0, 5)),
+                start_note=(0, 5, 40), end_note=(0, 5, 41), voice_index=(0, 5)),
 
         # m58
         Dynamic(synth=2, levels=[d[6], d[2], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 51),
-                end_note=(0, 5, 51), voice_index=(0, 5)),
+                start_note=(0, 5, 51), end_note=(0, 5, 51), voice_index=(0, 5)),
 
         # m61
         Dynamic(synth=2, levels=[d[7], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 141),
-                end_note=(0, 5, 58), voice_index=(0, 0)),
+                start_note=(0, 0, 141), end_note=(0, 5, 58), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[7], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 141),
-                end_note=(0, 5, 58), voice_index=(0, 5)),
+                start_note=(0, 0, 141), end_note=(0, 5, 58), voice_index=(0, 5)),
 
         # m66
         Dynamic(synth=2, levels=[d[2], d[3], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 64),
-                end_note=(0, 5, 68), voice_index=(0, 5)),
+                start_note=(0, 5, 64), end_note=(0, 5, 68), voice_index=(0, 5)),
 
         # m67
         Dynamic(synth=2, levels=[d[4], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 70),
-                end_note=(0, 5, 76), voice_index=(0, 5)),
+                start_note=(0, 5, 70), end_note=(0, 5, 76), voice_index=(0, 5)),
 
         # m70
         Dynamic(synth=2, levels=[d[1], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 150),
-                end_note=(0, 0, 150), voice_index=(0, 0)),
+                start_note=(0, 0, 150), end_note=(0, 0, 150), voice_index=(0, 0)),
 
         # m72
         Dynamic(synth=2, levels=[d[3], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 151),
-                end_note=(0, 0, 151), voice_index=(0, 0)),
+                start_note=(0, 0, 151), end_note=(0, 0, 151), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[3], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 151),
-                end_note=(0, 0, 151), voice_index=(0, 5)),
+                start_note=(0, 0, 151), end_note=(0, 0, 151), voice_index=(0, 5)),
 
         # m76
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 88),
-                end_note=(0, 5, 88), voice_index=(0, 5)),
+                start_note=(0, 5, 88), end_note=(0, 5, 88), voice_index=(0, 5)),
 
         # m77
         Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 92),
-                end_note=(0, 5, 92), voice_index=(0, 5)),
+                start_note=(0, 5, 92), end_note=(0, 5, 92), voice_index=(0, 5)),
 
         # m79
         Dynamic(synth=5, levels=[d[7], d[9], d[7], d[9], d[9]], times=[11/34, 4/17, 4/17, 7/34, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 93),
-                end_note=(0, 5, 98), voice_index=(0, 5)),
+                start_note=(0, 5, 93), end_note=(0, 5, 98), voice_index=(0, 5)),
 
         # m83
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 182),
-                end_note=(0, 0, 189), voice_index=(0, 0)),
+                start_note=(0, 0, 182), end_note=(0, 0, 189), voice_index=(0, 0)),
 
         # m85
         Dynamic(synth=2, levels=[d[7], d[9], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 193),
-                end_note=(0, 0, 195), voice_index=(0, 0)),
+                start_note=(0, 0, 193), end_note=(0, 0, 195), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[7], d[9], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 193),
-                end_note=(0, 0, 195), voice_index=(0, 1)),
+                start_note=(0, 0, 193), end_note=(0, 0, 195), voice_index=(0, 1)),
 
         # m86
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 200),
-                end_note=(0, 0, 203), voice_index=(0, 0)),
+                start_note=(0, 0, 200), end_note=(0, 0, 203), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 200),
-                end_note=(0, 0, 203), voice_index=(0, 1)),
+                start_note=(0, 0, 200), end_note=(0, 0, 203), voice_index=(0, 1)),
 
         # m87
         Dynamic(synth=2, levels=[d[8], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 207),
-                end_note=(0, 5, 99), voice_index=(0, 0)),
+                start_note=(0, 0, 207), end_note=(0, 5, 99), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[8], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 207),
-                end_note=(0, 5, 99), voice_index=(0, 1)),
+                start_note=(0, 0, 207), end_note=(0, 5, 99), voice_index=(0, 1)),
         Dynamic(synth=2, levels=[d[8], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 207),
-                end_note=(0, 5, 99), voice_index=(0, 5)),
+                start_note=(0, 0, 207), end_note=(0, 5, 99), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[8], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 207),
-                end_note=(0, 5, 99), voice_index=(0, 6)),
+                start_note=(0, 0, 207), end_note=(0, 5, 99), voice_index=(0, 6)),
 
         # m89
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 100),
-                end_note=(0, 5, 100), voice_index=(0, 0)),
+                start_note=(0, 5, 100), end_note=(0, 5, 100), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 100),
-                end_note=(0, 5, 100), voice_index=(0, 1)),
+                start_note=(0, 5, 100), end_note=(0, 5, 100), voice_index=(0, 1)),
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 100),
-                end_note=(0, 5, 100), voice_index=(0, 5)),
+                start_note=(0, 5, 100), end_note=(0, 5, 100), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 100),
-                end_note=(0, 5, 100), voice_index=(0, 6)),
+                start_note=(0, 5, 100), end_note=(0, 5, 100), voice_index=(0, 6)),
 
         # m92
         Dynamic(synth=2, levels=[d[5], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 106),
-                end_note=(0, 5, 109), voice_index=(0, 5)),
+                start_note=(0, 5, 106), end_note=(0, 5, 109), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[5], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 106),
-                end_note=(0, 5, 109), voice_index=(0, 6)),
+                start_note=(0, 5, 106), end_note=(0, 5, 109), voice_index=(0, 6)),
 
         # m93
         Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 112),
-                end_note=(0, 5, 115), voice_index=(0, 5)),
+                start_note=(0, 5, 112), end_note=(0, 5, 115), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 112),
-                end_note=(0, 5, 115), voice_index=(0, 6)),
+                start_note=(0, 5, 112), end_note=(0, 5, 115), voice_index=(0, 6)),
 
         # m94
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 119),
-                end_note=(0, 0, 224), voice_index=(0, 0)),
+                start_note=(0, 5, 119), end_note=(0, 0, 224), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 119),
-                end_note=(0, 0, 224), voice_index=(0, 5)),
+                start_note=(0, 5, 119), end_note=(0, 0, 224), voice_index=(0, 5)),
 
         # m97
         Dynamic(synth=2, levels=[d[4], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 125),
-                end_note=(0, 6, 23), voice_index=(0, 5)),
+                start_note=(0, 5, 125), end_note=(0, 6, 23), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[4], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 125),
-                end_note=(0, 6, 23), voice_index=(0, 6)),
+                start_note=(0, 5, 125), end_note=(0, 6, 23), voice_index=(0, 6)),
 
         # m98
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 135),
-                end_note=(0, 5, 139), voice_index=(0, 5)),
+                start_note=(0, 5, 135), end_note=(0, 5, 139), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 135),
-                end_note=(0, 5, 139), voice_index=(0, 6)),
+                start_note=(0, 5, 135), end_note=(0, 5, 139), voice_index=(0, 6)),
 
         # m100
         Dynamic(synth=3, levels=[d[6], d[9], d[8], 0, 0], times=[1/2, 1/2, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 140),
-                end_note=(0, 5, 140), voice_index=(0, 5)),
+                start_note=(0, 5, 140), end_note=(0, 5, 140), voice_index=(0, 5)),
 
         # m102
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 245),
-                end_note=(0, 0, 248), voice_index=(0, 0)),
+                start_note=(0, 0, 245), end_note=(0, 0, 248), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 245),
-                end_note=(0, 0, 248), voice_index=(0, 5)),
+                start_note=(0, 0, 245), end_note=(0, 0, 248), voice_index=(0, 5)),
 
         # m106
         Dynamic(synth=2, levels=[d[2], d[3], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 158),
-                end_note=(0, 5, 162), voice_index=(0, 5)),
+                start_note=(0, 5, 158), end_note=(0, 5, 162), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[2], d[3], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 158),
-                end_note=(0, 5, 162), voice_index=(0, 6)),
+                start_note=(0, 5, 158), end_note=(0, 5, 162), voice_index=(0, 6)),
 
         # m107
         Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 176),
-                end_note=(0, 5, 185), voice_index=(0, 5)),
+                start_note=(0, 5, 176), end_note=(0, 5, 185), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 176),
-                end_note=(0, 5, 185), voice_index=(0, 6)),
+                start_note=(0, 5, 176), end_note=(0, 5, 185), voice_index=(0, 6)),
 
         # m113
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 254),
-                end_note=(0, 5, 195), voice_index=(0, 0)),
+                start_note=(0, 0, 254), end_note=(0, 5, 195), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 254),
-                end_note=(0, 5, 195), voice_index=(0, 5)),
+                start_note=(0, 0, 254), end_note=(0, 5, 195), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 254),
-                end_note=(0, 5, 195), voice_index=(0, 6)),
+                start_note=(0, 0, 254), end_note=(0, 5, 195), voice_index=(0, 6)),
 
         # m114
         Dynamic(synth=2, levels=[d[4], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 270),
-                end_note=(0, 0, 274), voice_index=(0, 0)),
+                start_note=(0, 0, 270), end_note=(0, 0, 274), voice_index=(0, 0)),
 
         # m115
         Dynamic(synth=2, levels=[d[8], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 275),
-                end_note=(0, 0, 277), voice_index=(0, 0)),
+                start_note=(0, 0, 275), end_note=(0, 0, 277), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[8], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 275),
-                end_note=(0, 0, 277), voice_index=(0, 5)),
+                start_note=(0, 0, 275), end_note=(0, 0, 277), voice_index=(0, 5)),
 
         # m116
         Dynamic(synth=2, levels=[d[8], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 201),
-                end_note=(0, 5, 205), voice_index=(0, 0)),
+                start_note=(0, 5, 201), end_note=(0, 5, 205), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[8], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 201),
-                end_note=(0, 5, 205), voice_index=(0, 5)),
+                start_note=(0, 5, 201), end_note=(0, 5, 205), voice_index=(0, 5)),
 
         # m126
         Dynamic(synth=2, levels=[d[2], d[3], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 226),
-                end_note=(0, 5, 229), voice_index=(0, 5)),
+                start_note=(0, 5, 226), end_note=(0, 5, 229), voice_index=(0, 5)),
 
         # m126
         Dynamic(synth=2, levels=[d[3], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 230),
-                end_note=(0, 5, 230), voice_index=(0, 5)),
+                start_note=(0, 5, 230), end_note=(0, 5, 230), voice_index=(0, 5)),
 
         # m127
         Dynamic(synth=2, levels=[d[6], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 231),
-                end_note=(0, 5, 231), voice_index=(0, 5)),
+                start_note=(0, 5, 231), end_note=(0, 5, 231), voice_index=(0, 5)),
 
         # m128
         Dynamic(synth=2, levels=[d[5], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 232),
-                end_note=(0, 5, 233), voice_index=(0, 5)),
+                start_note=(0, 5, 232), end_note=(0, 5, 233), voice_index=(0, 5)),
 
         # m132
         Dynamic(synth=2, levels=[d[7], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 247),
-                end_note=(0, 5, 251), voice_index=(0, 5)),
+                start_note=(0, 5, 247), end_note=(0, 5, 251), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[7], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 247),
-                end_note=(0, 5, 251), voice_index=(0, 6)),
+                start_note=(0, 5, 247), end_note=(0, 5, 251), voice_index=(0, 6)),
 
         # m136
         Dynamic(synth=2, levels=[d[7], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 266),
-                end_note=(0, 5, 266), voice_index=(0, 5))
+                start_note=(0, 5, 266), end_note=(0, 5, 266), voice_index=(0, 5))
     ]
 
     dynamics2 = [
         # m5
         Dynamic(synth=3, levels=[d[3], d[5], d[3], 0, 0], times=[6/11, 5/11, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 1, 0),
-                end_note=(0, 7, 0), voice_index=(0, 1)),
+                start_note=(0, 1, 0), end_note=(0, 7, 0), voice_index=(0, 1)),
         Dynamic(synth=3, levels=[d[3], d[5], d[3], 0, 0], times=[6/11, 5/11, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 1, 0),
-                end_note=(0, 7, 0), voice_index=(0, 7)),
+                start_note=(0, 1, 0), end_note=(0, 7, 0), voice_index=(0, 7)),
 
         # m10
         Dynamic(synth=2, levels=[d[5], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 1, 9),
-                end_note=(0, 1, 9), voice_index=(0, 1)),
+                start_note=(0, 1, 9), end_note=(0, 1, 9), voice_index=(0, 1)),
         Dynamic(synth=2, levels=[d[5], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 1, 9),
-                end_note=(0, 1, 9), voice_index=(0, 2)),
+                start_note=(0, 1, 9), end_note=(0, 1, 9), voice_index=(0, 2)),
 
         # m10
         Dynamic(synth=2, levels=[d[3], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 1, 10),
-                end_note=(0, 1, 10), voice_index=(0, 1)),
+                start_note=(0, 1, 10), end_note=(0, 1, 10), voice_index=(0, 1)),
         Dynamic(synth=2, levels=[d[3], d[4], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 1, 10),
-                end_note=(0, 1, 10), voice_index=(0, 7)),
+                start_note=(0, 1, 10), end_note=(0, 1, 10), voice_index=(0, 7)),
 
         # m14
         Dynamic(synth=2, levels=[d[1], d[2], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 7, 8),
-                end_note=(0, 7, 8), voice_index=(0, 1)),
+                start_note=(0, 7, 8), end_note=(0, 7, 8), voice_index=(0, 1)),
         Dynamic(synth=2, levels=[d[1], d[2], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 7, 8),
-                end_note=(0, 7, 8), voice_index=(0, 7))
+                start_note=(0, 7, 8), end_note=(0, 7, 8), voice_index=(0, 7))
     ]
 
     # A data structure that holds conversion information for FM synths. Index 1 holds the synth index in the score,
@@ -1362,8 +1316,8 @@ def build_score():
     collapse_voices(parsed_parts2)
 
     # Create the SuperCollider score
-    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score1", parsed_parts1, "score1")
-    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score2", parsed_parts2, "score2")
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT_DESKTOP}\\score1", parsed_parts1, "score1")
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT_DESKTOP}\\score2", parsed_parts2, "score2")
 
 
 def collapse_voices(new_parts):
