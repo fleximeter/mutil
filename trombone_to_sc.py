@@ -13,7 +13,8 @@ import time
 
 # File names and locations
 OUTPUT_DESKTOP = "D:\\SuperCollider\\erudition_i"
-OUTPUT_LAPTOP = "C:\\Users\\Jeffrey Martin\\Source\\erudition_i"
+OUTPUT_LAPTOP = "C:\\Users\\Jeff Martin\\Source\\erudition_i"
+OUTPUT = OUTPUT_LAPTOP
 FILE1 = "Trombone Piece 0.2.4.1a - Full score - 01 erudition I.xml"
 FILE2 = "Trombone Piece 0.2.4.1b - Full score - 01 erudition I.xml"
 FILE1_debug = "Trombone Piece 0.2.4.1a_debug - Full score - 01 erudition I.xml"
@@ -248,6 +249,15 @@ def add_legato(notes, legato_dur):
     """
     for note in notes:
         note.duration += legato_dur
+        if note.duration > 1:
+            note.env = sc_data_gen.env6_weak_atk(note.duration)
+            note.envlen = 6
+        elif note.duration >= 0.25:
+            note.env = sc_data_gen.env5_weak_atk(note.duration)
+            note.envlen = 5
+        else:
+            note.env = sc_data_gen.env4_weak_atk(note.duration)
+            note.envlen = 4
 
 
 def batch_fm_synth_update(new_parts, updates):
@@ -295,6 +305,200 @@ def build_score():
 
     # Output the score for manual edit planning
     xml_parse_sc.dump_parts(parsed_parts1)
+
+    # Add legato
+    legato = [
+        parsed_parts1[0][0][5],
+        parsed_parts1[0][0][6],
+        parsed_parts1[0][0][7],
+        parsed_parts1[0][0][8],
+        parsed_parts1[0][0][9],
+        parsed_parts1[0][0][10],
+        parsed_parts1[0][0][11],
+        parsed_parts1[0][0][12],
+        parsed_parts1[0][0][13],
+        parsed_parts1[0][0][14],
+        parsed_parts1[0][0][15],
+        parsed_parts1[0][0][16],
+        parsed_parts1[0][0][17],
+        parsed_parts1[0][0][18],
+        parsed_parts1[0][5][6],
+        parsed_parts1[0][5][10],
+        parsed_parts1[0][0][28],
+        parsed_parts1[0][0][33],
+        parsed_parts1[0][0][42],
+        parsed_parts1[0][0][43],
+        parsed_parts1[0][0][45],
+        parsed_parts1[0][0][47],
+        parsed_parts1[0][0][48],
+        parsed_parts1[0][0][49],
+        parsed_parts1[0][0][50],
+        parsed_parts1[0][0][53],
+        parsed_parts1[0][0][56],
+        parsed_parts1[0][0][58],
+        parsed_parts1[0][0][60],
+        parsed_parts1[0][0][61],
+        parsed_parts1[0][0][63],
+        parsed_parts1[0][0][64],
+        parsed_parts1[0][0][65],
+        parsed_parts1[0][0][66],
+        parsed_parts1[0][0][67],
+        parsed_parts1[0][0][69],
+        parsed_parts1[0][0][71],
+        parsed_parts1[0][0][73],
+        parsed_parts1[0][0][74],
+        parsed_parts1[0][0][79],
+        parsed_parts1[0][0][82],
+        parsed_parts1[0][0][87],
+        parsed_parts1[0][0][90],
+        parsed_parts1[0][0][91],
+        parsed_parts1[0][0][93],
+        parsed_parts1[0][0][95],
+        parsed_parts1[0][0][97],
+        parsed_parts1[0][5][25],
+        parsed_parts1[0][5][26],
+        parsed_parts1[0][5][27],
+        parsed_parts1[0][5][30],
+        parsed_parts1[0][5][31],
+        parsed_parts1[0][0][99],
+        parsed_parts1[0][0][100],
+        parsed_parts1[0][0][101],
+        parsed_parts1[0][0][103],
+        parsed_parts1[0][0][104],
+        parsed_parts1[0][0][105],
+        parsed_parts1[0][0][107],
+        parsed_parts1[0][0][108],
+        parsed_parts1[0][0][109],
+        parsed_parts1[0][0][110],
+        parsed_parts1[0][0][112],
+        parsed_parts1[0][3][5],
+        parsed_parts1[0][0][114],
+        parsed_parts1[0][5][35],
+        parsed_parts1[0][5][36],
+        parsed_parts1[0][5][38],
+        parsed_parts1[0][5][40],
+        parsed_parts1[0][0][118],
+        parsed_parts1[0][0][123],
+        parsed_parts1[0][1][0],
+        parsed_parts1[0][5][45],
+        parsed_parts1[0][5][46],
+        parsed_parts1[0][0][127],
+        parsed_parts1[0][0][131],
+        parsed_parts1[0][0][136],
+        parsed_parts1[0][5][52],
+        parsed_parts1[0][0][143],
+        parsed_parts1[0][0][144],
+        parsed_parts1[0][0][65],
+        parsed_parts1[0][0][66],
+        parsed_parts1[0][0][71],
+        parsed_parts1[0][0][74],
+        parsed_parts1[0][0][154],
+        parsed_parts1[0][0][155],
+        parsed_parts1[0][0][162],
+        parsed_parts1[0][0][163],
+        parsed_parts1[0][0][164],
+        parsed_parts1[0][0][174],
+        parsed_parts1[0][0][175],
+        parsed_parts1[0][0][177],
+        parsed_parts1[0][0][179],
+        parsed_parts1[0][0][182],
+        parsed_parts1[0][0][184],
+        parsed_parts1[0][0][185],
+        parsed_parts1[0][0][187],
+        parsed_parts1[0][0][188],
+        parsed_parts1[0][0][190],
+        parsed_parts1[0][0][191],
+        parsed_parts1[0][1][10],
+        parsed_parts1[0][0][197],
+        parsed_parts1[0][0][198],
+        parsed_parts1[0][0][200],
+        parsed_parts1[0][0][201],
+        parsed_parts1[0][0][202],
+        parsed_parts1[0][0][210],
+        parsed_parts1[0][1][19],
+        parsed_parts1[0][0][214],
+        parsed_parts1[0][0][215],
+        parsed_parts1[0][0][216],
+        parsed_parts1[0][0][217],
+        parsed_parts1[0][5][108],
+        parsed_parts1[0][6][10],
+        parsed_parts1[0][5][112],
+        parsed_parts1[0][5][114],
+        parsed_parts1[0][6][14],
+        parsed_parts1[0][6][16],
+        parsed_parts1[0][5][119],
+        parsed_parts1[0][0][225],
+        parsed_parts1[0][0][226],
+        parsed_parts1[0][0][227],
+        parsed_parts1[0][5][128],
+        parsed_parts1[0][5][129],
+        parsed_parts1[0][5][136],
+        parsed_parts1[0][0][232],
+        parsed_parts1[0][0][238],
+        parsed_parts1[0][0][241],
+        parsed_parts1[0][0][242],
+        parsed_parts1[0][5][142],
+        parsed_parts1[0][5][143],
+        parsed_parts1[0][0][249],
+        parsed_parts1[0][0][250],
+        parsed_parts1[0][0][251],
+        parsed_parts1[0][0][252],
+        parsed_parts1[0][5][143],
+        parsed_parts1[0][5][155],
+        parsed_parts1[0][5][156],
+        parsed_parts1[0][5][159],
+        parsed_parts1[0][5][160],
+        parsed_parts1[0][5][165],
+        parsed_parts1[0][5][166],
+        parsed_parts1[0][5][172],
+        parsed_parts1[0][5][176],
+        parsed_parts1[0][5][177],
+        parsed_parts1[0][5][180],
+        parsed_parts1[0][5][181],
+        parsed_parts1[0][5][182],
+        parsed_parts1[0][5][187],
+        parsed_parts1[0][5][188],
+        parsed_parts1[0][0][254],
+        parsed_parts1[0][0][255],
+        parsed_parts1[0][0][257],
+        parsed_parts1[0][0][258],
+        parsed_parts1[0][0][260],
+        parsed_parts1[0][0][261],
+        parsed_parts1[0][0][265],
+        parsed_parts1[0][0][266],
+        parsed_parts1[0][0][270],
+        parsed_parts1[0][0][271],
+        parsed_parts1[0][0][272],
+        parsed_parts1[0][0][273],
+        parsed_parts1[0][0][279],
+        parsed_parts1[0][5][206],
+        parsed_parts1[0][5][208],
+        parsed_parts1[0][5][211],
+        parsed_parts1[0][5][215],
+        parsed_parts1[0][5][216],
+        parsed_parts1[0][5][227],
+        parsed_parts1[0][5][232],
+        parsed_parts1[0][5][240],
+        parsed_parts1[0][5][241],
+        parsed_parts1[0][5][245],
+        parsed_parts1[0][5][247],
+        parsed_parts1[0][5][248],
+        parsed_parts1[0][6][45],
+        parsed_parts1[0][6][46],
+        parsed_parts1[0][6][50],
+        parsed_parts1[0][5][257],
+        parsed_parts1[0][5][258],
+        parsed_parts2[0][0][0],
+        parsed_parts2[0][1][0],
+        parsed_parts2[0][1][2],
+        parsed_parts2[0][1][6],
+        parsed_parts2[0][1][19],
+        parsed_parts2[0][1][21],
+        parsed_parts2[0][7][2],
+        parsed_parts2[0][7][3],
+        parsed_parts2[0][7][4]
+    ]
+    add_legato(legato, 0.04)
 
     # Data structures that hold score updates for panning
     pan1 = []
@@ -1316,8 +1520,8 @@ def build_score():
     collapse_voices(parsed_parts2)
 
     # Create the SuperCollider score
-    xml_parse_sc.dump_sc_to_file(f"{OUTPUT_DESKTOP}\\score1", parsed_parts1, "score1")
-    xml_parse_sc.dump_sc_to_file(f"{OUTPUT_DESKTOP}\\score2", parsed_parts2, "score2")
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score1", parsed_parts1, "score1")
+    xml_parse_sc.dump_sc_to_file(f"{OUTPUT}\\score2", parsed_parts2, "score2")
 
 
 def collapse_voices(new_parts):

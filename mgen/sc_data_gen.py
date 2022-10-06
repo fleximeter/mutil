@@ -29,6 +29,17 @@ def env4_weak_atk(duration):
     return env
 
 
+def env4_no_atk(duration):
+    """
+    Generates a 4-point envelope with no attack. Minimum duration of note: 0.08 seconds.
+    :param duration: The duration
+    :return: The envelope as a string
+    """
+    env = f"[[0, 0.75, 0.75, 0, 0, 0, 0, 0, 0, 0], [0.04, {duration - 0.04 - 0.04}, " \
+          f"0.04, 0, 0, 0, 0, 0, 0], [4, 0, -4, 0, 0, 0, 0, 0, 0]]"
+    return env
+
+
 def env5_strong_atk(duration):
     """
     Generates a 5-point envelope with a strong attack. Minimum duration of note: 0.22 seconds.
