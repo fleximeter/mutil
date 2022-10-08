@@ -666,7 +666,6 @@ def build_score():
         "0,5,40": Pan(start_note=(0, 5, 40), pan2=0, panx=0.7, panw=2.0),
         # m55
         "0,5,41": Pan(start_note=(0, 5, 41), pan2=0, panx=0.7, panw=2.0),
-
         # m56
         "0,0,118": Pan(start_note=(0, 0, 118), pan2=0, panx=0.3, panw=2.0),
         "0,0,119": Pan(start_note=(0, 0, 119), pan2=0, panx=0.3, panw=2.0),
@@ -817,7 +816,6 @@ def build_score():
         "0,0,174": Pan(start_note=(0, 0, 174), pan2=0, panx=0.3, panw=2.0),
         "0,5,97": Pan(start_note=(0, 5, 97), pan2=0, panx=0.7, panw=2.0),
         "0,5,98": Pan(start_note=(0, 5, 98), pan2=0, panx=0.7, panw=2.0),
-
         # m81
         "0,0,175": Pan(start_note=(0, 0, 175), pan2=0, panx=0.3, panw=2.0),
         "0,0,176": Pan(start_note=(0, 0, 176), pan2=0, panx=0.3, panw=2.0),
@@ -938,7 +936,68 @@ def build_score():
         "0,0,228": Pan(start_note=(0, 0, 228), pan2=0, panx=0.5, panw=2.0),
         "0,5,119": Pan(start_note=(0, 5, 119), pan2=0, panx=0.7, panw=2.0),
         "0,5,120": Pan(start_note=(0, 5, 120), pan2=0, panx=0.65, panw=2.0),
-
+        # m96
+        "0,5,121": Pan(start_note=(0, 5, 121), pan2=0, panx=0.5, panw=2.0),
+        "0,5,122": Pan(start_note=(0, 5, 122), pan2=0, panx=0.5, panw=2.0),
+        "0,5,123": Pan(start_note=(0, 5, 123), pan2=0, panx=0.45, panw=2.0),
+        "0,5,124": Pan(start_note=(0, 5, 124), pan2=0, panx=0.45, panw=2.0),
+        "0,7,6": Pan(start_note=(0, 7, 6), pan2=0, panx=0.7, panw=2.0),
+        "0,7,7": Pan(start_note=(0, 7, 7), pan2=0, panx=0.7, panw=2.0),
+        "0,6,19": Pan(start_note=(0, 6, 19), pan2=0, panx=0.65, panw=2.0),
+        "0,6,20": Pan(start_note=(0, 6, 20), pan2=0, panx=0.65, panw=2.0),
+        # m97
+        "0,5,125": Pan(start_note=(0, 5, 125), pan2=0, panx=0.4, panw=2.0),
+        "0,5,126": Pan(start_note=(0, 5, 126), pan2=0, panx=0.4, panw=2.0),
+        "0,5,127": Pan(start_note=(0, 5, 127), pan2=0, panx=0.4, panw=2.0),
+        "0,5,128": Pan(start_note=(0, 5, 128), pan2=0, panx=0.45, panw=2.0),
+        "0,5,129": Pan(start_note=(0, 5, 129), pan2=0, panx=0.5, panw=2.0),
+        "0,5,130": Pan(start_note=(0, 5, 130), pan2=0, panx=0.5, panw=2.0),
+        "0,6,21": Pan(start_note=(0, 6, 21), pan2=0, panx=0.6, panw=2.0),
+        "0,6,22": Pan(start_note=(0, 6, 22), pan2=0, panx=0.6, panw=2.0),
+        "0,6,23": Pan(start_note=(0, 6, 23), pan2=0, panx=0.6, panw=2.0),
+        # m98
+        "0,5,131": Pan(start_note=(0, 5, 131), pan2=0, panx=0.55, panw=2.0),
+        "0,5,132": Pan(start_note=(0, 5, 132), pan2=0, panx=0.5, panw=2.0),
+        "0,5,133": Pan(start_note=(0, 5, 133), pan2=0, panx=0.45, panw=2.0),
+        "0,5,134": Pan(start_note=(0, 5, 134), pan2=0, panx=0.4, panw=2.0),
+        "0,5,135": Pan(start_note=(0, 5, 135), pan2=0, panx=0.45, panw=2.0),
+        "0,5,136": Pan(start_note=(0, 5, 136), pan2=0, panx=0.55, panw=2.0),
+        "0,5,137": Pan(start_note=(0, 5, 137), pan2=0, panx=0.4, panw=2.0),
+        "0,5,138": Pan(start_note=(0, 5, 138), pan2=0, panx=0.4, panw=2.0),
+        "0,5,139": Pan(start_note=(0, 5, 139), pan2=0, panx=0.4, panw=2.0),
+        "0,6,24": Pan(start_note=(0, 6, 24), pan2=0, panx=0.6, panw=2.0),
+        "0,6,25": Pan(start_note=(0, 6, 25), pan2=0, panx=0.6, panw=2.0),
+        "0,6,26": Pan(start_note=(0, 6, 26), pan2=0, panx=0.6, panw=2.0),
+        # m99
+        "0,0,229": Pan(start_note=(0, 0, 229), pan2=0, panx=0.4, panw=2.0),
+        "0,0,230": Pan(start_note=(0, 0, 230), pan2=0, panx=0.35, panw=2.0),
+        "0,0,231": Pan(start_note=(0, 0, 231), pan2=0, panx=0.4, panw=2.0),
+        "0,0,232": Pan(start_note=(0, 0, 232), pan2=0, panx=0.45, panw=2.0),
+        "0,0,233": Pan(start_note=(0, 0, 233), pan2=0, panx=0.4, panw=2.0),
+        # m100
+        "0,0,234": Pan(start_note=(0, 0, 234), pan2=0, panx=0.35, panw=2.0),
+        "0,0,235": Pan(start_note=(0, 0, 235), pan2=0, panx=0.45, panw=2.0),
+        "0,0,236": Pan(start_note=(0, 0, 236), pan2=0, panx=0.4, panw=2.0),
+        "0,0,237": Pan(start_note=(0, 0, 237), pan2=0, panx=0.4, panw=2.0),
+        "0,0,238": Pan(start_note=(0, 0, 238), pan2=0, panx=0.4, panw=2.0),
+        "0,0,239": Pan(start_note=(0, 0, 239), pan2=0, panx=0.4, panw=2.0),
+        "0,5,140": Pan(start_note=(0, 5, 140), pan2=0, panx=0.65, panw=2.0),
+        # m101
+        "0,0,240": Pan(start_note=(0, 0, 240), pan2=0, panx=0.35, panw=2.0),
+        "0,0,241": Pan(start_note=(0, 0, 241), pan2=0, panx=0.35, panw=2.0),
+        "0,0,242": Pan(start_note=(0, 0, 242), pan2=0, panx=0.35, panw=2.0),
+        "0,0,243": Pan(start_note=(0, 0, 243), pan2=0, panx=0.35, panw=2.0),
+        "0,0,244": Pan(start_note=(0, 0, 244), pan2=0, panx=0.35, panw=2.0),
+        "0,1,22": Pan(start_note=(0, 1, 22), pan2=0, panx=0.5, panw=2.0),
+        "0,1,23": Pan(start_note=(0, 1, 23), pan2=0, panx=0.5, panw=2.0),
+        "0,5,141": Pan(start_note=(0, 5, 141), pan2=0, panx=0.65, panw=2.0),
+        # m102
+        "0,0,245": Pan(start_note=(0, 0, 245), pan2=0, panx=0.4, panw=2.0),
+        "0,0,246": Pan(start_note=(0, 0, 246), pan2=0, panx=0.4, panw=2.0),
+        "0,0,247": Pan(start_note=(0, 0, 247), pan2=0, panx=0.4, panw=2.0),
+        "0,0,248": Pan(start_note=(0, 0, 248), pan2=0, panx=0.4, panw=2.0),
+        "0,5,142": Pan(start_note=(0, 5, 142), pan2=0, panx=0.6, panw=2.0),
+        "0,5,143": Pan(start_note=(0, 5, 143), pan2=0, panx=0.6, panw=2.0),
     }
     pan2 = {
 
