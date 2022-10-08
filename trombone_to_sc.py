@@ -341,8 +341,6 @@ def build_score():
         parsed_parts1[0][0][63],
         parsed_parts1[0][0][64],
         parsed_parts1[0][0][65],
-        parsed_parts1[0][0][66],
-        parsed_parts1[0][0][67],
         parsed_parts1[0][0][69],
         parsed_parts1[0][0][71],
         parsed_parts1[0][0][73],
