@@ -513,8 +513,8 @@ def build_score():
         "0,0,3": Pan(start_note=(0, 0, 3), pan2=0.4, panx=0.4, panw=2.0),
         "0,5,3": Pan(start_note=(0, 5, 3), pan2=0.65, panx=0.65, panw=2.0),
         # m9
-        "0,0,4": Pan(start_note=(0, 0, 4), pan2=0.4, panx=2, panw=2.0),
-        "0,5,4": Pan(start_note=(0, 5, 4), pan2=0.6, panx=3, panw=2.0),
+        "0,0,4": Pan(start_note=(0, 0, 4), pan2=0.4, panx=2.6, panw=2.0),
+        "0,5,4": Pan(start_note=(0, 5, 4), pan2=0.6, panx=2.4, panw=2.0),
         # m10
         "0,0,5": Pan(start_note=(0, 0, 5), pan2=0.45, panx=0.45, panw=2.0),
         "0,0,6": Pan(start_note=(0, 0, 6), pan2=0.45, panx=0.45, panw=2.0),
@@ -534,15 +534,15 @@ def build_score():
         "0,0,19": Pan(start_note=(0, 0, 19), pan2=0.45, panx=0.45, panw=2.0),
         "0,5,5": Pan(start_note=(0, 5, 5), pan2=0.55, panx=0.55, panw=2.0),
         # m15
-        "0,0,20": Pan(start_note=(0, 0, 20), pan2=0.4, panx=0.4, panw=2.0),
-        "0,5,6": Pan(start_note=(0, 5, 6), pan2=0.55, panx=0.55, panw=2.0),
+        "0,0,20": Pan(start_note=(0, 0, 20), pan2=0.4, panx=2.6, panw=2.0),
+        "0,5,6": Pan(start_note=(0, 5, 6), pan2=0.55, panx=2.45, panw=2.0),
         # m16
-        "0,5,7": Pan(start_note=(0, 5, 7), pan2=0.6, panx=0.6, panw=2.0),
+        "0,5,7": Pan(start_note=(0, 5, 7), pan2=0.6, panx=2.4, panw=2.0),
         # m20
-        "0,5,8": Pan(start_note=(0, 5, 8), pan2=0.4, panx=1, panw=2.0),
+        "0,5,8": Pan(start_note=(0, 5, 8), pan2=0.4, panx=3, panw=2.0),
         "0,5,9": Pan(start_note=(0, 5, 9), pan2=0.5, panx=2, panw=2.0),
-        "0,5,10": Pan(start_note=(0, 5, 10), pan2=0.6, panx=3, panw=2.0),
-        "0,5,11": Pan(start_note=(0, 5, 11), pan2=0.6, panx=3, panw=2.0),
+        "0,5,10": Pan(start_note=(0, 5, 10), pan2=0.6, panx=0.6, panw=2.0),
+        "0,5,11": Pan(start_note=(0, 5, 11), pan2=0.6, panx=0.6, panw=2.0),
         # mm 21-24
         "0,0,21": Pan(start_note=(0, 0, 21), pan2=0.35, panx=2.65, panw=2.0),
         "0,0,22": Pan(start_note=(0, 0, 22), pan2=0.35, panx=2.65, panw=2.0),
