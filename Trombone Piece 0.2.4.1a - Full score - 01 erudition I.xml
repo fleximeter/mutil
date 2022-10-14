@@ -10,7 +10,7 @@
     <rights>Copyright © 2022 by Jeffrey Martin. All rights reserved. https://jeffreymartincomposer.com</rights>
     <encoding>
       <software>Dorico 4.2.0.1092</software>
-      <encoding-date>2022-09-25</encoding-date>
+      <encoding-date>2022-10-14</encoding-date>
     </encoding>
   </identification>
   <part-list>
@@ -22370,13 +22370,21 @@
           <alter>1.5</alter>
           <octave>3</octave>
         </pitch>
-        <duration>10</duration>
+        <duration>5</duration>
         <voice>3</voice>
-        <type>eighth</type>
+        <type>16th</type>
         <accidental>three-quarters-sharp</accidental>
         <stem>up</stem>
         <staff>1</staff>
-        <beam number="1">end</beam>
+        <beam number="1">continue</beam>
+        <beam number="2">begin</beam>
+      </note>
+      <note>
+        <rest/>
+        <duration>5</duration>
+        <voice>3</voice>
+        <type>16th</type>
+        <staff>1</staff>
       </note>
       <note>
         <rest/>
