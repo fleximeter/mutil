@@ -14,7 +14,7 @@ import time
 # File names and locations
 OUTPUT_DESKTOP = "D:\\SuperCollider\\erudition_i"
 OUTPUT_LAPTOP = "C:\\Users\\Jeff Martin\\Source\\erudition_i"
-OUTPUT = OUTPUT_DESKTOP
+OUTPUT = OUTPUT_LAPTOP
 FILE1 = "Trombone Piece 0.2.4.1a - Full score - 01 erudition I.xml"
 FILE2 = "Trombone Piece 0.2.4.1b - Full score - 01 erudition I.xml"
 FILE1_debug = "Trombone Piece 0.2.4.1a_debug - Full score - 01 erudition I.xml"
@@ -1373,7 +1373,7 @@ def build_score():
 
         # m5
         Dynamic(synth=3, levels=[d[3], d[4], d[2], 0, 0], times=[1 / 4, 3 / 4, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 0, 2), end_note=(0, 0, 2), voice_index=(0, 0)),
+                start_note=(0, 5, 2), end_note=(0, 0, 2), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[6], d[3], d[2], 0, 0], times=[1 / 3, 2 / 3, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 2), end_note=(0, 0, 2), voice_index=(0, 5)),
 
@@ -1432,6 +1432,8 @@ def build_score():
         # m33
         Dynamic(synth=2, levels=[d[4], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 47), end_note=(0, 0, 51), voice_index=(0, 0)),
+        Dynamic(synth=2, levels=[d[3], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 19), end_note=(0, 5, 19), voice_index=(0, 5)),
 
         # m36
         Dynamic(synth=2, levels=[d[8], d[5], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
@@ -1449,13 +1451,13 @@ def build_score():
 
         # m48
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 0)),
+                start_note=(0, 5, 34), end_note=(0, 0, 113), voice_index=(0, 0)),
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 3)),
+                start_note=(0, 5, 34), end_note=(0, 0, 113), voice_index=(0, 3)),
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 5)),
+                start_note=(0, 5, 34), end_note=(0, 0, 113), voice_index=(0, 5)),
         Dynamic(synth=3, levels=[d[5], d[2], d[2], 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 34), end_note=(0, 0, 112), voice_index=(0, 7)),
+                start_note=(0, 5, 34), end_note=(0, 0, 113), voice_index=(0, 7)),
 
         # m51
         Dynamic(synth=4, levels=[d[2], d[4], d[7], d[5], 0], times=[11/32, 149/32, 3/8, 0, 0], curves=[0, 0, 0, 0],
@@ -1463,7 +1465,7 @@ def build_score():
         Dynamic(synth=4, levels=[d[2], d[4], d[7], d[5], 0], times=[11/32, 149/32, 3/8, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 114), end_note=(0, 0, 116), voice_index=(0, 5)),
 
-        # m55
+        # m54
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 40), end_note=(0, 5, 41), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
@@ -1512,6 +1514,8 @@ def build_score():
         # m83
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 182), end_note=(0, 0, 189), voice_index=(0, 0)),
+        Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 0, 182), end_note=(0, 0, 189), voice_index=(0, 1)),
 
         # m85
         Dynamic(synth=2, levels=[d[7], d[9], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
@@ -1565,9 +1569,9 @@ def build_score():
 
         # m97
         Dynamic(synth=2, levels=[d[4], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 125), end_note=(0, 6, 23), voice_index=(0, 5)),
+                start_note=(0, 5, 125), end_note=(0, 5, 130), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[4], d[6], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
-                start_note=(0, 5, 125), end_note=(0, 6, 23), voice_index=(0, 6)),
+                start_note=(0, 5, 125), end_note=(0, 5, 130), voice_index=(0, 6)),
 
         # m98
         Dynamic(synth=2, levels=[d[5], d[7], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
@@ -1593,11 +1597,15 @@ def build_score():
 
         # m107
         Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
+                start_note=(0, 5, 165), end_note=(0, 5, 171), voice_index=(0, 5)),
+
+        # m109
+        Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 176), end_note=(0, 5, 185), voice_index=(0, 5)),
         Dynamic(synth=2, levels=[d[6], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 5, 176), end_note=(0, 5, 185), voice_index=(0, 6)),
 
-        # m113
+        # m112
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
                 start_note=(0, 0, 254), end_note=(0, 5, 195), voice_index=(0, 0)),
         Dynamic(synth=2, levels=[d[5], d[8], 0, 0, 0], times=[1, 0, 0, 0, 0], curves=[0, 0, 0, 0],
@@ -1761,7 +1769,7 @@ def build_score():
 
         # m58
         [[0, 0, 135], 10, [0.175, 0.2], [1], [0]],
-        [[0, 5, 49], 10, [0.1, 0.2], [1], [0]],
+        [[0, 5, 51], 10, [0.1, 0.2], [1], [0]],
 
         # m68-75
         [[0, 0, 147], 10, [0.6, 0.6], [1], [0]],
@@ -1925,8 +1933,6 @@ def build_score():
     parsed_parts1[0][0][93].mul *= d[2]
     # m43
     parsed_parts1[0][0][94].mul *= d[2]
-    # m50
-    parsed_parts1[0][0][113].mul *= d[4]
     # m56
     parsed_parts1[0][0][118].mul *= d[7]
     parsed_parts1[0][0][119].mul *= d[7]
@@ -2086,8 +2092,6 @@ def build_score():
     parsed_parts1[0][1][5].mul *= d[5]
     parsed_parts1[0][1][6].mul *= d[6]
     parsed_parts1[0][1][7].mul *= d[6]
-    # m82
-    parsed_parts1[0][1][8].mul *= d[7]
     # m83
     parsed_parts1[0][1][9].mul *= d[5]
     # m84
