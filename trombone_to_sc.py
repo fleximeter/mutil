@@ -14,7 +14,7 @@ import time
 # File names and locations
 OUTPUT_DESKTOP = "D:\\SuperCollider\\erudition_i"
 OUTPUT_LAPTOP = "C:\\Users\\Jeff Martin\\Source\\erudition_i"
-OUTPUT = OUTPUT_LAPTOP
+OUTPUT = OUTPUT_DESKTOP
 FILE1 = "Trombone Piece 0.2.4.1a - Full score - 01 erudition I.xml"
 FILE2 = "Trombone Piece 0.2.4.1b - Full score - 01 erudition I.xml"
 FILE1_debug = "Trombone Piece 0.2.4.1a_debug - Full score - 01 erudition I.xml"
@@ -98,6 +98,8 @@ def add_effects(new_parts, effect_parts):
     :param effect_parts: A list of dynamic parts
     :return:
     """
+    NOTE_END_TIME_PADDING = 0.1
+
     # Iterate through each effect entry for the current voice
     for effect in effect_parts:
         # Identify the starting note
@@ -161,6 +163,7 @@ def add_effects(new_parts, effect_parts):
             # Update the buses of affected notes
             for i in range(first_idx, len(new_parts[effect.voice_index[0]][effect.voice_index[1]])):
                 done = False
+
                 # If we're doing separate chaining
                 if type(new_parts[effect.voice_index[0]][effect.voice_index[1]][i]) == list:
                     for item in new_parts[effect.voice_index[0]][effect.voice_index[1]][i]:
@@ -169,9 +172,14 @@ def add_effects(new_parts, effect_parts):
                         if type(item) == Note or type(item) == Sound:
                             if item.start_time > effect.end_time:
                                 done = True
+                            elif item.end_time > effect.end_time + NOTE_END_TIME_PADDING:
+                                done = True
                             else:
                                 item.bus_out -= CHANGE_BUS_CONSTANT
                 elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].start_time > effect.end_time:
+                    done = True
+                elif new_parts[effect.voice_index[0]][effect.voice_index[1]][i].end_time > \
+                        effect.end_time + NOTE_END_TIME_PADDING:
                     done = True
                 else:
                     new_parts[effect.voice_index[0]][effect.voice_index[1]][i].bus_out -= CHANGE_BUS_CONSTANT
@@ -2092,8 +2100,6 @@ def build_score():
     parsed_parts1[0][1][5].mul *= d[5]
     parsed_parts1[0][1][6].mul *= d[6]
     parsed_parts1[0][1][7].mul *= d[6]
-    # m83
-    parsed_parts1[0][1][9].mul *= d[5]
     # m84
     parsed_parts1[0][1][10].mul *= d[8]
     parsed_parts1[0][1][11].mul *= d[8]
@@ -2120,8 +2126,6 @@ def build_score():
     parsed_parts1[0][3][3].mul *= d[7]
     # m35
     parsed_parts1[0][3][4].mul *= d[7]
-    # m50
-    parsed_parts1[0][3][6].mul *= d[4]
 
     # m20
     parsed_parts1[0][5][8].mul *= d[5]

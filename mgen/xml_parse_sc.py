@@ -140,12 +140,12 @@ def dump_parts(new_parts):
     for part in new_parts:
         for voice in part:
             print(f"Voice {current_voice_index + 1}")
-            print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format("m", "i", "p", "mul", "dur",
+            print("{0: <3}{1: >4}{2: >6}{3: >7}{4: >9}{5: >10}{6: >10}{7: >12}".format("m", "i", "p", "mul", "dur",
                                                                                        "start", "end", "index"))
             for i in range(len(voice)):
                 if type(voice[i]) == Note:
-                    print("{0: <3}{1: >4}{2: >6}{3: >5}{4: >9}{5: >10}{6: >10}{7: >12}".format(voice[i].measure,
-                          i, voice[i].pitch.p, voice[i].mul, round(voice[i].duration, 4),
+                    print("{0: <3}{1: >4}{2: >6}{3: >7}{4: >9}{5: >10}{6: >10}{7: >12}".format(voice[i].measure,
+                          i, voice[i].pitch.p, round(voice[i].mul, 3), round(voice[i].duration, 4),
                           round(voice[i].start_time, 4), round(voice[i].end_time, 4),
                           f"[{current_voice_index}][{i}]"))
                 if type(voice[i]) == Sound:
