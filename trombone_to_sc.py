@@ -2187,6 +2187,8 @@ def build_score():
     # m65
     parsed_parts1[0][5][62].mul *= d[5]
     parsed_parts1[0][5][63].mul *= d[5]
+    # m66
+    parsed_parts1[0][5][69].mul *= d[5]
     # m68
     parsed_parts1[0][5][77].mul *= d[6]
     # m69
@@ -2254,8 +2256,8 @@ def build_score():
     parsed_parts1[0][5][163].mul *= d[3]
     parsed_parts1[0][5][164].mul *= d[3]
     # m108
-    parsed_parts1[0][5][172].mul *= d[6]
-    parsed_parts1[0][5][173].mul *= d[6]
+    parsed_parts1[0][5][172].mul *= d[8]
+    parsed_parts1[0][5][173].mul *= d[8]
     # m109
     parsed_parts1[0][5][174].mul *= d[6]
     parsed_parts1[0][5][175].mul *= d[6]
@@ -2366,7 +2368,7 @@ def build_score():
     parsed_parts1[0][6][33].mul *= d[3]
     parsed_parts1[0][6][34].mul *= d[3]
     # m108
-    parsed_parts1[0][6][36].mul *= d[6]
+    parsed_parts1[0][6][36].mul *= d[8]
     # m111
     parsed_parts1[0][6][38].mul *= d[5]
     parsed_parts1[0][6][39].mul *= d[5]
