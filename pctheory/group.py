@@ -21,7 +21,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import numpy
 from queue import Queue
 from pctheory import pitch, transformations
 
@@ -40,11 +39,24 @@ class OperatorGroup:
         self._MNUM_24 = {1, 5, 7, 11, 13, 17, 19, 23}
         self._name = ""
         self._num_pcs = num_pcs
-        self._operators = [[] for i in range(len(self._MNUM_12))]
+        if num_pcs == 12:
+            self._operators = [[] for i in range(len(self._MNUM_12))]
+        elif num_pcs == 24:
+            self._operators = [[] for i in range(len(self._MNUM_24))]
         self._utos = set()
         if utos is not None:
             self.load_utos(utos)
 
+    def __contains__(self, uto: transformations.UTO):
+        return uto in self._utos
+
+    def __iter__(self):
+        return (uto for uto in self._utos)
+
+    def __list__(self):
+        uto_list = list(self._utos)
+        return uto_list
+        
     def __str__(self):
         return self.name
 

@@ -146,8 +146,20 @@ class UTO:
     def __getitem__(self, item):
         return self._uto[item]
 
+    def __ge__(self, other):
+        return self._uto[1] > other.uto[1] or (self._uto[0] >= other.uto[0] and self._uto[1] == other.uto[1])
+
+    def __gt__(self, other):
+        return self._uto[1] > other.uto[1] or (self._uto[0] > other.uto[0] and self._uto[1] == other.uto[1])
+
     def __hash__(self):
         return self._uto[0] * 100 + self._uto[1]
+
+    def __le__(self, other):
+        return self._uto[1] < other.uto[1] or (self._uto[0] <= other.uto[0] and self._uto[1] == other.uto[1])
+
+    def __lt__(self, other):
+        return self._uto[1] < other.uto[1] or (self._uto[0] < other.uto[0] and self._uto[1] == other.uto[1])
 
     def __ne__(self, other):
         return self._uto[0] != other.uto[0] or self._uto[1] != other.uto[1]
