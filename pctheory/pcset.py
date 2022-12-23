@@ -206,6 +206,10 @@ class SetClass12:
         :param value: The new pcset
         :return:
         """
+        if type(value) == set:
+            if len(value) > 0:
+                if type(next(iter(value))) == pitch.PitchClass24:
+                    value = convert_to_pcset12(value)
         self._pcset = SetClass12.calculate_prime_form(value, self._weight_right)
         self._make_names()
 
@@ -701,6 +705,11 @@ class SetClass24:
         :param value: The new pcset
         :return:
         """
+        if type(value) == set:
+            if len(value) > 0:
+                if type(next(iter(value))) == pitch.PitchClass12:
+                    value = convert_to_pcset24(value)
+
         self._pcset = SetClass24.calculate_prime_form(value, self._weight_right)
         self._make_names()
 
@@ -1132,6 +1141,25 @@ def get_self_map_utos(pcset: set):
                 utos.add(uto[f"T{i}M23"])
     return utos
 
+
+def convert_to_pcset12(pcset: set) -> set:
+    """
+    Converts a microtonal pcset to a chromatic pcset. Microtonal pitch classes
+    are rounded down to the nearest chromatic pitch class.
+    :param args: A microtonal pcset
+    :return: A chromatic pcset
+    """
+    return {pitch.PitchClass12(pc.pc // 2) for pc in pcset}
+
+
+def convert_to_pcset24(pcset: set) -> set:
+    """
+    Converts a chromatic pcset to a microtonal pcset.
+    :param args: A chromatic pcset
+    :return: A microtonal pcset
+    """
+    return {pitch.PitchClass24(pc.pc * 2) for pc in pcset}
+    
 
 def invert(pcset: set):
     """
