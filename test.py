@@ -1,11 +1,8 @@
 from pctheory import array, group, pcseg, pcset, pseg, pset, pitch, set_complex, tables, tempo, transformations, util
 from fractions import Fraction
-import json
-import importlib.resources
-import os.path
+from mgen import xml_gen
 
-ro = transformations.get_otos12()
-pc = [pitch.PitchClass12(i) for i in range(12)]
+score1 = xml_gen.create_score("Randomness Testing", "Jeffrey Martin")
+xml_gen.add_instrument(score1, "Cello", "Vlc.")
 
-print(os.path.dirname(__file__))
-print(os.path.join(os.path.dirname(__file__), "test.py"))
+# Create the function for determining range

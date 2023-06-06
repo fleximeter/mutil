@@ -76,7 +76,7 @@ def plot_tempo_table(quarter_note_tempos: list):
     plt.rcParams["font.family"] = "Segoe UI"
     fig, ax = plt.subplots()
     fig.set_size_inches(10, 5)
-    fig.canvas.set_window_title("Tempo Table")
+    fig.canvas.setWindowTitle("Tempo Table")
     fig.patch.set_visible(False)
     ax.axis("off")
     ax.axis("tight")
