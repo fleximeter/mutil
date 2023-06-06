@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import numpy
+from queue import Queue
 from pctheory import pitch, transformations
 
 
@@ -29,20 +29,39 @@ class OperatorGroup:
     """
     Represents a group of operators
     """
-    def __init__(self, ttos: list = None):
+    def __init__(self, utos: list = None, num_pcs: int = 12):
         """
         Creates an OperatorGroup
-        :param ttos: TTOs
+        :param utos: TTOs
+        :param num_pcs: The number of pcs in the system of the group (chromatic: 12, microtonal: 24)
         """
+        self._MNUM_12 = {1, 5, 7, 11}
+        self._MNUM_24 = {1, 5, 7, 11, 13, 17, 19, 23}
         self._name = ""
-        self._ttos = []
-        self._tn = []
-        self._tni = []
-        self._tnm5 = []
-        self._tnm7 = []
-        self._ttos = []
-        if ttos is not None:
-            self.load_ttos(ttos)
+        self._num_pcs = num_pcs
+        if num_pcs == 12:
+            self._operators = [[] for i in range(len(self._MNUM_12))]
+        elif num_pcs == 24:
+            self._operators = [[] for i in range(len(self._MNUM_24))]
+        self._utos = set()
+        if utos is not None:
+            self.load_utos(utos)
+
+    def __contains__(self, uto: transformations.UTO):
+        return uto in self._utos
+
+    def __iter__(self):
+        return (uto for uto in self._utos)
+
+    def __list__(self):
+        uto_list = list(self._utos)
+        return uto_list
+        
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
     @property
     def name(self):
@@ -51,33 +70,45 @@ class OperatorGroup:
         :return: The group name
         """
         group_name = "G"
-        if len(self._tn) == 12:
-            group_name += "*"
+        if self._num_pcs == 12:
+            for i in range(len(self._MNUM_12) - 1):
+                if len(self._operators[i]) == 12:
+                    group_name += "*"
+                else:
+                    for uto in self._operators[i]:
+                        group_name += str(uto[0])
+                group_name += "/"
+            if len(self._operators[len(self._MNUM_12) - 1]) == 12:
+                group_name += "*"
+            else:
+                for uto in self._operators[len(self._MNUM_12) - 1]:
+                    group_name += str(uto[0])
         else:
-            for tto in self._tn:
-                group_name += str(tto[0])
-        if len(self._tni) > 0 or len(self._tnm5) > 0 or len(self._tnm7) > 0:
-            group_name += "/"
-        if len(self._tni) == 12:
-            group_name += "*"
-        else:
-            for tto in self._tni:
-                group_name += str(tto[0])
-        if len(self._tnm5) > 0 or len(self._tnm7) > 0:
-            group_name += "/"
-        if len(self._tnm5) == 12:
-            group_name += "*"
-        else:
-            for tto in self._tnm5:
-                group_name += str(tto[0])
-        if len(self._tnm7) > 0:
-            group_name += "/"
-        if len(self._tnm7) == 12:
-            group_name += "*"
-        else:
-            for tto in self._tnm7:
-                group_name += str(tto[0])
+            for i in range(len(self._MNUM_24) - 1):
+                if len(self._operators[i]) == 24:
+                    group_name += "*"
+                else:
+                    for j in range(len(self._operators[i]) - 1):
+                        group_name += f"{self._operators[i][j][0]},"
+                    if len(self._operators[i]) > 0:
+                        group_name += str(self._operators[i][len(self._operators[i]) - 1][0])
+                group_name += "/"
+            if len(self._operators[len(self._MNUM_24) - 1]) == 24:
+                group_name += "*"
+            else:
+                for j in range(len(self._operators[len(self._MNUM_24) - 1]) - 1):
+                    group_name += f"{self._operators[len(self._MNUM_24) - 1][j][0]},"
+                if len(self._operators[len(self._MNUM_24) - 1]) > 0:
+                    group_name += str(self._operators[len(self._MNUM_24) - 1][len(self._operators[len(self._MNUM_24) - 1]) - 1][0])
         return group_name
+
+    @property
+    def utos(self):
+        """
+        The set of UTOs in the group
+        :return: The set of UTOs
+        """
+        return self._utos
 
     def get_orbits(self):
         """
@@ -85,68 +116,77 @@ class OperatorGroup:
         :return: The orbits, as a list of sets
         """
         orbits = []
-        n = len(self._tn) + len(self._tni) + len(self._tnm5) + len(self._tnm7)
-        operator_table = numpy.empty((n, 12), dtype=numpy.int32)
-
-        # Populate the operator table
-        for i in range(12):
-            operator_table[0][i] = i
-        for i in range(1, n):
-            for j in range(0, 12):
-                operator_table[i][j] = self._ttos[i].transform(operator_table[0][j])
-
-        # Compute the orbits
-        for i in range(12):
+        u = None
+        if self._num_pcs == 12:
+            u = {pitch.PitchClass12(i) for i in range(self._num_pcs)}
+        elif self._num_pcs == 24:
+            u = {pitch.PitchClass24(i) for i in range(self._num_pcs)}
+        while len(u) > 0:
             orbit = set()
-            for j in range(n):
-                orbit.add(pitch.PitchClass(int(operator_table[j][i])))
-            if orbit not in orbits:
-                orbits.append(orbit)
-        return orbits
+            q = Queue()
+            pc = next(iter(u))
+            q.put(pc)
+            orbit.add(pc)
+            u.remove(pc)
+            while not q.empty():
+                pc = q.get()
+                for op in self._utos:
+                    tr = op.transform(pc)
+                    if tr not in orbit:
+                        orbit.add(tr)
+                        q.put(tr)
+                        u.remove(tr)
+            orbits.append(orbit)
 
-    def left_coset(self, tto):
+    def left_coset(self, uto):
         """
         Gets a left coset of the group
-        :param tto: A TTO
+        :param uto: A UTO
         :return: The left coset
         """
         coset = []
-        for t in self._ttos:
-            coset.append(transformations.left_multiply_ttos(tto, t))
+        for u in self._utos:
+            coset.append(transformations.left_multiply_utos(uto, u))
         coset.sort()
         return coset
 
-    def load_ttos(self, ttos: list):
+    def load_utos(self, utos: list):
         """
         Loads TTOs into the group
-        :param ttos: TTOs
+        :param utos: TTOs
         :return:
         """
-        for tto in ttos:
-            match tto[1]:
+        self._utos = set()
+        for uto in utos:
+            match uto[1]:
                 case 1:
-                    self._tn.append(tto)
+                    self._operators[0].append(uto)
                 case 5:
-                    self._tnm5.append(tto)
+                    self._operators[1].append(uto)
                 case 7:
-                    self._tnm7.append(tto)
+                    self._operators[2].append(uto)
                 case 11:
-                    self._tni.append(tto)
-            self._ttos.append(tto)
-        self._tn.sort()
-        self._tni.sort()
-        self._tnm5.sort()
-        self._tnm7.sort()
-        self._ttos.sort()
+                    self._operators[3].append(uto)
+                case 13:
+                    self._operators[4].append(uto)
+                case 17:
+                    self._operators[5].append(uto)
+                case 19:
+                    self._operators[6].append(uto)
+                case 23:
+                    self._operators[7].append(uto)
+            self._utos.add(uto)
+        for li in self._operators:
+            li.sort()
 
-    def right_coset(self, tto):
+    def right_coset(self, uto):
         """
         Gets a right coset of the group
-        :param tto: A TTO
+        :param uto: A UTO
         :return: The right coset
         """
         coset = []
-        for t in self._ttos:
-            coset.append(transformations.left_multiply_ttos(t, tto))
+        for u in self._utos:
+            coset.append(transformations.left_multiply_utos(u, uto))
         coset.sort()
         return coset

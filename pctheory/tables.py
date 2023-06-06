@@ -25,12 +25,46 @@ import importlib.resources
 import json
 
 
-def create_tables():
+def create_tables_all_trichord():
     """
-    Creates tables
+    Creates tables for all-trichord rows
     :return: Tables
     """
-    json_data = None
-    with importlib.resources.open_text("pctheory", "resources.json") as table_json:
-        json_data = json.loads(table_json.read())
-    return json_data
+    with importlib.resources.open_text("pctheory", "all_trichord.json") as table_json:
+        return json.loads(table_json.read())
+
+
+def create_tables_all_trichord_babbitt():
+    """
+    Creates tables for all-trichord (Babbitt) rows
+    :return: Tables
+    """
+    with importlib.resources.open_text("pctheory", "babbitt_trichord.json") as table_json:
+        return json.loads(table_json.read())
+
+
+def create_tables_eleven_interval():
+    """
+    Creates tables for eleven-interval row generators
+    :return: Tables
+    """
+    with importlib.resources.open_text("pctheory", "eleven_interval.json") as table_json:
+        return json.loads(table_json.read())
+
+
+def create_tables_sc12():
+    """
+    Creates tables for SetClass12 objects
+    :return: Tables
+    """
+    with importlib.resources.open_text("pctheory", "sc12.json") as table_json:
+        return json.loads(table_json.read())
+
+
+def create_tables_ten_trichord():
+    """
+    Creates tables for ten-trichord rows
+    :return: Tables
+    """
+    with importlib.resources.open_text("pctheory", "ten_trichord.json") as table_json:
+        return json.loads(table_json.read())

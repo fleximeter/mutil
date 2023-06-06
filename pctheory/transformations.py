@@ -25,351 +25,374 @@ from enum import Enum
 from pctheory import pitch
 
 
-class OperatorType(Enum):
+class OTO:
     """
-    Represents operator types
-    """
-    RTn = 1
-    RTnI = 2
-    RTnM5 = 3
-    RTnM7 = 4
-    Tn = 5
-    TnI = 6
-    TnM5 = 7
-    TnM7 = 8
-
-
-class RO:
-    """
-    Represents a row operator (RO). Objects of this class are subscriptable.
-    [0] is the index of transposition. [1] is whether or not to retrograde (0-no or 1-yes).
-    [2] is the multiplier. Multiplication is performed first, then retrograding,
+    Represents an ordered tone operator (OTO). If used with a twelve-tone row, it is a row operator (RO).
+    Objects of this class are subscriptable. [0] is the index of transposition. [1] is whether or not to
+    retrograde (0-no or 1-yes). [2] is the multiplier. Multiplication is performed first, then retrograding,
     then transposition. These operators can be used with pcsegs.
     """
-    def __init__(self, transpose=0, retrograde=0, multiply=1):
+    def __init__(self, T=0, R=0, M=1):
         """
-        Creates a RO
-        :param transpose: The index of transposition
-        :param retrograde: Whether or not to retrograde
-        :param multiply: The multiplier
+        Creates an OTO
+        :param T: The index of transposition
+        :param R: Whether or not to retrograde
+        :param M: The multiplier
         """
-        self._ro = [transpose, retrograde, multiply]
+        self._oto = (T, R, M)
 
     def __eq__(self, other):
-        return self._ro[0] == other.tto[0] and self._ro[1] == other.tto[1] and self._ro[2] == other.tto[2]
+        return self._oto[0] == other.oto[0] and self._oto[1] == other.oto[1] and self._oto[2] == other.oto[2]
 
     def __getitem__(self, item):
-        return self._ro[item]
+        return self._oto[item]
 
     def __hash__(self):
-        return self._ro[0] * 1000 + self._ro[1] * 100 + self._ro[2]
+        return self._oto[0] * 1000 + self._oto[1] * 100 + self._oto[2]
 
     def __ne__(self, other):
-        return self._ro[0] != other.tto[0] or self._ro[1] != other.tto[1] or self._ro[2] != other.tto[2]
+        return self._oto[0] != other.oto[0] or self._oto[1] != other.oto[1] or self._oto[2] != other.oto[2]
+
+    def __repr__(self):
+        if self._oto[1] and self._oto[2] != 1:
+            return f"T{self._oto[0]}RM{self._oto[2]}"
+        elif self._oto[2] != 1:
+            return f"T{self._oto[0]}M{self._oto[2]}"
+        elif self._oto[1]:
+            return f"T{self._oto[0]}R"
+        else:
+            return f"T{self._oto[0]}"
+
+    def __str__(self):
+        if self._oto[1] and self._oto[2] != 1:
+            return f"T{self._oto[0]}RM{self._oto[2]}"
+        elif self._oto[2] != 1:
+            return f"T{self._oto[0]}M{self._oto[2]}"
+        elif self._oto[1]:
+            return f"T{self._oto[0]}R"
+        else:
+            return f"T{self._oto[0]}"
 
     @property
-    def ro(self):
+    def oto(self):
         """
-        Gets the RO as a list. Index 0 is the index of transposition, index 1 is whether or not to retrograde, and
+        Gets the OTO as a tuple. Index 0 is the index of transposition, index 1 is whether or not to retrograde, and
         index 2 is the multiplier.
-        :return: The RO
+        :return: The OTO
         """
-        return self._ro
+        return self._oto
 
-    @ro.setter
-    def ro(self, value):
+    @oto.setter
+    def oto(self, value):
         """
-        Sets the RO using a list
-        :param value: A list
+        Sets the OTO using a tuple
+        :param value: A tuple
         :return:
         """
-        self._ro = value
-        self._ro[0] %= 12
-        self._ro[2] %= 12
-        if self._ro[0] < 0:
-            self._ro[0] += 12
-        if self._ro[2] < 0:
-            self._ro[2] += 12
+        self._oto = value
 
-    @property
-    def transpose_n(self):
+    def transform(self, item):
         """
-        The index of transposition
-        :return: The index of transposition
+        Transforms an item (can be a pitch-class, list, set, or any number of nestings of these objects)
+        :param item: An item
+        :return: The transformed item
         """
-        return self._ro[0]
-
-    @property
-    def multiply_n(self):
-        """
-        The multiplier
-        :return: The multiplier
-        """
-        return self._ro[2]
-
-    @property
-    def invert(self):
-        """
-        Whether or not this RO has an inversion operator
-        :return: A boolean
-        """
-        return self._ro[1] == 11 or self._ro == 7
-
-    def transform(self, pcseg: list):
-        """
-        Transforms a pcseg
-        :param pcseg: A pcseg
-        :return: The transformed pcseg
-        """
-        pcseg2 = list()
-        for i in range(len(pcseg)):
-            pcseg2.append(pitch.PitchClass(pcseg[i].pc * self._ro[2] + self._ro[0]))
-        if self._ro[1]:
-            pcseg2.reverse()
-        return pcseg2
+        new_item = None
+        if type(item) == list:
+            new_item = []
+            for item2 in item:
+                t = type(item2)
+                if t == list:
+                    new_item.append(self.transform(item2))
+                elif t == set:
+                    new_item.append(self.transform(item2))
+                else:
+                    new_item.append(t(item2.pc * self._oto[2] + self._oto[0]))
+            if self._oto[1]:
+                new_item.reverse()
+        elif type(item) == set:
+            new_item = set()
+            for item2 in item:
+                t = type(item2)
+                if t == list:
+                    new_item.add(self.transform(item2))
+                elif t == set:
+                    new_item.add(self.transform(item2))
+                else:
+                    new_item.add(t(item2.pc * self._oto[2] + self._oto[0]))
+        else:
+            new_item = type(item)(item.pc * self._oto[2] + self._oto[0])
+        return new_item
 
 
-class TTO:
+class UTO:
     """
-    Represents a twelve-tone operator (TTO). Objects of this class are subscriptable.
+    Represents an unordered tone operator (UTO), which can be used as a twelve-tone operator (TTO)
+    or 24-tone operator (24TO). Objects of this class are subscriptable.
     [0] is the index of transposition. [1] is the multiplier. Multiplication is performed first,
     then transposition.
     """
-    def __init__(self, transpose=0, multiply=1):
+    def __init__(self, T=0, M=1):
         """
-        Creates a TTO
-        :param transpose: The index of transposition
-        :param multiply: The multiplier
+        Creates a UTO
+        :param T: The index of transposition
+        :param M: The index of multiplication
         """
-        self._tto = [transpose, multiply]
+        self._uto = (T, M)
 
     def __eq__(self, other):
-        return self._tto[0] == other.tto[0] and self._tto[1] == other.tto[1]
+        return self._uto[0] == other.uto[0] and self._uto[1] == other.uto[1]
 
     def __getitem__(self, item):
-        return self._tto[item]
+        return self._uto[item]
 
     def __ge__(self, other):
-        return self._tto[1] > other[1] or (self._tto[1] == other[1] and self._tto[0] >= other[0])
+        return self._uto[1] > other.uto[1] or (self._uto[0] >= other.uto[0] and self._uto[1] == other.uto[1])
 
     def __gt__(self, other):
-        return self._tto[1] > other[1] or (self._tto[1] == other[1] and self._tto[0] > other[0])
+        return self._uto[1] > other.uto[1] or (self._uto[0] > other.uto[0] and self._uto[1] == other.uto[1])
 
     def __hash__(self):
-        return self._tto[0] * 100 + self._tto[1]
+        return self._uto[0] * 100 + self._uto[1]
 
     def __le__(self, other):
-        return self._tto[1] < other[1] or (self._tto[1] == other[1] and self._tto[0] <= other[0])
+        return self._uto[1] < other.uto[1] or (self._uto[0] <= other.uto[0] and self._uto[1] == other.uto[1])
 
     def __lt__(self, other):
-        return self._tto[1] < other[1] or (self._tto[1] == other[1] and self._tto[0] < other[0])
+        return self._uto[1] < other.uto[1] or (self._uto[0] < other.uto[0] and self._uto[1] == other.uto[1])
 
     def __ne__(self, other):
-        return self._tto[0] != other.tto[0] or self._tto[1] != other.tto[1]
+        return self._uto[0] != other.uto[0] or self._uto[1] != other.uto[1]
 
     def __repr__(self):
-        return f"T{self._tto[0]}M{self._tto[1]}"
+        if self._uto[1] != 1:
+            return f"T{self._uto[0]}M{self._uto[1]}"
+        else:
+            return f"T{self._uto[0]}"
 
     def __str__(self):
-        return f"T{self._tto[0]}M{self._tto[1]}"
+        if self._uto[1] != 1:
+            return f"T{self._uto[0]}M{self._uto[1]}"
+        else:
+            return f"T{self._uto[0]}"
 
     @property
-    def tto(self):
+    def uto(self):
         """
-        Gets the TTO as a list. Index 0 is the index of transposition, and index 1
+        Gets the UTO as a list. Index 0 is the index of transposition, and index 1
         is the multiplier.
-        :return: The TTO
+        :return: The UTO
         """
-        return self._tto
+        return self._uto
 
-    @tto.setter
-    def tto(self, value):
+    @uto.setter
+    def uto(self, value):
         """
-        Sets the TTO using a list
-        :param value: A list
+        Sets the UTO using a tuple
+        :param value: A tuple
         :return:
         """
-        self._tto = value
-        self._tto[0] %= 12
-        self._tto[1] %= 12
-        if self._tto[0] < 0:
-            self._tto[0] += 12
-        if self._tto[1] < 0:
-            self._tto[1] += 12
+        self._uto = value
 
-    @property
-    def transpose_n(self):
+    def cycles(self, num_pcs=12):
         """
-        The index of transposition
-        :return: The index of transposition
-        """
-        return self._tto[0]
-
-    @property
-    def multiply_n(self):
-        """
-        The multiplier
-        :return: The multiplier
-        """
-        return self._tto[1]
-
-    @property
-    def has_invert(self):
-        """
-        Whether or not this TTO has an inversion operator
-        :return: A boolean
-        """
-        return self._tto[1] == 11 or self._tto == 7
-
-    @property
-    def type(self):
-        """
-        The OperatorType of the TTO
-        :return: The OperatorType
-        """
-        match self._tto[1]:
-            case 5:
-                return OperatorType.TnM5
-            case 7:
-                return OperatorType.TnM7
-            case 11:
-                return OperatorType.TnI
-            case _:
-                return OperatorType.Tn
-
-    def cycles(self):
-        """
-        Gets the cycles of the TTO
+        Gets the cycles of the UTO
+        :param num_pcs: The number of possible pcs in the system
         :return: The cycles, as a list of lists
         """
-        int_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        int_list = [i for i in range(num_pcs)]
         cycles = []
         while len(int_list) > 0:
-            cycle = [pitch.PitchClass(int_list[0])]
-            n = (cycle[0].pc * self._tto[1] + self._tto[0]) % 12
-            while n != cycle[0].pc:
-                cycle.append(pitch.PitchClass(n))
-                int_list.remove(n)
-                n = (cycle[len(cycle)-1].pc * self._tto[1] + self._tto[0]) % 12
-            del int_list[0]
+            cycle = [int_list[0]]
+            pc = cycle[0]
+            pc = (pc * self._uto[1] + self._uto[0]) % num_pcs
+            while pc != cycle[0]:
+                cycle.append(pc)
+                int_list.remove(pc)
+                pc = cycle[len(cycle) - 1]
+                pc = (pc * self._uto[1] + self._uto[0]) % num_pcs
             cycles.append(cycle)
+            del int_list[0]
         return cycles
 
-    def inverse(self):
+    def inverse(self, num_pcs=12):
         """
-        Gets the inverse of the TTO
+        Gets the inverse of the UTO
+        :param num_pcs: The number of possible pcs in the system
         :return: The inverse
         """
-        return TTO((self._tto[0] * self._tto[1] * -1) % 12, self._tto[1])
+        return UTO((-self._uto[1] * self._uto[0]) % num_pcs, self._uto[1])
 
-    def transform(self, pcset):
+    def transform(self, item):
         """
-        Transforms a pcset
-        :param pcset: A pcset
-        :return: The transformed set
+        Transforms a pcset, pcseg, or pc
+        :param item: A pcset, pcseg, or pc
+        :return: The transformed item
         """
-        if type(pcset) == set:
-            pcset2 = set()
-            for pc in pcset:
-                pcset2.add(pitch.PitchClass(pc.pc * self._tto[1] + self._tto[0]))
-            return pcset2
-        elif type(pcset) == pitch.PitchClass:
-            return pitch.PitchClass(pcset.pc * self._tto[1] + self._tto[0])
+        t = type(item)
+        if t == pitch.PitchClass12:
+            return pitch.PitchClass12(item.pc * self._uto[1] + self._uto[0])
+        elif t == pitch.PitchClass24:
+            return pitch.PitchClass24(item.pc * self._uto[1] + self._uto[0])
         else:
-            return (pcset * self._tto[1] + self._tto[0]) % 12
+            new_item = t()
+            if t == set:
+                for i in item:
+                    new_item.add(self.transform(i))
+            if t == list:
+                for i in item:
+                    new_item.append(self.transform(i))
+            return new_item
 
 
-def get_ros(*args):
+def find_utos(pcset1: set, pcset2: set):
     """
-    Gets ROs
-    :param args: One or more RO categories (OperatorType)
-    :return: A list of ROs
+    Finds the UTOS that transform pcset1 into pcset2
+    :param pcset1: A pcset
+    :param pcset2: A transformed pcset
+    :return: A list of UTOS
     """
-    arg_set = set(args)
-    ros = []
-    if OperatorType.Tn in arg_set:
-        for i in range(12):
-            ros.append(RO(i))
-    if OperatorType.TnI in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 0, 11))
-    if OperatorType.TnM5 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 0, 5))
-    if OperatorType.TnM7 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 0, 7))
-    if OperatorType.RTn in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1))
-    if OperatorType.RTnI in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1, 11))
-    if OperatorType.RTnM5 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1, 5))
-    if OperatorType.RTnM7 in arg_set:
-        for i in range(12):
-            ros.append(RO(i, 1, 7))
-    return ros
+    utos = get_utos12()
+    utos_final = {}
+    for u in utos:
+        if utos[u].transform(pcset1) == pcset2:
+            utos_final[u] = utos[u]
+    return utos_final
 
 
-def get_ttos(*args):
+def get_otos12():
     """
-    Gets TTOs
-    :param args: One or more TTO categories (OperatorType)
-    :return: A list of TTOs
+    Gets OTOs
+    :return: A list of OTOs
     """
-    arg_set = set(args)
-    ttos = []
-    if OperatorType.Tn in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i))
-    if OperatorType.TnI in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i, 11))
-    if OperatorType.TnM5 in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i, 5))
-    if OperatorType.TnM7 in arg_set:
-        for i in range(12):
-            ttos.append(TTO(i, 7))
-    return ttos
+    otos = {}
+    for i in range(12):
+        otos[f"T{i}"] = OTO(i, 0, 1)
+        otos[f"T{i}R"] = OTO(i, 1, 1)
+        otos[f"T{i}M1"] = otos[f"T{i}"]
+        otos[f"T{i}RM1"] = otos[f"T{i}R"]
+        otos[f"T{i}M11"] = OTO(i, 0, 11)
+        otos[f"T{i}RM11"] = OTO(i, 1, 11)
+        otos[f"T{i}M5"] = OTO(i, 0, 5)
+        otos[f"T{i}RM5"] = OTO(i, 1, 5)
+        otos[f"T{i}M"] = otos[f"T{i}M5"]
+        otos[f"T{i}RM"] = otos[f"T{i}RM5"]
+        otos[f"T{i}M7"] = OTO(i, 0, 7)
+        otos[f"T{i}RM7"] = OTO(i, 1, 7)
+        otos[f"T{i}MI"] = otos[f"T{i}M7"]
+        otos[f"T{i}RMI"] = otos[f"T{i}RM7"]
+        otos[f"T{i}M11"] = OTO(i, 0, 11)
+        otos[f"T{i}RM11"] = OTO(i, 1, 11)
+        otos[f"T{i}I"] = otos[f"T{i}M11"]
+        otos[f"T{i}RI"] = otos[f"T{i}RM11"]
+    return otos
 
 
-def left_multiply_ttos(*args):
+def get_otos24():
     """
-    Left-multiplies a list of TTOs
-    :param args: A collection of TTOs (can be one argument as a list, or multiple TTOs separated by commas.
+    Gets microtonal OTOs
+    :return: A list of microtonal OTOs
+    """
+    otos = {}
+    for i in range(24):
+        otos[f"T{i}"] = OTO(i, 0, 1)
+        otos[f"T{i}R"] = OTO(i, 1, 1)
+        otos[f"T{i}M1"] = otos[f"T{i}"]
+        otos[f"T{i}RM1"] = otos[f"T{i}R"]
+        otos[f"T{i}M5"] = OTO(i, 0, 5)
+        otos[f"T{i}RM5"] = OTO(i, 1, 5)
+        otos[f"T{i}M7"] = OTO(i, 0, 7)
+        otos[f"T{i}RM7"] = OTO(i, 1, 7)
+        otos[f"T{i}M11"] = OTO(i, 0, 11)
+        otos[f"T{i}RM11"] = OTO(i, 1, 11)
+        otos[f"T{i}M13"] = OTO(i, 0, 13)
+        otos[f"T{i}RM13"] = OTO(i, 1, 13)
+        otos[f"T{i}M17"] = OTO(i, 0, 17)
+        otos[f"T{i}RM17"] = OTO(i, 1, 17)
+        otos[f"T{i}M19"] = OTO(i, 0, 19)
+        otos[f"T{i}RM19"] = OTO(i, 1, 19)
+        otos[f"T{i}M23"] = OTO(i, 0, 23)
+        otos[f"T{i}RM23"] = OTO(i, 1, 23)
+        otos[f"T{i}I"] = otos[f"T{i}M23"]
+        otos[f"T{i}RI"] = otos[f"T{i}RM23"]
+    return otos
+
+
+def get_utos12():
+    """
+    Gets the twelve-tone UTOs (TTOs)
+    :return: A dictionary of UTOs
+    """
+    utos = {}
+    for i in range(12):
+        utos[f"T{i}"] = UTO(i, 1)
+        utos[f"T{i}M1"] = utos[f"T{i}"]
+        utos[f"T{i}M5"] = UTO(i, 5)
+        utos[f"T{i}M"] = utos[f"T{i}M5"]
+        utos[f"T{i}M7"] = UTO(i, 7)
+        utos[f"T{i}MI"] = utos[f"T{i}M7"]
+        utos[f"T{i}M11"] = UTO(i, 11)
+        utos[f"T{i}I"] = utos[f"T{i}M11"]
+    return utos
+
+
+def get_utos24():
+    """
+    Gets the 24-tone UTOs (24TOs)
+    :return: A dictionary of UTOs
+    """
+    utos = {}
+    for i in range(24):
+        utos[f"T{i}"] = UTO(i, 1)
+        utos[f"T{i}M1"] = utos[f"T{i}"]
+        utos[f"T{i}M5"] = UTO(i, 5)
+        utos[f"T{i}M7"] = UTO(i, 7)
+        utos[f"T{i}M11"] = UTO(i, 11)
+        utos[f"T{i}M13"] = UTO(i, 13)
+        utos[f"T{i}M17"] = UTO(i, 17)
+        utos[f"T{i}M19"] = UTO(i, 19)
+        utos[f"T{i}M23"] = UTO(i, 23)
+        utos[f"T{i}I"] = utos[f"T{i}M23"]
+    return utos
+
+
+def left_multiply_utos(*args, num_pcs=12):
+    """
+    Left-multiplies a list of UTOs
+    :param args: A collection of UTOs (can be one argument as a list, or multiple UTOs separated by commas.
     The highest index is evaluated first, and the lowest index is evaluated last.
+    :param num_pcs: The number of pcs in the system
     :return: The result
     """
-    ttos = args
+    utos = args
 
     # If the user provided a list object
     if len(args) == 1:
         if type(args[0]) == list:
-            ttos = args[0]
+            utos = args[0]
 
-    if len(ttos) == 0:
+    if len(utos) == 0:
         return None
-    elif len(ttos) == 1:
-        return ttos[0]
+    elif len(utos) == 1:
+        return utos[0]
     else:
-        m = ttos[len(ttos)-1].transpose_n
-        n = ttos[len(ttos)-1].multiply_n
-        for i in range(len(ttos)-2, -1, -1):
-            m = m * ttos[i].multiply_n + ttos[i].transpose_n
-            n *= ttos[i].multiply_n
-        return TTO(m % 12, n % 12)
+        n = utos[len(utos) - 1][0]
+        m = utos[len(utos)-1][1]
+        for i in range(len(utos)-2, -1, -1):
+            tr_n = utos[i][0]
+            mul_n = utos[i][1]
+            m = m * mul_n + tr_n
+            n *= mul_n
+        return UTO(n % num_pcs, m % num_pcs)
 
 
-def make_tto_list(*args):
+def make_uto_list(*args):
     """
-    Makes a TTO list
-    :return: A TTO list
+    Makes a UTO list
+    :param args: One or more tuples or lists representing UTOs
+    :return: A UTO list
     """
-    tto_list = []
-    for tto in args:
-        tto_list.append(TTO(tto[0], tto[1]))
-    return tto_list
+    uto_list = []
+    for uto in args:
+        uto_list.append(UTO(uto[0], uto[1]))
+    return uto_list

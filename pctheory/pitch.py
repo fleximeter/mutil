@@ -22,18 +22,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-class PitchClass:
+class PitchClass12:
     def __init__(self, pc: int = 0):
         """
         Creates a PitchClass
         :param pc: The pitch class integer
         """
         self._pc = pc % 12
-        if self._pc < 0:
-            self._pc += 12
 
     def __add__(self, other):
-        return PitchClass(self.pc + other.pc)
+        return PitchClass12(self.pc + other.pc)
 
     def __eq__(self, other):
         return self.pc == other.pc
@@ -54,20 +52,20 @@ class PitchClass:
         return self.pc < other.pc
 
     def __mul__(self, other):
-        return PitchClass(self.pc * other.pc)
+        return PitchClass12(self.pc * other.pc)
 
     def __ne__(self, other):
         return self.pc != other.pc
 
     def __repr__(self):
         # return "<pctheory.pitch.PitchClass object at " + str(id(self)) + ">: " + self.pc_char
-        return self.pc_char
+        return self.pc_str
 
     def __str__(self):
-        return self.pc_char
+        return self.pc_str
 
     def __sub__(self, other):
-        return PitchClass(self.pc - other.pc)
+        return PitchClass12(self.pc - other.pc)
 
     @property
     def pc(self):
@@ -89,10 +87,10 @@ class PitchClass:
             self._pc += 12
 
     @property
-    def pc_char(self):
+    def pc_str(self):
         """
-        The pitch-class character
-        :return: The pitch-class character
+        The pitch-class string
+        :return: The pitch-class string
         """
         if self._pc == 10:
             return 'A'
@@ -102,7 +100,83 @@ class PitchClass:
             return str(self._pc)
 
 
-class Pitch(PitchClass):
+class PitchClass24:
+    def __init__(self, pc: int = 0):
+        """
+        Creates a quarter-tone PitchClass
+        :param pc: The pitch class integer
+        """
+        self._pc = pc % 24
+
+    def __add__(self, other):
+        return PitchClass24(self.pc + other.pc)
+
+    def __eq__(self, other):
+        return self.pc == other.pc
+
+    def __ge__(self, other):
+        return self.pc >= other.pc
+
+    def __gt__(self, other):
+        return self.pc > other.pc
+
+    def __hash__(self):
+        return self.pc
+
+    def __le__(self, other):
+        return self.pc <= other.pc
+
+    def __lt__(self, other):
+        return self.pc < other.pc
+
+    def __mul__(self, other):
+        return PitchClass24(self.pc * other.pc)
+
+    def __ne__(self, other):
+        return self.pc != other.pc
+
+    def __repr__(self):
+        # return "<pctheory.pitch.PitchClass24 object at " + str(id(self)) + ">: " + self.pc_char
+        return self.pc_str
+
+    def __str__(self):
+        return self.pc_str
+
+    def __sub__(self, other):
+        return PitchClass24(self.pc - other.pc)
+
+    @property
+    def pc(self):
+        """
+        The pitch-class integer
+        :return: The pitch-class integer
+        """
+        return self._pc
+
+    @pc.setter
+    def pc(self, value: int):
+        """
+        The pitch-class integer
+        :param value: The new pitch-class integer
+        :return:
+        """
+        self._pc = value % 24
+        if self._pc < 0:
+            self._pc += 24
+
+    @property
+    def pc_str(self):
+        """
+        The pitch-class string
+        :return: The pitch-class string
+        """
+        if self._pc < 10:
+            return f"0{self._pc}"
+        else:
+            return str(self._pc)
+
+
+class Pitch12(PitchClass12):
     """
     Represents a pitch
     """
@@ -113,13 +187,13 @@ class Pitch(PitchClass):
         :param pname: The pitch name as a string
         """
         pc = p % 12
-        super().__init__(pc if pc >= 0 else pc + 12)
+        super().__init__(pc)
         self._p = p
         self._pname = pname
         self.pc = p
 
     def __add__(self, other):
-        return Pitch(self.p + other.p)
+        return Pitch12(self.p + other.p)
 
     def __eq__(self, other):
         return self.p == other.p
@@ -140,7 +214,7 @@ class Pitch(PitchClass):
         return self.p < other.p
 
     def __mul__(self, other):
-        return Pitch(self.p * other.p)
+        return Pitch12(self.p * other.p)
 
     def __ne__(self, other):
         return self.p != other.p
@@ -153,7 +227,7 @@ class Pitch(PitchClass):
         return str(self._p)
 
     def __sub__(self, other):
-        return Pitch(self.p - other.p)
+        return Pitch12(self.p - other.p)
 
     @property
     def p(self):
@@ -207,3 +281,92 @@ class Pitch(PitchClass):
         """
         self._p = value - 60
         self.pc = self._p
+
+
+class Pitch24(PitchClass24):
+    """
+    Represents a pitch
+    """
+    def __init__(self, p: int = 0, pname: str = 0):
+        """
+        Creates a Pitch
+        :param p: The pitch integer
+        :param pname: The pitch name as a string
+        """
+        pc = p % 24
+        super().__init__(pc)
+        self._p = p
+        self._pname = pname
+        self.pc = p
+
+    def __add__(self, other):
+        return Pitch24(self.p + other.p)
+
+    def __eq__(self, other):
+        return self.p == other.p
+
+    def __ge__(self, other):
+        return self.p >= other.p
+
+    def __gt__(self, other):
+        return self.p > other.p
+
+    def __hash__(self):
+        return self.p
+
+    def __le__(self, other):
+        return self.p <= other.p
+
+    def __lt__(self, other):
+        return self.p < other.p
+
+    def __mul__(self, other):
+        return Pitch24(self.p * other.p)
+
+    def __ne__(self, other):
+        return self.p != other.p
+
+    def __repr__(self):
+        # return "<pctheory.pitch.Pitch object at " + str(id(self)) + ">: " + str(self._p)
+        return str(self._p)
+
+    def __str__(self):
+        return str(self._p)
+
+    def __sub__(self, other):
+        return Pitch24(self.p - other.p)
+
+    @property
+    def p(self):
+        """
+        The pitch integer
+        :return: The pitch integer
+        """
+        return self._p
+
+    @p.setter
+    def p(self, value: int):
+        """
+        The pitch integer
+        :param value: The new pitch integer
+        :return:
+        """
+        self._p = value
+        self.pc = self._p
+
+    @property
+    def pname(self):
+        """
+        The pitch name of the pitch
+        :return: The pitch name
+        """
+        return self._pname
+
+    @pname.setter
+    def pname(self, value: str):
+        """
+        The pitch name of the pitch
+        :param value: The new name
+        :return:
+        """
+        self._pname = value

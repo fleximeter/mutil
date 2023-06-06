@@ -37,18 +37,18 @@ def com(a: int, b: int):
         return -1
 
 
-def com_mx(contour1: list, contour2: list):
+def com_mx(cseg1: list, cseg2: list):
     """
     Generates a COM matrix for two csegs
-    :param contour1: A cseg
-    :param contour2: A cseg
+    :param cseg1: A cseg
+    :param cseg2: A cseg
     :return: The COM matrix
     """
     mx = []
-    for i in range(len(contour2)):
+    for i in range(len(cseg2)):
         row = []
-        for j in range(len(contour1)):
-            row.append(com(contour1[j], contour2[i]))
+        for j in range(len(cseg1)):
+            row.append(com(cseg1[j], cseg2[i]))
         mx.append(row)
     return mx
 

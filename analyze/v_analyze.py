@@ -3,7 +3,7 @@ File: v_analyze.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains functions for analyzing vertical slices.
-Copyright (c) 2021 by Jeff Martin.
+Copyright (c) 2022 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,15 +18,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+import fractions
 import json
 import music21
-import numpy
-import matplotlib.pyplot
 from vslice2 import VSlice
 from results import Results
 from fractions import Fraction
 from pctheory import pitch, pcset
+from decimal import Decimal
 
 
 def analyze(input_xml, first=-1, last=-1, use_local=False):
@@ -41,10 +40,10 @@ def analyze(input_xml, first=-1, last=-1, use_local=False):
     stream = music21.converter.parse(input_xml)
     parts = []
     for item in stream:
-        if type(item) == music21.stream.Part:
+        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
             parts.append(item)
     results = slice_parts(parts, get_slice_num(parts), [], [use_local], first, last)
-    return results[0]
+    return results
 
 
 def analyze_corpus(name, first=-1, last=-1, use_local=False):
@@ -59,7 +58,7 @@ def analyze_corpus(name, first=-1, last=-1, use_local=False):
     stream = music21.corpus.parse(name)
     parts = []
     for item in stream:
-        if type(item) == music21.stream.Part:
+        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
             parts.append(item)
     results = slice_parts(parts, get_slice_num(parts), [], [use_local], first, last)
     return results[0]
@@ -78,30 +77,37 @@ def analyze_with_sections(input_xml, section_divisions, use_local):
     stream = music21.converter.parse(input_xml)
     parts = []
     for item in stream:
-        if type(item) == music21.stream.Part:
+        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
             parts.append(item)
     return slice_parts(parts, get_slice_num(parts), section_divisions, use_local, -1, -1)
 
 
-#done
-def clean_slices(slices):
+def clean_slices(slices, match_tempo=False, sections=None):
     """
     Cleans up a list of v_slices
     :param slices: A list of v_slices
+    :param match_tempo: Whether or not to force tempo match
+    :param sections: A list of section divisions
     """
     # Remove duplicate slices, and update durations
-    if len(slices) > 0:
-        i = 1
-        while i < len(slices):
-            if slice_compare(slices[i - 1], slices[i]):
-                slices[i - 1].duration += slices[i].duration
-                slices[i - 1].quarter_duration += slices[i].quarter_duration
-                del slices[i]
-            else:
-                i += 1
+    i = 1
+    while i < len(slices):
+        equal = True
+        if match_tempo and slices[i]._tempo != slices[i - 1]._tempo:
+            equal = False
+        elif slices[i].pitchseg != slices[i - 1].pitchseg:
+            equal = False
+        elif sections is not None:
+            if slices[i].measure in sections and slices[i - 1].measure < slices[i].measure:
+                equal = False
+        if equal:
+            slices[i - 1].duration += slices[i].duration
+            slices[i - 1].quarter_duration += slices[i].quarter_duration
+            del slices[i]
+        else:
+            i += 1
 
 
-#done
 def factor(n):
     """
     Factors a positive integer
@@ -217,6 +223,7 @@ def get_slice_num(parts):
     # Get the LCM and return it. This is the number of slices per quarter note that we need.
     for item in denominators:
         denominators_list.append(item)
+    # print(lcm(denominators_list))
     return lcm(denominators_list)
 
 
@@ -290,14 +297,13 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     :return: A list of v_slices
     """
 
-    sc = pcset.SetClass()  # A set-class for calculating names, etc.
+    sc = pcset.SetClass12()  # A set-class for calculating names, etc.
     final_slices = []      # Holds the finalized slices to return
     first_measure = -1     # We assume that the first measure is -1
     last_measure = -1      # We assume that the last measure is -1
-    n = Fraction(n, 1)     # The number of slices per quarter note
     next_indices = [0 for i in range(len(parts))]  # The index of the next measure, for each part
     next_measure = -1      # The number of the next measure
-    tempo = 60.0           # We assume a tempo of 60 to begin
+    tempo = Decimal(60)    # We assume a tempo of 60 to begin
     tempo_multiplier = 10  # This is in place to avoid floats
     time_signature = None  # The current time signature
     transpose = [0 for i in range(len(parts))]  # The amount by which to transpose, for each part
@@ -351,8 +357,18 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
                     # Update the tempo if we find a new one
                     if type(item) == music21.tempo.MetronomeMark:
-                        tempo = item.number
-                        tempo_multiplier = 10 ** str(tempo)[::-1].find(".")
+                        tempo = Decimal(item.number)
+
+                        # Specific adjustments for Carter 5
+                        if parts[a][next_indices[a]].number == 46:
+                            tempo = Decimal(512) / Decimal(7)
+                        elif parts[a][next_indices[a]].number == 66:
+                            tempo = Decimal(384) / Decimal(7)
+                        elif parts[a][next_indices[a]].number == 128:
+                            tempo = Decimal(1152) / Decimal(10)
+                        # print(f"Tempo: {tempo}, Measure {parts[a][next_indices[a]].number}")
+                        # deprecated:
+                        # tempo_multiplier = 10 ** str(tempo)[::-1].find(".")
 
                     # If we have found multiple voices in the same part in the same measure
                     if type(item) == music21.stream.Voice:
@@ -387,9 +403,9 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                                 for j in range(num_slices):
                                     if num_slices_taken >= len(measure_slices):
                                         measure_slices.append(
-                                            VSlice(Fraction(60 * tempo_multiplier, int(tempo * tempo_multiplier) * n),
-                                                   Fraction(1, n.numerator), parts[a][next_indices[a]].number))
-                                    measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item)
+                                            VSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
+                                                   len(parts)))
+                                    measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                                     measure_slices[num_slices_taken].time_signature = time_signature
                                     measure_slices[num_slices_taken].start_position = Fraction(num_slices_taken,
                                                                                                n.numerator)
@@ -432,16 +448,16 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                         for j in range(num_slices):
                             if num_slices_taken >= len(measure_slices):
                                 measure_slices.append(
-                                    VSlice(Fraction(60 * tempo_multiplier, int(tempo * tempo_multiplier) * n),
-                                           Fraction(1, n.numerator), parts[a][next_indices[a]].number))
-                            measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item)
+                                    VSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
+                                           len(parts)))
+                            measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                             measure_slices[num_slices_taken].time_signature = time_signature
                             measure_slices[num_slices_taken].start_position = Fraction(num_slices_taken,
                                                                                        n.numerator)
                             num_slices_taken += 1
 
             # Clean up the slices from this measure
-            clean_slices(measure_slices)
+            clean_slices(measure_slices, True)
             for item in measure_slices:
                 final_slices.append(item)
 
@@ -468,22 +484,31 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
     # Make pctheory objects
     for sl in final_slices:
-        sl.make_sets()
+        sl.prepare_for_clean()
+
+    clean_slices(final_slices, True, [section_divisions[i][0] for i in range(len(section_divisions))])
+    for s in final_slices:
+        s.run_calculations(sc)
+
+    clean_slices(final_slices, False, [section_divisions[i][0] for i in range(len(section_divisions))])
 
     # Create sectional results
     for i in range(len(section_divisions)):
         section_slices = []
+        start_time = 0
         for sl in final_slices:
-            if section_divisions[i][0] <= sl.measure <= section_divisions[i][1]:
+            if sl.measure < section_divisions[i][0]:
+                start_time += sl.duration
+            elif sl.measure <= section_divisions[i][1]:
                 section_slices.append(sl)
-        clean_slices(section_slices)
         bounds = global_bounds
         if use_local[i]:
             bounds = get_bounds(section_slices)
         set_slice_bounds(section_slices, bounds)
         for s in section_slices:
-            s.run_calculations(sc)
-        results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1]))
+            s.run_calculations_burt()
+        results.append(Results(section_slices, section_divisions[i][0], section_divisions[i][1],
+                               len(parts), start_time))
 
     # Create overall results
     clean_slices(final_slices)
@@ -493,28 +518,9 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
             bounds = get_bounds(final_slices)
     set_slice_bounds(final_slices, bounds)
     for f_slice in final_slices:
-        f_slice.run_calculations(sc)
-    results.insert(0, Results(final_slices, first_measure, last_measure))
+        f_slice.run_calculations_burt()
+    results.insert(0, Results(final_slices, first_measure, last_measure, len(parts)))
     return results
-
-
-#done
-def slice_compare(slice1, slice2):
-    """
-    Compares two v_slices for equality
-    :param slice1: A v_slice
-    :param slice2: A v_slice
-    :return: True if equal, False if not equal
-    """
-    equal = True
-    if slice1.p_count != slice2.p_count:
-        equal = False
-    else:
-        for p in slice1.pitchseg:
-            if p not in slice2.pitchseg:
-                equal = False
-                break
-    return equal
 
 
 def read_analysis_from_file(path):
@@ -531,21 +537,31 @@ def read_analysis_from_file(path):
         slices = []
         for dslice in item["slices"]:
             cslice = VSlice()
+            cslice._cseg = dslice["cseg"]
+            cslice._pset_spacing_index = float(dslice["chord_spread"])
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
-            cslice._duration = Fraction(dslice["duration"][0], dslice["duration"][1])
+            cslice._duration = Decimal(dslice["duration"])
             cslice._ipseg = dslice["ipseg"]
             cslice._measure = dslice["measure"]
             cslice._p_cardinality = dslice["p_cardinality"]
             cslice._p_count = dslice["p_count"]
             cslice._pc_cardinality = dslice["pc_cardinality"]
-            cslice._pcseg = [pitch.PitchClass(pc) for pc in dslice["pcseg"]]
+            cslice._pcseg = [pitch.PitchClass12(pc) for pc in dslice["pcseg"]]
             cslice._pcset = set(cslice.pcseg)
+            cslice._pcsegs = [[pitch.PitchClass12(pc) for pc in dslice["pcsegs"][v]]
+                              for v in range(len(dslice["pcsegs"]))]
+            cslice._pcset = set(cslice.pcseg)
+            cslice._pcsets = [set(cslice.pcsegs[v]) for v in range(len(cslice.pcsegs))]
             cslice._pitchseg = dslice["pitchseg"]
+            cslice._pitchsegs = dslice["pitchsegs"]
             cslice._pnameseg = dslice["pnameseg"]
-            cslice._pseg = [pitch.Pitch(p) for p in dslice["pseg"]]
+            cslice._pnamesegs = dslice["pnamesegs"]
+            cslice._pseg = [pitch.Pitch12(p) for p in dslice["pseg"]]
+            cslice._psegs = [[pitch.Pitch12(p) for p in dslice["psegs"][v]] for v in range(len(dslice["psegs"]))]
             cslice._pset = set(cslice.pseg)
+            cslice._psets = [set(cslice.psegs[v]) for v in range(len(cslice.psegs))]
             cslice._quarter_duration = Fraction(dslice["quarter_duration"][0], dslice["quarter_duration"][1])
             cslice._sc_name = dslice["sc_name"]
             cslice._sc_name_carter = dslice["sc_name_carter"]
@@ -560,9 +576,11 @@ def read_analysis_from_file(path):
             cslice._uns = dslice["uns"]
             cslice._upper_bound = dslice["upper_bound"]
             slices.append(cslice)
-        result = Results(slices, item["measure_num_first"], item["measure_num_last"])
+        result = Results(slices, item["measure_num_first"], item["measure_num_last"], len(item["pitch_highest_voices"]))
         result._max_p_count = item["max_p_count"]
-        result._duration = Fraction(item["duration"][0], item["duration"][1])
+        result._cseg_duration = {}
+        result._cseg_frequency = item["cseg_frequency"]
+        result._duration = Decimal(item["duration"])
         result._ins_avg = item["ins_avg"]
         result._ins_max = item["ins_max"]
         result._ins_min = item["ins_min"]
@@ -575,24 +593,63 @@ def read_analysis_from_file(path):
         result._mediant_max = item["mediant_max"]
         result._mediant_min = item["mediant_min"]
         result._num_measures = item["num_measures"]
+        result._num_voices = len(item["pitch_highest_voices"])
         result._pitch_highest = item["pitch_highest"]
+        result._pitch_highest_voices = item["pitch_highest_voices"]
         result._pitch_lowest = item["pitch_lowest"]
+        result._pitch_lowest_voices = item["pitch_lowest_voices"]
+        result._pset_card_avg = item["pset_card_avg"]
+        result._pset_spacing_index_avg = item["pset_spacing_index_avg"]
+        result._pset_duration = {}
+        result._pset_frequency = item["pset_frequency"]
+        result._psc_duration = {}
+        result._pcsc_frequency = item["pcsc_frequency"]
+        result._psc_frequency = item["psc_frequency"]
         result._ps_avg = item["ps_avg"]
         result._ps_max = item["ps_max"]
         result._ps_min = item["ps_min"]
         result._quarter_duration = Fraction(item["quarter_duration"][0], item["quarter_duration"][1])
+        result._start_time = Decimal(item["start_time"])
         result._uns_avg = item["uns_avg"]
         result._uns_max = item["uns_max"]
         result._uns_min = item["uns_min"]
         result._upper_bound = item["upper_bound"]
         result._pc_duration = {}
-        result._pc_frequency = item["pc_frequency"]
+        result._pc_frequency = {}
         result._pitch_duration = {}
-        result._pitch_frequency = item["pitch_frequency"]
+        result._pitch_frequency = {}
+        for key, val in item["cseg_duration"].items():
+            result.cseg_duration[key] = Decimal(val)
         for key, val in item["pc_duration"].items():
-            result.pc_duration[key] = Fraction(val[0], val[1])
+            result.pc_duration[int(key)] = Decimal(val)
+        for v in range(len(item["pc_duration_voices"])):
+            result.pc_duration_voices.append({})
+            for key, val in item["pc_duration_voices"][v].items():
+                result.pc_duration_voices[v][int(key)] = Decimal(val)
         for key, val in item["pitch_duration"].items():
-            result.pitch_duration[key] = Fraction(val[0], val[1])
+            result.pitch_duration[int(key)] = Decimal(val)
+        for v in range(len(item["pitch_duration_voices"])):
+            result.pitch_duration_voices.append({})
+            for key, val in item["pitch_duration_voices"][v].items():
+                result.pitch_duration_voices[v][int(key)] = Decimal(val)
+        for key, val in item["pc_frequency"].items():
+            result.pc_frequency[int(key)] = val
+        for v in range(len(item["pc_frequency_voices"])):
+            result.pc_frequency_voices.append({})
+            for key, val in item["pc_frequency_voices"][v].items():
+                result.pc_frequency_voices[v][int(key)] = val
+        for key, val in item["pitch_frequency"].items():
+            result.pitch_frequency[int(key)] = val
+        for v in range(len(item["pitch_frequency_voices"])):
+            result.pitch_frequency_voices.append({})
+            for key, val in item["pitch_frequency_voices"][v].items():
+                result.pitch_frequency_voices[v][int(key)] = val
+        for key, val in item["pset_duration"].items():
+            result.pset_duration[key] = Decimal(val)
+        for key, val in item["pcsc_duration"].items():
+            result.pcsc_duration[key] = Decimal(val)
+        for key, val in item["psc_duration"].items():
+            result.psc_duration[key] = Decimal(val)
         results.append(result)
     return results
 
@@ -608,7 +665,9 @@ def write_analysis_to_file(results, path):
     for i in range(len(results)):
         data.append({})
         data[i]["max_p_count"] = results[i].max_p_count
-        data[i]["duration"] = [results[i].duration.numerator, results[i].duration.denominator]
+        data[i]["cseg_duration"] = {}
+        data[i]["cseg_frequency"] = results[i].cseg_frequency
+        data[i]["duration"] = str(results[i].duration)
         data[i]["ins_avg"] = results[i].ins_avg
         data[i]["ins_max"] = results[i].ins_max
         data[i]["ins_min"] = results[i].ins_min
@@ -624,56 +683,89 @@ def write_analysis_to_file(results, path):
         data[i]["mediant_min"] = results[i].mediant_min
         data[i]["num_measures"] = results[i].num_measures
         data[i]["pitch_highest"] = results[i].pitch_highest
+        data[i]["pitch_highest_voices"] = results[i].pitch_highest_voices
         data[i]["pitch_lowest"] = results[i].pitch_lowest
+        data[i]["pitch_lowest_voices"] = results[i].pitch_lowest_voices
+        data[i]["pset_card_avg"] = results[i].pset_card_avg
+        data[i]["pset_spacing_index_avg"] = results[i].pset_spacing_index_avg
+        data[i]["pset_duration"] = {}
+        data[i]["pset_frequency"] = results[i].pset_frequency
+        data[i]["pcsc_duration"] = {}
+        data[i]["psc_duration"] = {}
+        data[i]["pcsc_frequency"] = results[i].pcsc_frequency
+        data[i]["psc_frequency"] = results[i].psc_frequency
         data[i]["ps_avg"] = results[i].ps_avg
         data[i]["ps_max"] = results[i].ps_max
         data[i]["ps_min"] = results[i].ps_min
         data[i]["quarter_duration"] = [results[i].quarter_duration.numerator, results[i].quarter_duration.denominator]
+        data[i]["start_time"] = str(results[i].start_time)
         data[i]["uns_avg"] = results[i].uns_avg
         data[i]["uns_max"] = results[i].uns_max
         data[i]["uns_min"] = results[i].uns_min
         data[i]["upper_bound"] = results[i].upper_bound
         data[i]["pc_duration"] = {}
-        data[i]["pc_frequency"] = {}
+        data[i]["pc_duration_voices"] = []
+        data[i]["pc_frequency"] = results[i].pc_frequency
+        data[i]["pc_frequency_voices"] = results[i].pc_frequency_voices
         data[i]["pitch_duration"] = {}
-        data[i]["pitch_frequency"] = {}
+        data[i]["pitch_duration_voices"] = []
+        data[i]["pitch_frequency"] = results[i].pitch_frequency
+        data[i]["pitch_frequency_voices"] = results[i].pitch_frequency_voices
         data[i]["slices"] = []
+        for key, val in results[i].cseg_duration.items():
+            data[i]["cseg_duration"][key] = str(val)
         for key, val in results[i].pc_duration.items():
-            data[i]["pc_duration"][key] = [val.numerator, val.denominator]
-        for key, val in results[i].pc_frequency.items():
-            data[i]["pc_frequency"][key] = val
+            data[i]["pc_duration"][key] = str(val)
+        for v in range(len(results[i].pc_duration_voices)):
+            data[i]["pc_duration_voices"].append({})
+            for key, val in results[i].pc_duration_voices[v].items():
+                data[i]["pc_duration_voices"][len(data[i]["pc_duration_voices"]) - 1][key] = str(val)
         for key, val in results[i].pitch_duration.items():
-            data[i]["pitch_duration"][key] = [val.numerator, val.denominator]
-        for key, val in results[i].pitch_frequency.items():
-            data[i]["pitch_frequency"][key] = val
-        for slice in results[i].slices:
+            data[i]["pitch_duration"][key] = str(val)
+        for v in range(len(results[i].pitch_duration_voices)):
+            data[i]["pitch_duration_voices"].append({})
+            for key, val in results[i].pitch_duration_voices[v].items():
+                data[i]["pitch_duration_voices"][len(data[i]["pitch_duration_voices"]) - 1][key] = str(val)
+        for key, val in results[i].pset_duration.items():
+            data[i]["pset_duration"][key] = str(val)
+        for key, val in results[i].pcsc_duration.items():
+            data[i]["pcsc_duration"][key] = str(val)
+        for key, val in results[i].psc_duration.items():
+            data[i]["psc_duration"][key] = str(val)
+        for rslice in results[i].slices:
             cslice = {}
-            cslice["core"] = int(slice.core)
-            cslice["derived_core"] = int(slice.derived_core)
-            cslice["derived_core_associations"] = slice.derived_core_associations
-            cslice["duration"] = [slice.duration.numerator, slice.duration.denominator]
-            cslice["ipseg"] = slice.ipseg
-            cslice["measure"] = slice.measure
-            cslice["p_cardinality"] = slice.p_cardinality
-            cslice["p_count"] = slice.p_count
-            cslice["pc_cardinality"] = slice.pc_cardinality
-            cslice["pcseg"] = [pc.pc for pc in slice.pcseg]
-            cslice["pitchseg"] = [p for p in slice.pitchseg]
-            cslice["pnameseg"] = [pname for pname in slice.pitchseg]
-            cslice["pseg"] = [p.p for p in slice.pseg]
-            cslice["quarter_duration"] = [slice.quarter_duration.numerator, slice.quarter_duration.denominator]
-            cslice["sc_name"] = slice.sc_name
-            cslice["sc_name_carter"] = slice.sc_name_carter
-            cslice["ins"] = slice.ins
-            cslice["lns"] = slice.lns
-            cslice["lower_bound"] = slice.lower_bound
-            cslice["mediant"] = slice.mediant
-            cslice["ns"] = slice.ns
-            cslice["ps"] = slice.ps
-            cslice["start_position"] = [slice.start_position.numerator, slice.start_position.denominator]
-            cslice["time_signature"] = slice.time_signature.ratioString
-            cslice["uns"] = slice.uns
-            cslice["upper_bound"] = slice.upper_bound
+            cslice["cseg"] = rslice.cseg
+            cslice["chord_spread"] = rslice.pset_spacing_index
+            cslice["core"] = int(rslice.core)
+            cslice["derived_core"] = int(rslice.derived_core)
+            cslice["derived_core_associations"] = rslice.derived_core_associations
+            cslice["duration"] = str(rslice.duration)
+            cslice["ipseg"] = rslice.ipseg
+            cslice["measure"] = rslice.measure
+            cslice["p_cardinality"] = rslice.p_cardinality
+            cslice["p_count"] = rslice.p_count
+            cslice["pc_cardinality"] = rslice.pc_cardinality
+            cslice["pcseg"] = [pc.pc for pc in rslice.pcseg]
+            cslice["pcsegs"] = [[pc.pc for pc in rslice.pcsegs[v]] for v in range(len(rslice.pcsegs))]
+            cslice["pitchseg"] = [p for p in rslice.pitchseg]
+            cslice["pitchsegs"] = [[p for p in rslice.pitchsegs[v]] for v in range(len(rslice.pitchsegs))]
+            cslice["pnameseg"] = [pname for pname in rslice.pnameseg]
+            cslice["pnamesegs"] = [[pname for pname in rslice.pnamesegs[v]] for v in range(len(rslice.pnamesegs))]
+            cslice["pseg"] = [p.p for p in rslice.pseg]
+            cslice["psegs"] = [[p.p for p in rslice.psegs[v]] for v in range(len(rslice.psegs))]
+            cslice["quarter_duration"] = [rslice.quarter_duration.numerator, rslice.quarter_duration.denominator]
+            cslice["sc_name"] = rslice.sc_name
+            cslice["sc_name_carter"] = rslice.sc_name_carter
+            cslice["ins"] = rslice.ins
+            cslice["lns"] = rslice.lns
+            cslice["lower_bound"] = rslice.lower_bound
+            cslice["mediant"] = rslice.mediant
+            cslice["ns"] = rslice.ns
+            cslice["ps"] = rslice.ps
+            cslice["start_position"] = [rslice.start_position.numerator, rslice.start_position.denominator]
+            cslice["time_signature"] = rslice.time_signature.ratioString
+            cslice["uns"] = rslice.uns
+            cslice["upper_bound"] = rslice.upper_bound
             data[i]["slices"].append(cslice)
 
     with open(path, "w") as out:
@@ -694,46 +786,99 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
     with open(file, file_command) as general:
         if file_command == "w":
             # Write column headings
-            general.write("Section,LPS,P_U,P_L,PS avg,PS min,PS max,UNS avg,UNS min,UNS max," + \
-                          "LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min,MT max")
+            general.write("Section,Starting Time,Duration,Pset card avg,PSI avg,LPS,P_U,P_L,PS avg,PS min,PS max," +
+                          "UNS avg,UNS min,UNS max,LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min," +
+                          "MT max")
             for i in range(0, 12):
-                general.write(",pc" + str(i) + " dur")
+                general.write(f",pc{i} dur")
             for i in range(0, 12):
-                general.write(",pc" + str(i) + " freq")
+                general.write(f",pc{i} freq")
             for i in range(lowest_pitch, highest_pitch + 1):
-                general.write(",p" + str(i) + " dur")
+                general.write(f",p{i} dur")
             for i in range(lowest_pitch, highest_pitch + 1):
-                general.write(",p" + str(i) + " freq")
+                general.write(f",p{i} freq")
             general.write("\n")
-        general.write(section_name + ",")
-        general.write(str(results.lps_card) + "," + str(results.pitch_highest) + "," + str(results.pitch_lowest) +
-                      "," + str(results.ps_avg) + "," + str(results.ps_min) + "," + str(results.ps_max) +
-                      "," + str(results.uns_avg) + "," + str(results.uns_min) + "," + str(results.uns_max) +
-                      "," + str(results.lns_avg) + "," + str(results.lns_min) + "," + str(results.lns_max) +
-                      "," + str(results.ins_avg) + "," + str(results.ins_min) + "," + str(results.ins_max) +
-                      "," + str(results.mediant_avg) + "," + str(results.mediant_min) + "," +
-                      str(results.mediant_max))
+        general.write(f"{section_name},{results.start_time},{results.duration},{results.pset_card_avg}," +
+                      f"{results.pset_spacing_index_avg},{results.lps_card},{results.pitch_highest}," +
+                      f"{results.pitch_lowest},{results.ps_avg},{results.ps_min},{results.ps_max}," +
+                      f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
+                      f"{results.lns_avg},{results.lns_min},{results.lns_max}," +
+                      f"{results.ins_avg},{results.ins_min},{results.ins_max}," +
+                      f"{results.mediant_avg},{results.mediant_min},{results.mediant_max}")
         for i in range(0, 12):
             if i in results.pc_duration.keys():
-                general.write("," + str(float(results.pc_duration[i])))
+                general.write(f",{results.pc_duration[i]}")
             else:
                 general.write(",0")
         for i in range(0, 12):
             if i in results.pc_frequency.keys():
-                general.write("," + str(float(results.pc_frequency[i])))
+                general.write(f",{results.pc_frequency[i]}")
             else:
                 general.write(",0")
         for i in range(lowest_pitch, highest_pitch + 1):
             if i in results.pitch_duration.keys():
-                general.write("," + str(float(results.pitch_duration[i])))
+                general.write(f",{results.pitch_duration[i]}")
             else:
                 general.write(",0")
         for i in range(lowest_pitch, highest_pitch + 1):
             if i in results.pitch_frequency.keys():
-                general.write("," + str(float(results.pitch_frequency[i])))
+                general.write(f",{results.pitch_frequency[i]}")
             else:
                 general.write(",0")
         general.write("\n")
+        for v in range(results.num_voices):
+            general.write(f"{section_name} (Voice {v}),,,,,")
+            general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
+            general.write(f"{results.pitch_highest_voices[v]},")
+            general.write(f"{results.pitch_lowest_voices[v]},")
+            general.write(",,,,,,,,,,,,,,")
+            for i in range(0, 12):
+                if i in results.pc_duration_voices[v].keys():
+                    general.write(f",{results.pc_duration_voices[v][i]}")
+                else:
+                    general.write(",0")
+            for i in range(0, 12):
+                if i in results.pc_frequency_voices[v].keys():
+                    general.write(f",{results.pc_frequency_voices[v][i]}")
+                else:
+                    general.write(",0")
+            for i in range(lowest_pitch, highest_pitch + 1):
+                if i in results.pitch_duration_voices[v].keys():
+                    general.write(f",{results.pitch_duration_voices[v][i]}")
+                else:
+                    general.write(",0")
+            for i in range(lowest_pitch, highest_pitch + 1):
+                if i in results.pitch_frequency_voices[v].keys():
+                    general.write(f",{results.pitch_frequency_voices[v][i]}")
+                else:
+                    general.write(",0")
+            general.write("\n")
+
+
+def write_statistics(file, headings, dictionaries):
+    """
+    Writes a dictionary to file
+    :param file: A file name
+    :param headings: A headings row for the file
+    :param dictionaries: Dictionaries with common keys to write to file
+    :return: None
+    """
+    stat_list = []
+    for key, value in dictionaries[0].items():
+        stat_list.append([key, value])
+    for i in range(1, len(dictionaries)):
+        for j in range(len(stat_list)):
+            stat_list[j].append(dictionaries[i][stat_list[j][0]])
+    stat_list = sorted(stat_list, key=lambda x: x[0])
+    stat_list = sorted(stat_list, key=lambda x: len(x[0]))
+    with open(file, "w") as output:
+        output.write(headings)
+        for line in stat_list:
+            if len(line) > 0:
+                output.write(f"\"{line[0]}\"")
+            for i in range(1, len(line)):
+                output.write(f",{line[i]}")
+            output.write("\n")
 
 
 def write_report(file, results):
@@ -749,69 +894,76 @@ def write_report(file, results):
 
             # Output column headings
             line = "Measure #,Start Time (seconds),Duration (seconds),Quarter duration,Chord cardinality," + \
-                   "PS,Match,NS,UNS,INS,LNS,MT,Name,Carter name,Core,Derived core,DC associations,pcset,ipseg"
+                   "PS,Match,NS,UNS,INS,LNS,MT,Morris name,Carter name,Core,Derived core,DC associations,pcset,pset," \
+                   "psc,cseg,Chord Spread"
             for i in range(results.max_p_count):
-                line += ",Pitch " + str(i + 1)
+                line += f",Pitch {i + 1}"
             for i in range(results.ps_max):
-                line += ",Pn_" + str(i + 1)
+                line += f",Pn_{i + 1}"
             line += "\n"
             output.write(line)
 
             # Output each slice
             for item in results.slices:
-                line = str(item.measure)
-                line += "," + str(float(position))
-                line += "," + str(float(item.duration))
-                line += ",\'" + str(item.quarter_duration)
-                line += "," + str(item.p_count)
-                line += "," + str(item.ps)
-                if item.p_cardinality == item.ps:
+                line = f"{item.measure}"
+                line += f",{float(position)}"
+                line += f",{float(item.duration)}"
+                line += f",\'{item.quarter_duration}"
+                line += f",{item.p_count}"
+                line += f",{item.ps}"
+                if item.p_count == item.ps:
                     line += ",TRUE"
                 else:
                     line += ",FALSE"
                 if item.ns is not None:
-                    line += "," + str(item.ns)
+                    line += f",{item.ns}"
                 else:
                     line += ",N/A"
                 if item.uns is not None:
-                    line += "," + str(item.uns)
+                    line += f",{item.uns}"
                 else:
                     line += ",N/A"
-                line += "," + str(item.ins)
+                line += f",{item.ins}"
                 if item.lns is not None:
-                    line += "," + str(item.lns)
+                    line += f",{item.lns}"
                 else:
                     line += ",N/A"
                 if item.mediant is not None:
-                    line += "," + str(item.mediant)
+                    line += f",{item.mediant}"
                 else:
                     line += ",N/A"
                 if item.sc_name is not None:
-                    line += "," + str(item.sc_name)
+                    line += f",{item.sc_name}"
                 else:
                     line += ",N/A"
                 if item.sc_name_carter is not None:
-                    line += ",\"" + str(item.sc_name_carter) + "\""
+                    line += f",\"{item.sc_name_carter}\""
                 else:
                     line += ",N/A"
-                line += "," + str(item.core) + "," + str(item.derived_core)
+                line += f",{item.core},{item.derived_core}"
                 if item.derived_core:
-                    line += ",\"" + str(item.derived_core_associations) + "\""
+                    line += f",\"{item.derived_core_associations}\""
                 else:
                     line += ",N/A"
                 if item.pcset is not None:
-                    line += ",\"" + item.get_pcset_str() + "\""
+                    line += f",\"{item.get_pcset_string()}\""
                 else:
                     line += ",N/A"
-                line += "," + item.get_ipseg_string()
+                if item.pset is not None:
+                    line += f",\"{item.get_pset_string()}\""
+                else:
+                    line += ",N/A"
+                line += f",\"{item.get_ipseg_string()}\""
+                line += f",\"{item.get_cseg_string()}\""
+                line += f",{item.pset_spacing_index}"
                 for i in range(results.max_p_count):
                     if i < len(item.pitchseg):
-                        line += "," + str(item.pnameseg[i])
+                        line += f",{item.pnameseg[i]}"
                     else:
                         line += ","
                 for i in range(results.ps_max):
                     if i < len(item.pseg):
-                        line += "," + str(item.pseg[i])
+                        line += f",{item.pseg[i]}"
                     else:
                         line += ","
                 line += "\n"

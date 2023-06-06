@@ -22,6 +22,68 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
+def factor(n):
+    """
+    Factors a positive integer
+    :param n: An integer
+    :returns: A list of factors, in sorted order, including duplicates
+    """
+    factors = []
+    d = 1
+    while d <= int(n ** 0.5):
+        if n % d == 0:
+            factors.append(d)
+            n //= d
+        else:
+            d += 1
+        if d == 1:
+            d += 1
+        # if d > int(n ** 0.5):
+        #     factors.append(n)
+    factors.append(n)
+    # factors.sort()
+    return factors
+
+
+def lcm(integers):
+    """
+    Computes the LCM of a list of positive integers
+    :param integers: A list of positive integers
+    :return: The LCM
+    """
+    factors = {}  # A dictionary of individual factors and their multiplicities
+    multiple = 1  # The LCM
+
+    for num in integers:
+        cur_factors = factor(num)  # The factors of the current number
+        current = 1  # The current factor we are considering
+        count = 0  # The number of occurrences of that factor
+        for i in range(len(cur_factors)):
+            # If we found another occurrence of that factor, increase the count
+            if cur_factors[i] == current:
+                count += 1
+            # Otherwise record the count and move on
+            else:
+                if current not in factors:
+                    factors[current] = count
+                elif factors[current] < count:
+                    factors[current] = count
+                current = cur_factors[i]
+                count = 1
+            # If we are done, record the count of the last factor
+            if i + 1 == len(cur_factors):
+                if current not in factors:
+                    factors[current] = count
+                elif factors[current] < count:
+                    factors[current] = count
+
+    # Compute the LCM
+    for item in factors:
+        multiple *= item ** factors[item]
+    # print(multiple)
+    return multiple
+
+
 def map_to_chromatic(scale_map, sequence):
     """
     Maps a diatonic collection to the chromatic collection
