@@ -306,7 +306,7 @@ class Sieve24:
         return Sieve24(t, self._base_pitch)
 
 
-def fb_class(pset: set, p0: int):
+def get_fb_class(pset: set, p0: int):
     """
     Gets the FB-class of a pset
     :param pset: The pset
@@ -321,6 +321,17 @@ def fb_class(pset: set, p0: int):
     if len(intlist) > 0:
         del intlist[0]
     return intlist
+
+
+def generate_pcset_realizations(pcset: set, lower_boundary: int, upper_boundary: int) -> list:
+    """
+    Generates all of the possible pset realizations of a given pcset, 
+    within the specified upper and lower boundaries
+    :param pcset: The pcset to realize
+    :param lower_boundary: The lower boundary
+    :param upper_boundary: The upper boundary
+    :return: A list of all psets that realize the pcset within the given boundaries
+    """
 
 
 def invert(pset: set):
@@ -377,7 +388,7 @@ def make_pset24(*args):
     return {pitch.Pitch24(p) for p in args}
 
 
-def p_ic_matrix(pset: set):
+def get_ic_matrix(pset: set):
     """
     Gets the pitch ic-matrix
     :param pset: The pset
@@ -392,7 +403,7 @@ def p_ic_matrix(pset: set):
     return mx
 
 
-def p_ic_roster(pset: set):
+def get_ic_roster(pset: set):
     """
     Gets the pitch ic-roster
     :param pset: The pset
@@ -411,7 +422,7 @@ def p_ic_roster(pset: set):
     return roster
 
 
-def p_set_class(pset: set):
+def get_set_class(pset: set):
     """
     Gets the set-class of a pset
     :param pset: The pset
@@ -425,7 +436,7 @@ def p_set_class(pset: set):
     return intlist
 
 
-def pcint_class(pset: set):
+def get_pcint_class(pset: set):
     """
     Gets the PCINT-class of a pset
     :param pset: The pset
@@ -440,7 +451,7 @@ def pcint_class(pset: set):
     return intlist
 
 
-def pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=None):
+def calculate_pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=None):
     """
     Gets the pitch-measure (PM) similarity between pset1 and pset2
     :param pset1: A pset
@@ -452,9 +463,9 @@ def pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=None):
     cint = len(pset1.intersection(pset2))
     ic_shared = 0
     if ic_roster1 is None:
-        ic_roster1 = p_ic_roster(pset1)
+        ic_roster1 = get_ic_roster(pset1)
     if ic_roster2 is None:
-        ic_roster2 = p_ic_roster(pset2)
+        ic_roster2 = get_ic_roster(pset2)
     for ic in ic_roster1:
         if ic in ic_roster2:
             if ic_roster1[ic] < ic_roster2[ic]:
