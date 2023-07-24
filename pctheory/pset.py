@@ -23,7 +23,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from pctheory import pitch, transformations, util
 import music21
-import numpy
+import numpy as np
+import random
+
+_rng = random.Random()
 
 
 class Sieve:
@@ -46,7 +49,7 @@ class Sieve:
         self.add_tuples(tuples)
 
     @property
-    def base_pitch(self):
+    def base_pitch(self) -> pitch.Pitch:
         """
         The base pitch of the Sieve12 (pitch 0)
         :return: The base pitch
@@ -54,7 +57,7 @@ class Sieve:
         return self._base_pitch
 
     @property
-    def intervals(self):
+    def intervals(self) -> list:
         """
         The intervallic succession of the Sieve12
         :return: The intervallic succession
@@ -62,15 +65,15 @@ class Sieve:
         return self._intervals
 
     @property
-    def pc_mod(self):
+    def pc_mod(self) -> int:
         """
         The pitch class mod of the Sieve (which specifies the pitch type)
         :return: The pitch class mod
         """
-        return self._intervals
+        return self._pc_mod
 
     @property
-    def period(self):
+    def period(self) -> int:
         """
         The period of the Sieve12
         :return: The period
@@ -78,7 +81,7 @@ class Sieve:
         return self._period
 
     @property
-    def tuples(self):
+    def tuples(self) -> set:
         """
         The tuples in the Sieve12
         :return: The tuples
@@ -89,7 +92,7 @@ class Sieve:
         """
         Adds one or more tuples to the Sieve12
         :param args: One or more tuples
-        :return:
+        :return: None
         """
         lcm_list = set()
         if type(args[0]) == set or type(args[0]) == list or type(args[0]) == tuple:
@@ -105,7 +108,7 @@ class Sieve:
         for i in range(1, len(r)):
             self._intervals.append(r[i].p - r[i - 1].p)
 
-    def get_range(self, p0, p1):
+    def get_range(self, p0, p1) -> set:
         """
         Gets all pitches in the sieve between p0 and p1
         :param p0: The low pitch
@@ -125,9 +128,9 @@ class Sieve:
 
     def intersection(self, sieve):
         """
-        Intersects two Sieve12s
-        :param sieve: A Sieve12
-        :return: A new Sieve12. It will have the same base pitch as self.
+        Intersects two Sieves
+        :param sieve: A Sieve
+        :return: A new Sieve. It will have the same base pitch as self.
         """
         t = set()
         for tup1 in self._tuples:
@@ -136,7 +139,7 @@ class Sieve:
                     t.add(tup1)
         return Sieve(t, self._base_pitch, self._pc_mod)
 
-    def is_in_sieve(self, p):
+    def is_in_sieve(self, p) -> bool:
         """
         Whether or not a pitch or pset is in the sieve
         :param p: A pitch (Pitch or int) or pset
@@ -175,7 +178,7 @@ class Sieve:
         return Sieve(t, self._base_pitch, self._pc_mod)
 
 
-def get_fb_class(pset: set, p0: int):
+def get_fb_class(pset: set, p0: int) -> list:
     """
     Gets the FB-class of a pset
     :param pset: The pset
@@ -194,19 +197,57 @@ def get_fb_class(pset: set, p0: int):
     return intlist
 
 
-def generate_pcset_realizations(pcset: set, lower_boundary: int, upper_boundary: int) -> list:
+def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_boundary: int, num_realizations: int=1):
     """
-    Generates all of the possible pset realizations of a given pcset, 
+    Generates random pset realizations of a given pcset, 
     within the specified upper and lower boundaries
     :param pcset: The pcset to realize
     :param lower_boundary: The lower boundary
     :param upper_boundary: The upper boundary
-    :return: A list of all psets that realize the pcset within the given boundaries
+    :param num_realizations: The number of random realizations to generate
+    :return: One or more random pset realizations of the pcset within the given boundaries. If the number of realizations
+    is greater than 1, returns a list of psets. Otherwise returns a single pset.
     *Compatible with all Pitch modulos
     """
+    if len(pcset) == 0:
+        return set()
+    else:
+        mod = next(iter(pcset)).mod
+
+        # Generate all of the possible pitch realizations for each pitch-class
+        # within the range provided
+        pitch_choices = []
+        for pc in pcset:
+            choices = []
+            multiplier = lower_boundary // pc.pc
+            in_range = True
+            while in_range:
+                if multiplier < 0:
+                    candidate_pitch = pc.pc * -1 % mod * multiplier
+                else:
+                    candidate_pitch = pc.pc * multiplier
+                if candidate_pitch > upper_boundary:
+                    in_range = False
+                elif candidate_pitch >= lower_boundary:
+                    choices.append(pitch.Pitch(candidate_pitch, mod))
+                multiplier += 1
+            pitch_choices.append(choices)
+
+        # Generate pset realizations
+        realizations = []
+        for i in range(num_realizations):
+            realization = set()
+            for bucket in pitch_choices:
+                if len(bucket) > 0:
+                    realization.add(bucket[_rng.randrange(0, len(bucket) - 1)])
+            realizations.append(realization)
+        if len(realizations) == 1:
+            return realizations[0]
+        else:
+            return realizations
 
 
-def invert(pset: set):
+def invert(pset: set) -> set:
     """
     Inverts a pset
     :param pset: The pset
@@ -221,7 +262,7 @@ def invert(pset: set):
     return pset2
 
 
-def m21_make_pset(item):
+def m21_make_pset(item) -> set:
     """
     Makes a pset from a music21 object
     :param item: A music21 object
@@ -241,10 +282,10 @@ def m21_make_pset(item):
     return pset2
 
 
-def make_pset12(*args):
+def make_pset12(*args) -> set:
     """
     Makes a pset
-    :param *args: Ps
+    :param *args: Pitches
     :return: A pset
     *Compatible only with chromatic psegs
     """
@@ -253,10 +294,10 @@ def make_pset12(*args):
     return {pitch.Pitch(p, 12) for p in args}
 
 
-def make_pset24(*args):
+def make_pset24(*args) -> set:
     """
     Makes a pset
-    :param *args: Ps
+    :param *args: Pitches
     :return: A pset
     *Compatible only with microtonal psegs
     """
@@ -265,14 +306,14 @@ def make_pset24(*args):
     return {pitch.Pitch(p, 24) for p in args}
 
 
-def get_ic_matrix(pset: set):
+def get_ic_matrix(pset: set) -> np.array:
     """
     Gets the pitch ic-matrix
     :param pset: The pset
     :return: The ic-matrix as a list of lists
     *Compatible with all Pitch modulos
     """
-    mx = numpy.empty((len(pset), len(pset)))
+    mx = np.empty((len(pset), len(pset)))
     pseg = list(pset)
     pseg.sort()
     for i in range(mx.shape[0]):
@@ -281,7 +322,7 @@ def get_ic_matrix(pset: set):
     return mx
 
 
-def get_ic_roster(pset: set):
+def get_ic_roster(pset: set) -> dict:
     """
     Gets the pitch ic-roster
     :param pset: The pset
@@ -301,7 +342,7 @@ def get_ic_roster(pset: set):
     return roster
 
 
-def get_set_class(pset: set):
+def get_set_class(pset: set) -> list:
     """
     Gets the set-class of a pset
     :param pset: The pset
@@ -316,7 +357,7 @@ def get_set_class(pset: set):
     return intlist
 
 
-def get_pcint_class(pset: set):
+def get_pcint_class(pset: set) -> list:
     """
     Gets the PCINT-class of a pset
     :param pset: The pset
@@ -333,7 +374,7 @@ def get_pcint_class(pset: set):
     return intlist
 
 
-def calculate_pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=None):
+def calculate_pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=None) -> tuple:
     """
     Gets the pitch-measure (PM) similarity between pset1 and pset2
     :param pset1: A pset
@@ -358,7 +399,7 @@ def calculate_pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=
     return (cint, ic_shared)
 
 
-def subsets(pset: set):
+def subsets(pset: set) -> list:
     """
     Gets all subsets of a pset, using the bit masking solution from
     https://afteracademy.com/blog/print-all-subsets-of-a-given-set
@@ -380,7 +421,7 @@ def subsets(pset: set):
     return sub
 
 
-def to_pcset(pset: set):
+def to_pcset(pset: set) -> set:
     """
     Makes a pcset out of a pset
     :param pset: A pset
@@ -394,7 +435,7 @@ def to_pcset(pset: set):
         return set()
 
 
-def transform(pset: set, transformation: transformations.UTO):
+def transform(pset: set, transformation: transformations.UTO) -> set:
     """
     Transforms a pset
     :param pset: A pset
@@ -410,7 +451,7 @@ def transform(pset: set, transformation: transformations.UTO):
     return pset2
 
 
-def transpose(pset: set, n: int):
+def transpose(pset: set, n: int) -> set:
     """
     Transposes a pset
     :param pset: The pset
