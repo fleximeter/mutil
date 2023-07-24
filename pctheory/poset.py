@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from pctheory import pitch, pcset, pcseg, tables, transformations
+from . import pitch, pcset
 
 
 def filter_poset_positions(posets: list, position_filter: list, exclude=False):

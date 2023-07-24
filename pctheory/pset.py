@@ -198,13 +198,14 @@ def get_fb_class(pset: set, p0: int) -> list:
     return intlist
 
 
-def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_boundary: int, num_realizations: int=1):
+def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_boundary: int, num_duplicate_pitches: int=0, num_realizations: int=1):
     """
     Generates random pset realizations of a given pcset, 
     within the specified upper and lower boundaries
     :param pcset: The pcset to realize
     :param lower_boundary: The lower boundary
     :param upper_boundary: The upper boundary
+    :param num_duplicate_pitches: The number of additional duplicate pitches to include (for doubling)
     :param num_realizations: The number of random realizations to generate
     :return: One or more random pset realizations of the pcset within the given boundaries. If the number of realizations
     is greater than 1, returns a list of psets. Otherwise returns a single pset.
@@ -230,16 +231,26 @@ def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_bou
                     choices.append(pitch.Pitch(candidate_pitch, mod))
                 candidate_pitch += mod
             pitch_choices.append(choices)
-        print(pitch_choices)
 
         # Generate pset realizations
         realizations = {}
         i = 0
         while len(realizations) < num_realizations and i < 10 * num_realizations:
+            # Build the current realization
             realization = set()
+            unused_pitches = []
             for bucket in pitch_choices:
                 if len(bucket) > 0:
-                    realization.add(bucket[_rng.randrange(0, len(bucket))])
+                    idx = _rng.randrange(0, len(bucket))
+                    realization.add(bucket[idx])
+                    unused_pitches += bucket[:idx] + bucket[idx+1:]
+
+            # Add duplicate pitches 
+            for i in range(num_duplicate_pitches):
+                idx = _rng.randrange(0, len(unused_pitches))
+                realization.add(unused_pitches[idx])
+                del unused_pitches[idx]
+
             realizations[str(realization)] = realization
             i += 1
         realizations = [realizations[key] for key in realizations]

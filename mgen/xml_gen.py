@@ -274,16 +274,14 @@ def make_music21_list(items, durations):
             else:
                 m_list.append(music21.note.Note(current_item + 60, quarterLength=durations[i]))
         elif type(current_item) == list:
-            if type(current_item[0]) == int:
+            if len(current_item) == 0:
+                m_list.append(music21.note.Rest(durations[i]))
+            elif type(current_item[0]) == int:
                 m_list.append(music21.chord.Chord([j + 60 for j in current_item], quarterLength=durations[i]))
-            elif type(current_item[0]) == pitch.Pitch12:
-                m_list.append(music21.chord.Chord([p.p + 60 for p in current_item], quarterLength=durations[i]))
-            elif type(current_item[0]) == pitch.Pitch24:
-                m_list.append(music21.chord.Chord([music21.pitch.Pitch(p.p / 2 + 60) for p in current_item], quarterLength=durations[i]))
-        elif type(current_item) == pitch.Pitch12:
-            m_list.append(music21.note.Note(items[i].p + 60, quarterLength=durations[i]))
-        elif type(current_item) == pitch.Pitch24:
-            m_list.append(music21.note.Note(music21.pitch.Pitch(items[i].p / 2 + 60), quarterLength=durations[i]))
+            elif type(current_item[0]) == pitch.Pitch:
+                m_list.append(music21.chord.Chord([music21.pitch.Pitch(p.p / (p.mod / 12) + 60) for p in current_item], quarterLength=durations[i]))
+        elif type(current_item) == pitch.Pitch:
+            m_list.append(music21.note.Note(music21.pitch.Pitch(items[i].p / (items[i].mod / 12) + 60), quarterLength=durations[i]))
     return m_list
 
 
@@ -310,6 +308,23 @@ def open_in_reader(score):
     :return:
     """
     score.show()
+
+
+def split_chord_piano(chord):
+    """
+    Splits a chord for distribution across a grand staff
+    :param chord: A set or list of pitches
+    :return: Two lists of pitches, one for each staff. The first list is for the top staff,
+    and the second list is for the bottom staff.
+    """
+    bottom_staff = []
+    top_staff = []
+    for pitch in chord:
+        if pitch.p < 0:
+            bottom_staff.append(pitch)
+        else:
+            top_staff.append(pitch)
+    return top_staff, bottom_staff
 
 
 def test():

@@ -1,7 +1,7 @@
 from matplotlib import pyplot
 import networkx
 import random
-from pctheory import pitch, pcset, tables
+from ..pctheory import pitch, pcset, tables
 
 random.seed()
 

@@ -21,8 +21,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from pctheory import pcset, poset, pitch, tables, transformations
-from pctheory.pcseg import rotate, transpose
+from . import transformations
+from . import pcseg as ps
 
 
 class RotationalArray:
@@ -103,10 +103,10 @@ class RotationalArray:
         :param pcseg: A pcseg
         :return: None
         """
-        self._pcseg = transpose(pcseg, 12 - pcseg[0].pc)
+        self._pcseg = ps.transpose(pcseg, 12 - pcseg[0].pc)
         self._array = []
         for i in range(len(self._pcseg)):
-            self._array.append(rotate(transpose(self._pcseg, -self._pcseg[i].pc), len(self._pcseg) - i))
+            self._array.append(ps.rotate(ps.transpose(self._pcseg, -self._pcseg[i].pc), len(self._pcseg) - i))
 
 
 def str_simple_array(array, col_delimiter=" ", row_delimiter="\n"):

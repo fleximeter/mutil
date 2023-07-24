@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import networkx
 import pyvis
-from pctheory import pitch, tables, transformations
+from . import pitch, tables, transformations
 import numpy as np
 import re
 

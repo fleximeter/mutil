@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from queue import Queue
-from pctheory import pitch, transformations
+from . import pitch, transformations
 
 
 class OperatorGroup:

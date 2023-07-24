@@ -5,7 +5,7 @@ Date: 11/13/21
 """
 
 import mgen.xml_gen as xml_gen
-import pctheory.util as util
+from ..pctheory.util import util
 
 
 if __name__ == "__main__":
