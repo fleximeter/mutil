@@ -94,8 +94,11 @@ class SetClass:
             return self._name_prime
 
     def __str__(self):
-        return str([str(pc) for pc in self._pcset])
-
+        if self._NUM_PC == 12:
+            return self._name_morris
+        else:
+            return self._name_prime
+    
     @property
     def derived_core(self):
         """
@@ -278,9 +281,8 @@ class SetClass:
         prime_set = set()
         if len(pcset) > 0:
             lists_to_weight = []
-            int_set = SetClass._make_int_set(pcset)
-            pclist = list(int_set)
-            inverted = list(SetClass._make_int_set(set(SetClass._invert(pclist))))
+            pclist = [pc.pc for pc in pcset]
+            inverted = [pc * -1 % pc_mod for pc in pclist]
             prime_list = None
 
             # Add regular forms
@@ -478,11 +480,10 @@ class SetClass:
         low_mod_prime_form_matcher = re.compile(r'\[|\([0-9a-zA-Z]+\]|\)')
         high_mod_prime_form_matcher = re.compile(r'\[|\([0-9a-zA-Z]+\]|\)')
         name = name.upper()
-        valid = True
         prime_form_name = name
 
         if self._NUM_PC == 12:
-            prime_form_name = f"[{text_cleaner.sub(name)}]"
+            prime_form_name = f"[{text_cleaner.sub('', name)}]"
             # If it's a Morris name
             if morris_matcher.search(name):
                 prime_form_name = name.split("[")[1]
@@ -498,19 +499,23 @@ class SetClass:
                 elif name2 in name_tables["forteToSetNameTable"]:
                     prime_form_name = name_tables["forteToSetNameTable"][name2]
                 else:
-                    valid = False
                     raise Exception("Invalid Forte name.")
 
             elif prime_form_name not in name_tables["setToForteNameTable"]:
-                valid = False
+                raise Exception("Invalid set-class name.")
+            
+            prime_form_chars = [c for c in text_cleaner.sub('', prime_form_name)]
+            pcset = set([pitch.PitchClass(name_tables["hexToInt"][pn], self._NUM_PC) for pn in prime_form_chars])
+            self.pcset = pcset
+            if self.name_prime != f"[{text_cleaner.sub('', prime_form_name)}]":
                 raise Exception("Invalid set-class name.")
         
         elif self._NUM_PC <= 16 and low_mod_prime_form_matcher.search(name):
-            prime_form_name = text_cleaner.sub(name)
+            prime_form_name = text_cleaner.sub('', name)
             prime_form_chars = [c for c in prime_form_name]
             pcset = set([pitch.PitchClass(name_tables["hexToInt"][pn], self._NUM_PC) for pn in prime_form_chars])
             self.pcset = pcset
-            if self.name_prime != f"[{text_cleaner.sub(name)}]":
+            if self.name_prime != f"[{text_cleaner.sub('', name)}]":
                 raise Exception("Invalid set-class name.")
 
         elif self._NUM_PC > 16:
@@ -521,30 +526,6 @@ class SetClass:
         
         else:
             raise Exception("Invalid set-class name.")
-
-    @staticmethod
-    def _invert(pcseg: list):
-        """
-        Inverts a pcseg
-        :param pcset: The pcseg
-        :return: The inverted pcseg
-        """
-        pcseg2 = []
-        for pc in pcseg:
-            pcseg2.append(pitch.PitchClass(pc * -1, pc.mod))
-        return pcseg2
-
-    @staticmethod
-    def _make_int_set(pcset: set):
-        """
-        Makes an int set
-        :param pcset: A pcset
-        :return: An int set
-        """
-        pcset2 = set()
-        for pc in pcset:
-            pcset2.add(pc.pc)
-        return pcset2
 
     def _make_names(self):
         """
