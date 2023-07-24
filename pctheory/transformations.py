@@ -106,8 +106,10 @@ class OTO:
                     new_item.append(self.transform(item2))
                 elif t == set:
                     new_item.append(self.transform(item2))
+                elif t == pitch.PitchClass:
+                    new_item.append(pitch.PitchClass(item2.pc * self._oto[2] + self._oto[0], item2.mod))
                 else:
-                    new_item.append(t(item2.pc * self._oto[2] + self._oto[0]))
+                    raise ArithmeticError("Cannot transform a type other than a PitchClass.")
             if self._oto[1]:
                 new_item.reverse()
         elif type(item) == set:
@@ -118,8 +120,10 @@ class OTO:
                     new_item.add(self.transform(item2))
                 elif t == set:
                     new_item.add(self.transform(item2))
+                elif t == pitch.PitchClass:
+                    new_item.append(pitch.PitchClass(item2.pc * self._oto[2] + self._oto[0], item2.mod))
                 else:
-                    new_item.add(t(item2.pc * self._oto[2] + self._oto[0]))
+                    raise ArithmeticError("Cannot transform a type other than a PitchClass.")
         else:
             new_item = type(item)(item.pc * self._oto[2] + self._oto[0])
         return new_item
@@ -194,34 +198,34 @@ class UTO:
         """
         self._uto = value
 
-    def cycles(self, num_pcs=12):
+    def cycles(self, mod=12):
         """
         Gets the cycles of the UTO
-        :param num_pcs: The number of possible pcs in the system
+        :param mod: The number of possible pcs in the system
         :return: The cycles, as a list of lists
         """
-        int_list = [i for i in range(num_pcs)]
+        int_list = [i for i in range(mod)]
         cycles = []
         while len(int_list) > 0:
             cycle = [int_list[0]]
             pc = cycle[0]
-            pc = (pc * self._uto[1] + self._uto[0]) % num_pcs
+            pc = (pc * self._uto[1] + self._uto[0]) % mod
             while pc != cycle[0]:
                 cycle.append(pc)
                 int_list.remove(pc)
                 pc = cycle[len(cycle) - 1]
-                pc = (pc * self._uto[1] + self._uto[0]) % num_pcs
+                pc = (pc * self._uto[1] + self._uto[0]) % mod
             cycles.append(cycle)
             del int_list[0]
         return cycles
 
-    def inverse(self, num_pcs=12):
+    def inverse(self, mod=12):
         """
         Gets the inverse of the UTO
-        :param num_pcs: The number of possible pcs in the system
+        :param mod: The number of possible pcs in the system
         :return: The inverse
         """
-        return UTO((-self._uto[1] * self._uto[0]) % num_pcs, self._uto[1])
+        return UTO((-self._uto[1] * self._uto[0]) % mod, self._uto[1])
 
     def transform(self, item):
         """
@@ -230,10 +234,8 @@ class UTO:
         :return: The transformed item
         """
         t = type(item)
-        if t == pitch.PitchClass12:
-            return pitch.PitchClass12(item.pc * self._uto[1] + self._uto[0])
-        elif t == pitch.PitchClass24:
-            return pitch.PitchClass24(item.pc * self._uto[1] + self._uto[0])
+        if t == pitch.PitchClass:
+            return pitch.PitchClass12(item.pc * self._uto[1] + self._uto[0], item.mod)
         else:
             new_item = t()
             if t == set:
@@ -245,9 +247,9 @@ class UTO:
             return new_item
 
 
-def find_utos(pcset1: set, pcset2: set):
+def find_utos12(pcset1: set, pcset2: set):
     """
-    Finds the UTOS that transform pcset1 into pcset2
+    Finds the 12 tone UTOS that transform pcset1 into pcset2
     :param pcset1: A pcset
     :param pcset2: A transformed pcset
     :return: A list of UTOS
@@ -262,7 +264,7 @@ def find_utos(pcset1: set, pcset2: set):
 
 def get_otos12():
     """
-    Gets OTOs
+    Gets chromatic OTOs (ROs)
     :return: A list of OTOs
     """
     otos = {}
@@ -356,12 +358,12 @@ def get_utos24():
     return utos
 
 
-def left_multiply_utos(*args, num_pcs=12):
+def left_multiply_utos(*args, mod=12):
     """
     Left-multiplies a list of UTOs
     :param args: A collection of UTOs (can be one argument as a list, or multiple UTOs separated by commas.
     The highest index is evaluated first, and the lowest index is evaluated last.
-    :param num_pcs: The number of pcs in the system
+    :param mod: The number of pcs in the system
     :return: The result
     """
     utos = args
@@ -383,7 +385,7 @@ def left_multiply_utos(*args, num_pcs=12):
             mul_n = utos[i][1]
             m = m * mul_n + tr_n
             n *= mul_n
-        return UTO(n % num_pcs, m % num_pcs)
+        return UTO(n % mod, m % mod)
 
 
 def make_uto_list(*args):

@@ -27,21 +27,21 @@ from pctheory import pitch, transformations
 
 class OperatorGroup:
     """
-    Represents a group of operators
+    Represents a group of operators. Only compatible with mod 12 and mod 24 systems.
     """
-    def __init__(self, utos: list = None, num_pcs: int = 12):
+    def __init__(self, utos: list = None, mod: int = 12):
         """
         Creates an OperatorGroup
         :param utos: TTOs
-        :param num_pcs: The number of pcs in the system of the group (chromatic: 12, microtonal: 24)
+        :param mod: The number of pcs in the system of the group (chromatic: 12, microtonal: 24)
         """
         self._MNUM_12 = {1, 5, 7, 11}
         self._MNUM_24 = {1, 5, 7, 11, 13, 17, 19, 23}
         self._name = ""
-        self._num_pcs = num_pcs
-        if num_pcs == 12:
+        self._num_pcs = mod
+        if mod == 12:
             self._operators = [[] for i in range(len(self._MNUM_12))]
-        elif num_pcs == 24:
+        elif mod == 24:
             self._operators = [[] for i in range(len(self._MNUM_24))]
         self._utos = set()
         if utos is not None:
@@ -118,9 +118,9 @@ class OperatorGroup:
         orbits = []
         u = None
         if self._num_pcs == 12:
-            u = {pitch.PitchClass12(i) for i in range(self._num_pcs)}
+            u = {pitch.PitchClass(i, 12) for i in range(self._num_pcs)}
         elif self._num_pcs == 24:
-            u = {pitch.PitchClass24(i) for i in range(self._num_pcs)}
+            u = {pitch.PitchClass(i, 24) for i in range(self._num_pcs)}
         while len(u) > 0:
             orbit = set()
             q = Queue()

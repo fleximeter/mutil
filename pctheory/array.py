@@ -173,7 +173,7 @@ def make_array_chain(array, length: int):
 
         # Get the row operator we need for the transformation, and transform the array
         r = transformations.OTO()
-        transformation = transformations.find_utos(pcset_start, pcset_end_temp)
+        transformation = transformations.find_utos12(pcset_start, pcset_end_temp)
         r.oto = [transformation[0][0], 0, transformation[0][1]]
         m = r.transform(array1)
         m.reverse()
