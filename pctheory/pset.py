@@ -27,6 +27,7 @@ import numpy as np
 import random
 
 _rng = random.Random()
+_rng.seed()
 
 
 class Sieve:
@@ -213,34 +214,36 @@ def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_bou
         return set()
     else:
         mod = next(iter(pcset)).mod
-
+        lowest_boundary_note = lower_boundary % mod
+        
         # Generate all of the possible pitch realizations for each pitch-class
         # within the range provided
         pitch_choices = []
         for pc in pcset:
             choices = []
-            multiplier = lower_boundary // pc.pc
+            candidate_pitch = (pc.pc - lowest_boundary_note) % mod + lower_boundary           
             in_range = True
             while in_range:
-                if multiplier < 0:
-                    candidate_pitch = pc.pc * -1 % mod * multiplier
-                else:
-                    candidate_pitch = pc.pc * multiplier
                 if candidate_pitch > upper_boundary:
                     in_range = False
-                elif candidate_pitch >= lower_boundary:
+                else:
                     choices.append(pitch.Pitch(candidate_pitch, mod))
-                multiplier += 1
+                candidate_pitch += mod
             pitch_choices.append(choices)
+        print(pitch_choices)
 
         # Generate pset realizations
-        realizations = []
-        for i in range(num_realizations):
+        realizations = {}
+        i = 0
+        while len(realizations) < num_realizations and i < 10 * num_realizations:
             realization = set()
             for bucket in pitch_choices:
                 if len(bucket) > 0:
-                    realization.add(bucket[_rng.randrange(0, len(bucket) - 1)])
-            realizations.append(realization)
+                    realization.add(bucket[_rng.randrange(0, len(bucket))])
+            realizations[str(realization)] = realization
+            i += 1
+        realizations = [realizations[key] for key in realizations]
+
         if len(realizations) == 1:
             return realizations[0]
         else:

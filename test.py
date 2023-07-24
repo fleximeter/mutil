@@ -1,8 +1,12 @@
 from pctheory import pcseg, pcset, pseg, pset, pitch, transformations
 from mgen import xml_gen
+import music21
 
 base_sc = pcset.get_all_combinatorial_hexachord("C")
 print(base_sc)
-sc1 = pcset.SetClass()
-sc1.load_from_name("01237")
-print(sc1)
+
+# generate 10 different spacings of the chord
+realizations = pset.generate_random_pset_realizations(base_sc.pcset, -12, 12, 10)
+
+score = xml_gen.create_score_piano(num_measures=10)
+score.show()

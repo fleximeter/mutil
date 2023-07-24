@@ -207,12 +207,37 @@ def cleanup_semi_closed(chord):
 def create_score(title="Score", composer="Jeff Martin"):
     """
     Creates a score
+    :param title: The title of the score
+    :param composer: The composer name
     :return: A score
     """
     s = music21.stream.Score()
     s.insert(0, music21.metadata.Metadata())
     s.metadata.title = title
     s.metadata.composer = composer
+    return s
+
+
+def create_score_piano(title="Score", composer="Jeff Martin", num_measures: int=10, key=None, time_signature="4/4"):
+    """
+    Creates a piano score. This allows you to get started easily.
+    :param title: The title of the score
+    :param composer: The composer name
+    :param num_measures: The number of measures to add
+    :param key: The key to use (if None, will be C)
+    :param time_signature: The time signature to use
+    :return: A piano score
+    """
+    s = music21.stream.Score()
+    s.insert(0, music21.metadata.Metadata())
+    s.metadata.title = title
+    s.metadata.composer = composer
+    add_instrument_multi(s, "Piano", "Pno.", 2)
+    if key is None:
+        key = 0
+    add_measures(s, 10, 1, key, time_signature)
+    add_item(s[1], music21.clef.TrebleClef(), 1)
+    add_item(s[2], music21.clef.BassClef(), 1)
     return s
 
 
