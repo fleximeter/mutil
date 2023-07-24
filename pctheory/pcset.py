@@ -87,7 +87,7 @@ class SetClass:
             raise TypeError("SetClasses can only be compared to other SetClasses.")
 
     def __repr__(self):
-        # return "<pctheory.pcset.SetClass object at " + str(id(self)) + ">: " + repr(self._pcset)
+        # return f"<pctheory.pcset.SetClass object at {(id(self))}>: {repr(self._pcset)}"
         if self._NUM_PC == 12:
             return self._name_morris
         else:
