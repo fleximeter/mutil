@@ -26,22 +26,23 @@ import music21
 import numpy
 
 
-class Sieve12:
+class Sieve:
     """
-    Represents a chromatic sieve
+    Represents a Xenakis sieve. Compatible with all Pitch modulos.
     """
-    def __init__(self, tuples, base_pitch):
+    def __init__(self, tuples, base_pitch: int, pc_mod=12):
         """
-        Creates a Sieve12
+        Creates a Sieve
         :param tuples: A collection of tuples to add to the sieve.
         :param base_pitch: Pitch 0 for the sieve. This pitch does not actually have to be
         in the sieve - it will just serve as the 0 reference point.
+        :param pc_mod: The pitch-class mod of the Sieve
         """
         self._tuples = set()
         self._intervals = []
+        self._pc_mod = pc_mod
         self._period = 0
-        self._base_pitch = pitch.Pitch12(base_pitch.p) if type(base_pitch) == pitch.Pitch12 \
-            else pitch.Pitch12(base_pitch)
+        self._base_pitch = pitch.Pitch(base_pitch.p, pc_mod)
         self.add_tuples(tuples)
 
     @property
@@ -57,6 +58,14 @@ class Sieve12:
         """
         The intervallic succession of the Sieve12
         :return: The intervallic succession
+        """
+        return self._intervals
+
+    @property
+    def pc_mod(self):
+        """
+        The pitch class mod of the Sieve (which specifies the pitch type)
+        :return: The pitch class mod
         """
         return self._intervals
 
@@ -90,7 +99,7 @@ class Sieve12:
         for tup in self._tuples:
             lcm_list.add(tup[0])
         self._period = util.lcm(lcm_list)
-        r = self.get_range(pitch.Pitch12(self._base_pitch.p), pitch.Pitch12(self._base_pitch.p + self._period))
+        r = self.get_range(pitch.Pitch(self._base_pitch.p, self._pc_mod), pitch.Pitch(self._base_pitch.p + self._period, self._pc_mod))
         r = list(r)
         r.sort()
         for i in range(1, len(r)):
@@ -104,14 +113,14 @@ class Sieve12:
         :return: A pset
         """
         ps = set()
-        p_low = p0.p if type(p0) == pitch.Pitch12 else p0
-        p_high = p1.p + 1 if type(p1) == pitch.Pitch12 else p1 + 1
+        p_low = p0.p if type(p0) == pitch.Pitch else p0
+        p_high = p1.p + 1 if type(p1) == pitch.Pitch else p1 + 1
         for j in range(p_low, p_high):
             i = j - self._base_pitch.p
             if i >= 0:
                 for tup in self._tuples:
                     if i % tup[0] == tup[1]:
-                        ps.add(pitch.Pitch12(j))
+                        ps.add(pitch.Pitch(j, self._pc_mod))
         return ps
 
     def intersection(self, sieve):
@@ -125,21 +134,21 @@ class Sieve12:
             for tup2 in sieve.tuples:
                 if tup1 == tup2:
                     t.add(tup1)
-        return Sieve12(t, self._base_pitch)
+        return Sieve(t, self._base_pitch, self._pc_mod)
 
     def is_in_sieve(self, p):
         """
         Whether or not a pitch or pset is in the sieve
-        :param p: A pitch (Pitch12 or int) or pset
+        :param p: A pitch (Pitch or int) or pset
         :return: True or False
         """
         ps = None
         if type(p) == set:
             ps = p
-        elif type(p) == pitch.Pitch12:
+        elif type(p) == pitch.Pitch:
             ps = {p}
         elif type(p) == int:
-            ps = {pitch.Pitch12(p)}
+            ps = {pitch.Pitch(p, self._pc_mod)}
         for q in ps:
             i = q.p - self._base_pitch.p
             if i < 0:
@@ -163,147 +172,7 @@ class Sieve12:
             t.add(tup)
         for tup in sieve.tuples:
             t.add(tup)
-        return Sieve12(t, self._base_pitch)
-
-
-class Sieve24:
-    """
-    Represents a microtonal sieve
-    """
-    def __init__(self, tuples, base_pitch):
-        """
-        Creates a Sieve24
-        :param tuples: A collection of tuples to add to the sieve.
-        :param base_pitch: Pitch 0 for the sieve. This pitch does not actually have to be
-        in the sieve - it will just serve as the 0 reference point.
-        """
-        self._tuples = set()
-        self._ints = []
-        self._period = 0
-        self._base_pitch = pitch.Pitch24(base_pitch.p) if type(base_pitch) == pitch.Pitch24 \
-            else pitch.Pitch24(base_pitch)
-        self.add_tuples(tuples)
-
-    @property
-    def base_pitch(self):
-        """
-        The base pitch of the Sieve24 (pitch 0)
-        :return: The base pitch
-        """
-        return self._base_pitch
-
-    @property
-    def ints(self):
-        """
-        The intervallic succession of the Sieve24
-        :return: The intervallic succession
-        """
-        return self._ints
-
-    @property
-    def period(self):
-        """
-        The period of the Sieve24
-        :return: The period
-        """
-        return self._period
-
-    @property
-    def tuples(self):
-        """
-        The tuples in the Sieve24
-        :return: The tuples
-        """
-        return self._tuples
-
-    def add_tuples(self, *args):
-        """
-        Adds one or more tuples to the Sieve24
-        :param args: One or more tuples
-        :return:
-        """
-        lcm_list = set()
-        if type(args[0]) == set or type(args[0]) == list or type(args[0]) == tuple:
-            args = args[0]
-        for tup in args:
-            self._tuples.add(tup)
-        for tup in self._tuples:
-            lcm_list.add(tup[0])
-        self._period = util.lcm(lcm_list)
-        r = self.get_range(pitch.Pitch24(self._base_pitch.p), pitch.Pitch24(self._base_pitch.p + self._period))
-        r = list(r)
-        r.sort()
-        for i in range(1, len(r)):
-            self._ints.append(r[i].p - r[i-1].p)
-
-    def get_range(self, p0, p1):
-        """
-        Gets all pitches in the sieve between p0 and p1
-        :param p0: The low pitch
-        :param p1: The high pitch
-        :return: A pset
-        """
-        ps = set()
-        p_low = p0.p if type(p0) == pitch.Pitch24 else p0
-        p_high = p1.p + 1 if type(p1) == pitch.Pitch24 else p1 + 1
-        for j in range(p_low, p_high):
-            i = j - self._base_pitch.p
-            if i >= 0:
-                for tup in self._tuples:
-                    if i % tup[0] == tup[1]:
-                        ps.add(pitch.Pitch24(j))
-        return ps
-
-    def intersection(self, sieve):
-        """
-        Intersects two Sieve24s
-        :param sieve: A Sieve24
-        :return: A new Sieve24. It will have the same base pitch as self.
-        """
-        t = set()
-        for tup1 in self._tuples:
-            for tup2 in sieve.tuples:
-                if tup1 == tup2:
-                    t.add(tup1)
-        return Sieve24(t, self._base_pitch)
-
-    def is_in_sieve(self, p):
-        """
-        Whether or not a pitch or pset is in the sieve
-        :param p: A pitch (Pitch24 or int) or pset
-        :return: True or False
-        """
-        ps = None
-        if type(p) == set:
-            ps = p
-        elif type(p) == pitch.Pitch24:
-            ps = {p}
-        elif type(p) == int:
-            ps = {pitch.Pitch24(p)}
-        for q in ps:
-            i = q.p - self._base_pitch.p
-            if i < 0:
-                return False
-            else:
-                for tup in self._tuples:
-                    if i % tup[0] == tup[1]:
-                        break
-                else:
-                    return False
-        return True
-
-    def union(self, sieve):
-        """
-        Unions two Sieve24s
-        :param sieve: A Sieve24
-        :return: A new Sieve24. It will have the same base pitch as self.
-        """
-        t = set()
-        for tup in self._tuples:
-            t.add(tup)
-        for tup in sieve.tuples:
-            t.add(tup)
-        return Sieve24(t, self._base_pitch)
+        return Sieve(t, self._base_pitch, self._pc_mod)
 
 
 def get_fb_class(pset: set, p0: int):
@@ -312,14 +181,16 @@ def get_fb_class(pset: set, p0: int):
     :param pset: The pset
     :param p0: The lowest pitch
     :return: The FB-class as a list of integers
+    *Compatible with all Pitch modulos
     """
     intlist = []
-    n = 12 if type(next(iter(pset))) == pitch.PitchClass12 else 24
-    for p in pset:
-        intlist.append((p.p - p0) % n)
-    intlist.sort()
-    if len(intlist) > 0:
-        del intlist[0]
+    if len(pset) > 0 and p0 >= 0:
+        mod = pset[0].mod
+        for p in pset:
+            intlist.append((p.p - p0) % mod)
+        intlist.sort()
+        if len(intlist) > 0:
+            del intlist[0]
     return intlist
 
 
@@ -331,6 +202,7 @@ def generate_pcset_realizations(pcset: set, lower_boundary: int, upper_boundary:
     :param lower_boundary: The lower boundary
     :param upper_boundary: The upper boundary
     :return: A list of all psets that realize the pcset within the given boundaries
+    *Compatible with all Pitch modulos
     """
 
 
@@ -339,11 +211,13 @@ def invert(pset: set):
     Inverts a pset
     :param pset: The pset
     :return: The inverted pset
+    *Compatible with all Pitch modulos
     """
     pset2 = set()
-    t = type(next(iter(pset)))
-    for p in pset:
-        pset2.add(t(p.p * -1))
+    if len(pset) > 0:
+        mod = pset[0].mod
+        for p in pset:
+            pset2.add(pitch.Pitch(p.p * -1, mod))
     return pset2
 
 
@@ -352,15 +226,16 @@ def m21_make_pset(item):
     Makes a pset from a music21 object
     :param item: A music21 object
     :return: A pset
+    *Compatible only with chromatic psegs
     """
     pset2 = set()
     if type(item) == music21.note.Note:
-        pset2.add(pitch.Pitch12(item.pitch.midi - 60))
+        pset2.add(pitch.Pitch(item.pitch.midi - 60, 12))
     elif type(item) == music21.pitch.Pitch:
-        pset2.add(pitch.Pitch12(item.pitch.midi - 60))
+        pset2.add(pitch.Pitch(item.pitch.midi - 60, 12))
     elif type(item) == music21.chord.Chord:
         for p in item.pitches:
-            pset2.add(pitch.Pitch12(p.midi - 60))
+            pset2.add(pitch.Pitch(p.midi - 60, 12))
     else:
         raise TypeError("Unsupported music21 type")
     return pset2
@@ -371,10 +246,11 @@ def make_pset12(*args):
     Makes a pset
     :param *args: Ps
     :return: A pset
+    *Compatible only with chromatic psegs
     """
     if type(args[0]) == list:
         args = args[0]
-    return {pitch.Pitch12(p) for p in args}
+    return {pitch.Pitch(p, 12) for p in args}
 
 
 def make_pset24(*args):
@@ -382,10 +258,11 @@ def make_pset24(*args):
     Makes a pset
     :param *args: Ps
     :return: A pset
+    *Compatible only with microtonal psegs
     """
     if type(args[0]) == list:
         args = args[0]
-    return {pitch.Pitch24(p) for p in args}
+    return {pitch.Pitch(p, 24) for p in args}
 
 
 def get_ic_matrix(pset: set):
@@ -393,6 +270,7 @@ def get_ic_matrix(pset: set):
     Gets the pitch ic-matrix
     :param pset: The pset
     :return: The ic-matrix as a list of lists
+    *Compatible with all Pitch modulos
     """
     mx = numpy.empty((len(pset), len(pset)))
     pseg = list(pset)
@@ -408,6 +286,7 @@ def get_ic_roster(pset: set):
     Gets the pitch ic-roster
     :param pset: The pset
     :return: The ic-roster as a dictionary
+    *Compatible with all Pitch modulos
     """
     pseg = list(pset)
     roster = {}
@@ -427,6 +306,7 @@ def get_set_class(pset: set):
     Gets the set-class of a pset
     :param pset: The pset
     :return: The set-class as a list of integers
+    *Compatible with all Pitch modulos
     """
     pseg = list(pset)
     pseg.sort()
@@ -441,13 +321,15 @@ def get_pcint_class(pset: set):
     Gets the PCINT-class of a pset
     :param pset: The pset
     :return: The PCINT-class as a list of integers
+    *Compatible with all Pitch modulos
     """
-    pseg = list(pset)
-    pseg.sort()
-    n = 12 if type(next(iter(pset))) == pitch.PitchClass12 else 24
     intlist = []
-    for i in range(1, len(pseg)):
-        intlist.append((pseg[i].p - pseg[i - 1].p) % n)
+    if len(pset) > 0:
+        pseg = list(pset)
+        pseg.sort()
+        mod = pseg[0].mod
+        for i in range(1, len(pseg)):
+            intlist.append((pseg[i].p - pseg[i - 1].p) % mod)
     return intlist
 
 
@@ -459,6 +341,7 @@ def calculate_pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=
     :param ic_roster1: The ic_roster for pset 1. If None, will be calculated.
     :param ic_roster2: The ic_roster for pset 2. If None, will be calculated.
     :return: The PM similarity as a tuple of integers
+    *Compatible with all Pitch modulos
     """
     cint = len(pset1.intersection(pset2))
     ic_shared = 0
@@ -481,6 +364,7 @@ def subsets(pset: set):
     https://afteracademy.com/blog/print-all-subsets-of-a-given-set
     :param pset: A pset
     :return: A list containing all subsets of the pset
+    *Compatible with all Pitch modulos
     """
     total = 2 ** len(pset)
     t = type(next(iter(pset)))
@@ -501,11 +385,13 @@ def to_pcset(pset: set):
     Makes a pcset out of a pset
     :param pset: A pset
     :return: A pcset
+    *Compatible with all Pitch modulos
     """
-    if type(next(iter(pset))) == pitch.Pitch12:
-        return {pitch.PitchClass12(p.pc) for p in pset}
+    if len(pset) > 0:
+        mod = next(iter(pset)).mod
+        return {pitch.PitchClass(p.pc, mod) for p in pset}
     else:
-        return {pitch.PitchClass24(p.pc) for p in pset}
+        return set()
 
 
 def transform(pset: set, transformation: transformations.UTO):
@@ -514,10 +400,13 @@ def transform(pset: set, transformation: transformations.UTO):
     :param pset: A pset
     :param transformation: A transformation
     :return: The transformed set
+    *Compatible with all Pitch modulos
     """
     pset2 = set()
-    for p in pset:
-        pset2.add(pitch.Pitch12(p.p * transformation[1] + transformation[0]))
+    if len(pset) > 0:
+        mod = next(iter(pset)).mod
+        for p in pset:
+            pset2.add(pitch.Pitch(p.p * transformation[1] + transformation[0], mod))
     return pset2
 
 
@@ -527,9 +416,11 @@ def transpose(pset: set, n: int):
     :param pset: The pset
     :param n: The index of transposition
     :return: The transposed pset
+    *Compatible with all Pitch modulos
     """
     pset2 = set()
-    t = type(next(iter(pset)))
-    for p in pset:
-        pset2.add(t(p.p + n))
+    if len(pset) > 0:
+        mod = next(iter(pset)).mod
+        for p in pset:
+            pset2.add(pitch.Pitch(p.p + n, mod))
     return pset2

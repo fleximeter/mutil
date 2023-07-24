@@ -125,28 +125,32 @@ def find_otos(pcseg1: list, pcseg2: list):
     *Compatible with PitchClasses mod 12 and 24
     """
     otos = None
-    t = type(next(iter(pcseg1)))
-    if t == pitch.PitchClass12:
-        otos = transformations.get_otos12()
-    else:
-        otos = transformations.get_otos24()
     oto_set = set()
 
-    for oto in otos:
-        pcseg3 = otos[oto].transform(pcseg1)
-        # Search each transformation in t
-        done_searching = False
-        for i in range(len(pcseg3)):
-            if len(pcseg2) > len(pcseg3) - i:
-                break
-            done_searching = True
-            for j in range(i, i + len(pcseg2)):
-                if pcseg3[j] != pcseg2[j - i]:
-                    done_searching = False
+    if len(pcseg1) > 0 and len(pcseg2) > 0:
+        mod = pcseg1[0].mod
+        if mod == 12:
+            otos = transformations.get_otos12()
+        elif mod == 24:
+            otos = transformations.get_otos24()
+        else:
+            return oto_set
+        
+        for oto in otos:
+            pcseg3 = otos[oto].transform(pcseg1)
+            # Search each transformation in t
+            done_searching = False
+            for i in range(len(pcseg3)):
+                if len(pcseg2) > len(pcseg3) - i:
                     break
-            if done_searching:
-                oto_set.add(otos[oto])
-                break
+                done_searching = True
+                for j in range(i, i + len(pcseg2)):
+                    if pcseg3[j] != pcseg2[j - i]:
+                        done_searching = False
+                        break
+                if done_searching:
+                    oto_set.add(otos[oto])
+                    break
 
     return oto_set
 
@@ -157,17 +161,18 @@ def generate_pcseg12_from_interval_list(interval_list: list, starting_pc=None):
     :param interval_list: The interval list
     :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
     :return: A pcseg
+    *Compatible only with chromatic pcsegs
     """
     if starting_pc is None:
         random.seed()
-        pcseg = [pitch.PitchClass12(random.randrange(12))]
+        pcseg = [pitch.PitchClass(random.randrange(12), 12)]
         for i in range(len(interval_list)):
-            pcseg.append(pitch.PitchClass12(pcseg[i].pc + interval_list[i]))
+            pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i], 12))
         return pcseg
     else:
-        pcseg = [pitch.PitchClass12(starting_pc)]
+        pcseg = [pitch.PitchClass(starting_pc, 12)]
         for i in range(len(interval_list)):
-            pcseg.append(pitch.PitchClass12(pcseg[i].pc + interval_list[i]))
+            pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i], 12))
         return pcseg
 
 
@@ -177,17 +182,18 @@ def generate_pcseg24_from_interval_list(interval_list: list, starting_pc=None):
     :param interval_list: The interval list
     :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
     :return: A pcseg
+    *Compatible only with microtonal pcsegs
     """
     if starting_pc is None:
         random.seed()
-        pcseg = [pitch.PitchClass24(random.randrange(24))]
+        pcseg = [pitch.PitchClass(random.randrange(24), 24)]
         for i in range(len(interval_list)):
-            pcseg.append(pitch.PitchClass24(pcseg[i].pc + interval_list[i]))
+            pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i], 24))
         return pcseg
     else:
-        pcseg = [pitch.PitchClass24(starting_pc)]
+        pcseg = [pitch.PitchClass(starting_pc, 24)]
         for i in range(len(interval_list)):
-            pcseg.append(pitch.PitchClass24(pcseg[i].pc + interval_list[i]))
+            pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i], 24))
         return pcseg
 
 
@@ -204,12 +210,12 @@ def generate_random_all_interval_row(starting_pc=None):
 
     # Establish the starting pitch of the row
     if starting_pc is not None:
-        if type(starting_pc) == pitch.PitchClass12:
-            row.append(pitch.PitchClass12(starting_pc.pc))
+        if type(starting_pc) == pitch.PitchClass:
+            row.append(pitch.PitchClass(starting_pc.pc, 12))
         else:
-            row.append(pitch.PitchClass12(starting_pc))
+            row.append(pitch.PitchClass(starting_pc, 12))
     else:
-        row.append(pitch.PitchClass12(random.randrange(12)))
+        row.append(pitch.PitchClass(random.randrange(12), 12))
     generator = name_tables["elevenIntervalRowGenerators"][random.randrange(
         len(name_tables["elevenIntervalRowGenerators"]))]
 
@@ -219,7 +225,7 @@ def generate_random_all_interval_row(starting_pc=None):
 
     # Build the row
     for i in range(1, 12):
-        row.append(pitch.PitchClass12(row[i - 1].pc + generator[i - 1]))
+        row.append(pitch.PitchClass(row[i - 1].pc + generator[i - 1], 12))
     return row
 
 
@@ -233,11 +239,11 @@ def generate_random_all_trichord_row(starting_pc=None):
     name_tables = tables.create_tables_all_trichord()
     random.seed()
     if starting_pc is not None:
-        if type(starting_pc) == pitch.PitchClass12:
+        if type(starting_pc) == pitch.PitchClass:
             starting_pc = starting_pc.pc
     else:
         starting_pc = 0
-    row = [pitch.PitchClass12(pc + starting_pc) for pc in name_tables["allTrichordRows"][random.randrange(
+    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["allTrichordRows"][random.randrange(
         len(name_tables["allTrichordRows"]))]]
 
     # Randomly choose to invert the row generator
@@ -257,11 +263,11 @@ def generate_random_all_trichord_babbitt_row(starting_pc=None):
     name_tables = tables.create_tables_all_trichord_babbitt()
     random.seed()
     if starting_pc is not None:
-        if type(starting_pc) == pitch.PitchClass12:
+        if type(starting_pc) == pitch.PitchClass:
             starting_pc = starting_pc.pc
     else:
         starting_pc = 0
-    row = [pitch.PitchClass12(pc + starting_pc) for pc in name_tables["allTrichordBabbittRows"][random.randrange(
+    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["allTrichordBabbittRows"][random.randrange(
         len(name_tables["allTrichordBabbittRows"]))]]
 
     # Randomly choose to invert the row generator
@@ -281,17 +287,17 @@ def generate_random_pcseg12(length: int, non_duplicative=False, starting_pc=None
     *Compatible only with chromatic pcsegs
     """
     random.seed()
-    pcseg = [pitch.PitchClass12(random.randrange(12) if starting_pc is None else starting_pc)]
+    pcseg = [pitch.PitchClass(random.randrange(12) if starting_pc is None else starting_pc, 12)]
     if non_duplicative and 0 < length <= 12:
         pcs = [i for i in range(12)]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
             j = random.randrange(len(pcs))
-            pcseg.append(pitch.PitchClass12(pcs[j]))
+            pcseg.append(pitch.PitchClass(pcs[j], 12))
             del pcs[j]
     elif not non_duplicative and 0 < length:
         for i in range(length - 1):
-            pcseg.append(pitch.PitchClass12(random.randrange(12)))
+            pcseg.append(pitch.PitchClass(random.randrange(12), 12))
     else:
         raise ValueError("Invalid length")
     return pcseg
@@ -304,19 +310,20 @@ def generate_random_pcseg24(length: int, non_duplicative=False, starting_pc=None
     :param non_duplicative: Whether or not duplicate pcs may occur (must be True to generate a row)
     :param starting_pc: The starting pitch-class. If None, a random starting pitch-class is used.
     :return: A random pcseg
+    *Compatible only with microtonal pcsegs
     """
     random.seed()
-    pcseg = [pitch.PitchClass24(random.randrange(24) if starting_pc is None else starting_pc)]
+    pcseg = [pitch.PitchClass(random.randrange(24) if starting_pc is None else starting_pc, 24)]
     if non_duplicative and 0 < length <= 24:
         pcs = [i for i in range(24)]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
             j = random.randrange(len(pcs))
-            pcseg.append(pitch.PitchClass24(pcs[j]))
+            pcseg.append(pitch.PitchClass(pcs[j], 24))
             del pcs[j]
     elif not non_duplicative and 0 < length:
         for i in range(length - 1):
-            pcseg.append(pitch.PitchClass24(random.randrange(24)))
+            pcseg.append(pitch.PitchClass(random.randrange(24), 24))
     else:
         raise ValueError("Invalid length")
     return pcseg
@@ -327,15 +334,17 @@ def generate_random_pcseg_from_pcset(pcset: set):
     Generates a random pcseg from a pcset
     :param pcset: A pcset
     :return: A pcseg
+    *Compatible with all PitchClass modulos    
     """
     random.seed()
     pcseg = []
-    setseg = list(pcset)
-    t = type(setseg[0])
-    for i in range(len(setseg)):
-        j = random.randrange(len(setseg))
-        pcseg.append(t(setseg[j].pc))
-        del setseg[j]
+    if len(pcset) > 0:
+        setseg = list(pcset)
+        mod = setseg[0].mod
+        for i in range(len(setseg)):
+            j = random.randrange(len(setseg))
+            pcseg.append(pitch.PitchClass(setseg[j].pc, mod))
+            del setseg[j]
     return pcseg
 
 
@@ -349,11 +358,11 @@ def generate_random_ten_trichord_row(starting_pc=None):
     name_tables = tables.create_tables_ten_trichord()
     random.seed()
     if starting_pc is not None:
-        if type(starting_pc) == pitch.PitchClass12:
+        if type(starting_pc) == pitch.PitchClass:
             starting_pc = starting_pc.pc
     else:
         starting_pc = 0
-    row = [pitch.PitchClass12(pc + starting_pc) for pc in name_tables["tenTrichordRows"][random.randrange(
+    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["tenTrichordRows"][random.randrange(
         len(name_tables["tenTrichordRows"]))]]
 
     # Randomly choose to invert the row generator
@@ -368,6 +377,7 @@ def get_intervals(pcseg: list):
     Gets the interval sequence of a pcseg
     :param pcseg: The pcseg
     :return: The interval sequence
+    *Compatible with all PitchClass modulos    
     """
     intervals = []
     for i in range(1, len(pcseg)):
@@ -380,25 +390,28 @@ def get_row_class(row: list):
     Gets all of the rows in a row-class
     :param row: A row
     :return: The row-class, as a set of rows
+    *Compatible with PitchClasses mod 12 and 24
     """
-    t = type(next(iter(row)))
-    ros = None
-    n = 12
-    if t == pitch.PitchClass12:
+    row_class1 = []
+    if len(row) == 12 and row[0].mod == 12:
         ros = transformations.get_otos12()
-    else:
+        mod = 12
+    elif len(row) == 24 and row[0].mod == 24:
         ros = transformations.get_otos24()
-        n = 24
+        mod = 24
+    else:
+        return row_class1
+
     row_class = {}
     for t in ["", "I", "R", "RI"]:
-        for i in range(n):
+        for i in range(mod):
             transform = ros[f"T{i}{t}"].transform(row)
             row_name = str(transform)
             if row_name not in row_class:
                 row_class[row_name] = transform
-    row_class1 = []
     for row_name in row_class:
         row_class1.append(row_class[row_name])
+    
     return row_class1
 
 
@@ -407,11 +420,14 @@ def get_row_dsym(row: list):
     Gets the degree of symmetry of a row
     :param row: A row
     :return: The degree of symmetry of the row
+    *Compatible with PitchClasses mod 12 and 24
     """
-    if type(next(iter(row))) == pitch.PitchClass12:
+    if len(row) == 12 and row[0].mod == 12:
         return 48 // len(get_row_class(row))
-    else:
+    elif len(row) == 24 and row[0].mod == 24:
         return 96 // len(get_row_class(row))
+    else:
+        return 0
 
 
 def imb_n(pcseg: list, n: int):
@@ -420,20 +436,16 @@ def imb_n(pcseg: list, n: int):
     :param pcseg: The pcseg
     :param n: The cardinality of imbrication
     :return: The IMB_n
+    *Compatible with all PitchClass modulos        
     """
     imb = set()
     scs = []
-    if type(pcseg[0]) == pitch.PitchClass12:
+    if len(pcseg) > 0 and n > 0:
+        mod = pcseg[0].mod
         for i in range(len(pcseg) + 1 - n):
             for j in range(i, i + n):
                 imb.add(pcseg[j])
-            scs.append(pcset.SetClass12(imb))
-            imb.clear()
-    elif type(pcseg[0]) == pitch.PitchClass24:
-        for i in range(len(pcseg) + 1 - n):
-            for j in range(i, i + n):
-                imb.add(pcseg[j])
-            scs.append(pcset.SetClass24(imb))
+            scs.append(pcset.SetClass(imb, mod))
             imb.clear()
     return scs
 
@@ -443,13 +455,13 @@ def invert(pcseg: list):
     Inverts a pcseg
     :param pcseg: The pcseg
     :return: The inverted pcseg
+    *Compatible with all PitchClass modulos    
     """
     pcseg2 = []
     if len(pcseg) > 0:
-        # Need to support both PitchClass12 and PitchClass24, so use a type alias
-        t = type(next(iter(pcseg)))
+        mod = pcseg[0].mod
         for pc in pcseg:
-            pcseg2.append(t(pc.pc * -1))
+            pcseg2.append(pitch.PitchClass(pc.pc * -1, mod))
     return pcseg2
 
 
@@ -458,17 +470,18 @@ def is_all_interval_row(pcseg: list):
     Determines if a pcseg is an all-interval row
     :param pcseg: The pcseg
     :return: Whether or not the pcseg is an all-interval row
+    *Compatible with PitchClasses mod 12 and 24
     """
-    pcs = set([pc.pc for pc in pcseg])
-    if type(pcseg[0]) == pitch.PitchClass12:
-        if len(pcs) != 12 or len(pcs) != len(pcseg):
+    pcs = {pc.pc for pc in pcseg}
+    if len(pcseg) == 12 and pcseg[0].mod == 12:
+        if len(pcs) != len(pcseg):
             return False
         else:
             ints = {(pcseg[i].pc - pcseg[i-1].pc) % 12 for i in range(1, len(pcseg))}
             if len(ints) == 11:
                 return True
-    elif type(pcseg[0]) == pitch.PitchClass24:
-        if len(pcs) != 24 or len(pcs) != len(pcseg):
+    elif len(pcseg) == 24 and pcseg[0].mod == 24:
+        if len(pcs) != len(pcseg):
             return False
         else:
             ints = {(pcseg[i].pc - pcseg[i-1].pc) % 24 for i in range(1, len(pcseg))}
@@ -535,19 +548,16 @@ def is_row(pcseg: list):
     Determines if a pcseg is a row
     :param pcseg: The pcseg
     :return: Whether or not the pcseg is a row
+    *Compatible with PitchClasses mod 12 and 24
     """
     pcs = set([pc.pc for pc in pcseg])
-    if type(pcseg[0]) == pitch.PitchClass12:
-        if len(pcs) != 12 or len(pcs) != len(pcseg):
+    if (len(pcseg) == 12 and pcseg[0].mod == 12) or (len(pcseg) == 24 and pcseg[0].mod == 24):
+        if len(pcs) != len(pcseg):
             return False
         else:
             return True
-    elif type(pcseg[0]) == pitch.PitchClass24:
-        if len(pcs) != 24 or len(pcs) != len(pcseg):
-            return False
-        else:
-            return True
-    return False
+    else:
+        return False
 
 
 def is_row_generator(rgen: list):
@@ -555,6 +565,7 @@ def is_row_generator(rgen: list):
     Determines if a row generator is valid
     :param rgen: A row generator
     :return: True if the row generator is valid; false otherwise
+    *Compatible only with chromatic pcsegs
     """
     for i in range(len(list) - 1):
         rgen_sum = rgen[i]
@@ -591,7 +602,7 @@ def make_pcseg12(*args):
     """
     if type(args[0]) == list:
         args = args[0]
-    return [pitch.PitchClass12(pc) for pc in args]
+    return [pitch.PitchClass(pc, 12) for pc in args]
 
 
 def make_pcseg24(*args):
@@ -603,7 +614,7 @@ def make_pcseg24(*args):
     """
     if type(args[0]) == list:
         args = args[0]
-    return [pitch.PitchClass24(pc) for pc in args]
+    return [pitch.PitchClass(pc, 24) for pc in args]
 
 
 def multiply(pcseg: list, n: int):
@@ -612,13 +623,13 @@ def multiply(pcseg: list, n: int):
     :param pcseg: The pcseg
     :param n: The multiplier
     :return: The multiplied pcseg
+    *Compatible with all PitchClass modulos    
     """
     pcseg2 = []
     if len(pcseg) > 0:
-        # Need to support both PitchClass12 and PitchClass24, so use a type alias
-        t = type(next(iter(pcseg)))
+        mod = pcseg[0].mod
         for pc in pcseg:
-            pcseg2.append(t(pc.pc * n))
+            pcseg2.append(pitch.PitchClass(pc.pc * n, mod))
     return pcseg2
 
 
@@ -628,11 +639,13 @@ def multiply_order(pcseg: list, n: int):
     :param pcseg: The pcseg
     :param n: The multiplier
     :return: The order-multiplied pcseg
+    *Compatible with all PitchClass modulos    
     """
     pcseg2 = []
-    t = type(next(iter(pcseg)))
-    for i in range(len(pcseg)):
-        pcseg2.append(t(pcseg[(i * n) % len(pcseg)].pc))
+    if len(pcseg) > 0 and n > 0:
+        mod = pcseg[0].mod
+        for i in range(len(pcseg)):
+            pcseg2.append(pitch.PitchClass(pcseg[(i * n) % len(pcseg)].pc, mod))
     return pcseg2
 
 
@@ -642,6 +655,7 @@ def ormap(row: list, ormap: dict):
     :param row: A row
     :param ormap:
     :return: The ORMAP mapping for the row
+    *Compatible with all PitchClass modulos    
     """
     mapping = []
     for item in row:
@@ -654,6 +668,7 @@ def prot(pcseg: list):
     Generates the protocol pairs for a pcseg
     :param pcseg: A pcseg
     :return: A set of protocol pairs
+    *Compatible with all PitchClass modulos    
     """
     pp = set()
     for i in range(len(pcseg)):
@@ -667,13 +682,13 @@ def retrograde(pcseg: list):
     Retrogrades a pcseg
     :param pcseg: The pcseg
     :return: The retrograded pcseg
+    *Compatible with all PitchClass modulos    
     """
     pcseg2 = []
     if len(pcseg) > 0:
-        # Need to support both PitchClass12 and PitchClass24, so use a type alias
-        t = type(next(iter(pcseg)))
+        mod = pcseg[0].mod
         for i in range(len(pcseg) - 1, -1, -1):
-            pcseg2.append(t(pcseg[i].pc))
+            pcseg2.append(pitch.PitchClass(pcseg[i].pc, mod))
     return pcseg2
 
 
@@ -683,13 +698,13 @@ def rotate(pcseg: list, n: int):
     :param pcseg: The pcseg
     :param n: The index of rotation
     :return: The rotated pcseg
+    *Compatible with all PitchClass modulos    
     """
     pcseg2 = []
     if len(pcseg) > 0:
-        # Need to support both PitchClass12 and PitchClass24, so use a type alias
-        t = type(next(iter(pcseg)))
+        mod = pcseg[0].mod
         for i in range(len(pcseg)):
-            pcseg2.append(t(pcseg[(i - n) % len(pcseg)].pc))
+            pcseg2.append(pitch.PitchClass(pcseg[(i - n) % len(pcseg)].pc, mod))
     return pcseg2
 
 
@@ -699,13 +714,13 @@ def transpose(pcseg: list, n: int):
     :param pcseg: The pcseg
     :param n: The index of transposition
     :return: The transposed pcseg
+    *Compatible with all PitchClass modulos    
     """
     pcseg2 = []
     if len(pcseg) > 0:
-        # Need to support both PitchClass12 and PitchClass24, so use a type alias
-        t = type(next(iter(pcseg)))
+        mod = pcseg[0].mod
         for pc in pcseg:
-            pcseg2.append(t(pc.pc + n))
+            pcseg2.append(pitch.PitchClass(pc.pc + n, mod))
     return pcseg2
 
 
@@ -715,20 +730,22 @@ def transpositional_combination(pcseg1: list, pcseg2: list):
     :param pcseg1: A pcseg
     :param pcseg2: A pcseg
     :return: The TC pcset
+    *Compatible with all PitchClass modulos    
     """
     pcseg3 = []
     if len(pcseg1) > 0 and len(pcseg2) > 0:
-        # Need to support both PitchClass12 and PitchClass24, so use a type alias
-        t = type(next(iter(pcseg1)))
+        mod = pcseg1[0].mod
         for pc2 in pcseg2:
             for pc1 in pcseg1:
-                pcseg3.append(t(pc1.pc + pc2.pc))
+                pcseg3.append(pitch.PitchClass(pc1.pc + pc2.pc, mod))
     return pcseg3
 
 
 class InvarianceMatrix:
     """
-    Represents an invariance matrix
+    Represents an invariance matrix. Compatible with all PitchClass modulos for T and I
+    matrices, and compatible with mod 12 and mod 24 for various M matrices
+    (M5, M7 for mod 12; M5, M7, M11, M13, M17, M19 for mod 24)
     """
     def __init__(self, mx_type="T", a=None, c=None):
         """
@@ -760,7 +777,7 @@ class InvarianceMatrix:
         Gets a representation of the InvarianceMatrix object
         :returns: A string representation of the InvarianceMatrix object
         """
-        return "<pctheory.pcseg.InvarianceMatrix object at " + str(id(self)) + ">: " + str(self._mx)
+        return f"<pctheory.pcseg.InvarianceMatrix object at {id(self)}>: {self._mx}"
 
     def __str__(self):
         """
@@ -843,47 +860,54 @@ class InvarianceMatrix:
         :param c: Pcseg C
         :return: None
         """
-        self._t = type(a[0])
-        ro = transformations.OTO()
-        if self._t == pitch.PitchClass12:
-            INVERT = 11
-            if self._mx_type == "T":
-                ro.oto = [0, 0, 1 * INVERT % 12]
-            elif self._mx_type == "M" or self._mx_type == "M5":
-                ro.oto = [0, 0, 5 * INVERT % 12]
-            elif self._mx_type == "MI" or self._mx_type == "M7":
-                ro.oto = [0, 0, 7 * INVERT % 12]
-            elif self._mx_type == "I" or self._mx_type == "M11":
-                ro.oto = [0, 0, 11 * INVERT % 12]
-            b = ro.transform(c)
-        if self._t == pitch.PitchClass24:
-            INVERT = 23
-            if self._mx_type == "T":
-                ro.oto = [0, 0, 1 * INVERT % 24]
-            elif self._mx_type == "M5":
-                ro.oto = [0, 0, 5 * INVERT % 24]
-            elif self._mx_type == "M7":
-                ro.oto = [0, 0, 7 * INVERT % 24]
-            elif self._mx_type == "M11":
-                ro.oto = [0, 0, 11 * INVERT % 24]
-            elif self._mx_type == "M13":
-                ro.oto = [0, 0, 13 * INVERT % 24]
-            elif self._mx_type == "M17":
-                ro.oto = [0, 0, 17 * INVERT % 24]
-            elif self._mx_type == "M19":
-                ro.oto = [0, 0, 19 * INVERT % 24]
-            elif self._mx_type == "I" or self._mx_type == "M23":
-                ro.oto = [0, 0, 23 * INVERT % 24]
-            b = ro.transform(c)
-        self._mx = []
-        for i in range(len(b)):
-            mxrow = []
-            for j in range(len(a)):
-                mxrow.append(self._t(b[i].pc + a[j].pc))
-            self._mx.append(mxrow)
-        self._a = a.copy()
-        self._b = b
-        self._c = c.copy()
+        if len(a) > 0 and len(c) > 0:
+            ro = transformations.OTO()
+            if a[0].mod == 12:
+                INVERT = 11
+                if self._mx_type == "T":
+                    ro.oto = [0, 0, 1 * INVERT % 12]
+                elif self._mx_type == "M" or self._mx_type == "M5":
+                    ro.oto = [0, 0, 5 * INVERT % 12]
+                elif self._mx_type == "MI" or self._mx_type == "M7":
+                    ro.oto = [0, 0, 7 * INVERT % 12]
+                elif self._mx_type == "I" or self._mx_type == "M11":
+                    ro.oto = [0, 0, 11 * INVERT % 12]
+                b = ro.transform(c)
+            elif a[0].mod == 24:
+                INVERT = 23
+                if self._mx_type == "T":
+                    ro.oto = [0, 0, 1 * INVERT % 24]
+                elif self._mx_type == "M5":
+                    ro.oto = [0, 0, 5 * INVERT % 24]
+                elif self._mx_type == "M7":
+                    ro.oto = [0, 0, 7 * INVERT % 24]
+                elif self._mx_type == "M11":
+                    ro.oto = [0, 0, 11 * INVERT % 24]
+                elif self._mx_type == "M13":
+                    ro.oto = [0, 0, 13 * INVERT % 24]
+                elif self._mx_type == "M17":
+                    ro.oto = [0, 0, 17 * INVERT % 24]
+                elif self._mx_type == "M19":
+                    ro.oto = [0, 0, 19 * INVERT % 24]
+                elif self._mx_type == "I" or self._mx_type == "M23":
+                    ro.oto = [0, 0, 23 * INVERT % 24]
+                b = ro.transform(c)
+            else:
+                if self._mx_type == "T":
+                    ro.oto = [0, 0, 1 * (a[0].mod - 1) % a[0].mod]
+                elif self._mx_type == "I":
+                    ro.oto = [0, 0, 11 * (a[0].mod - 1) % a[0].mod]
+                b = ro.transform(c)
+
+            self._mx = []
+            for i in range(len(b)):
+                mxrow = []
+                for j in range(len(a)):
+                    mxrow.append(self._t(b[i].pc + a[j].pc))
+                self._mx.append(mxrow)
+            self._a = a.copy()
+            self._b = b
+            self._c = c.copy()
 
     def print(self, include: list = None):
         """
@@ -928,7 +952,7 @@ class InvarianceMatrix:
 
 class TwelveToneMatrix:
     """
-    Represents a twelve-tone matrix
+    Represents a twelve-tone matrix. Compatible only with mod 12 PitchClasses.
     """
     def __init__(self, row=None):
         """
@@ -1049,7 +1073,7 @@ class TwelveToneMatrix:
         """
         pcseg = []
         for i in range(len(self._mx)):
-            pcseg.append(pitch.PitchClass12(self._mx[i][j].pc))
+            pcseg.append(pitch.PitchClass(self._mx[i][j].pc, 12))
         return pcseg
 
     def get_row(self, i):

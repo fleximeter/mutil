@@ -60,7 +60,7 @@ def filter_poset_positions(posets: list, position_filter: list, exclude=False):
     return filtered
 
 
-def generate_chains_weak(p0: pitch.PitchClass12, sc_list: list, max_2_similarity: float = 0.4,
+def generate_chains_weak(p0: pitch.PitchClass, sc_list: list, max_2_similarity: float = 0.4,
                          min_2_similarity: float = 0, max_3_similarity: float = 1, min_3_similarity: float = 0,
                          pn=None):
     """
@@ -89,7 +89,7 @@ def generate_chains_weak(p0: pitch.PitchClass12, sc_list: list, max_2_similarity
     """
     chain_build = []   # The chains will be stored here
     chain_build2 = []      # (a temporary storage place for chains)
-    sc = pcset.SetClass12()  # The set-class object for pcset generation
+    sc = pcset.SetClass()  # The set-class object for pcset generation
 
     # Consider the first pcset and initialize the chains
     sc.load_from_name(sc_list[0])

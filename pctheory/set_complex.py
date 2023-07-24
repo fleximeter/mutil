@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from pctheory import pcset
 
 
-set_classes12 = pcset.SetClass12.get_set_classes()
+set_classes12 = pcset.SetClass.get_set_classes12()
 
 
 def assert_k(s, t):
@@ -55,7 +55,7 @@ def assert_kh(s, t):
         (t_bar.contains_abstract_subset(s) or s.contains_abstract_subset(t_bar))
 
 
-def get_k12(nexus: pcset.SetClass12):
+def get_k12(nexus: pcset.SetClass):
     """
     Gets a K-complex about a provided nexus set
     :param nexus: A nexus set
@@ -68,7 +68,7 @@ def get_k12(nexus: pcset.SetClass12):
     return k
 
 
-def get_kh12(nexus: pcset.SetClass12):
+def get_kh12(nexus: pcset.SetClass):
     """
     Gets a Kh-complex about a provided nexus set
     :param nexus: A nexus set

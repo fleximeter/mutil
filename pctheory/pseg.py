@@ -29,6 +29,7 @@ def intervals(pseg: list):
     Gets the ordered interval content of a pseg
     :param pseg: The pseg
     :return: The ordered interval content as a list
+    *Compatible with all Pitch modulos
     """
     intlist = []
     for i in range(1, len(pseg)):
@@ -41,11 +42,13 @@ def invert(pseg: list):
     Inverts a pseg
     :param pseg: The pseg
     :return: The inverted pseg
+    *Compatible with all Pitch modulos
     """
     pseg2 = []
-    t = type(next(iter(pseg)))
-    for p in pseg:
-        pseg2.append(t(p.p * -1))
+    if len(pseg) > 0:
+        mod = pseg[0].mod
+        for p in pseg:
+            pseg2.append(pitch.Pitch(p.p * -1, mod))
     return pseg2
 
 
@@ -54,10 +57,14 @@ def make_pseg12(*args):
     Makes a pseg
     :param args: Ps
     :return: A pseg
+    *Compatible only with chromatic psegs
     """
-    if type(args[0]) == list:
-        args = args[0]
-    return [pitch.Pitch12(p) for p in args]
+    if len(args) > 0:
+        if type(args[0]) == list:
+            args = args[0]
+        return [pitch.Pitch(p, 12) for p in args]
+    else:
+        return []
 
 
 def make_pseg24(*args):
@@ -65,10 +72,14 @@ def make_pseg24(*args):
     Makes a pseg
     :param args: Ps
     :return: A pseg
+    *Compatible only with microtonal psegs
     """
-    if type(args[0]) == list:
-        args = args[0]
-    return [pitch.Pitch24(p) for p in args]
+    if len(args) > 0:
+        if type(args[0]) == list:
+            args = args[0]
+        return [pitch.Pitch(p, 24) for p in args]
+    else:
+        return []
 
 
 def multiply_order(pseg: list, n: int):
@@ -77,11 +88,13 @@ def multiply_order(pseg: list, n: int):
     :param pseg: The pseg
     :param n: The multiplier
     :return: The order-multiplied pseg
+    *Compatible with all Pitch modulos
     """
     pseg2 = []
-    t = type(next(iter(pseg)))
-    for i in range(len(pseg)):
-        pseg2.append(t(pseg[(i * n) % len(pseg)].p))
+    if len(pseg) > 0:
+        mod = pseg[0].mod
+        for i in range(len(pseg)):
+            pseg2.append(pitch.Pitch(pseg[(i * n) % len(pseg)].p, mod))
     return pseg2
 
 
@@ -90,11 +103,13 @@ def retrograde(pseg: list):
     Retrogrades a pseg
     :param pseg: The pseg
     :return: The retrograded pseg
+    *Compatible with all Pitch modulos
     """
     pseg2 = []
-    t = type(next(iter(pseg)))
+    if len(pseg) > 0:
+        mod = pseg[0].mod
     for i in range(len(pseg) - 1, -1, -1):
-        pseg2.append(t(pseg[i].pc))
+        pseg2.append(pitch.Pitch(pseg[i].pc, mod))
     return pseg2
 
 
@@ -104,11 +119,13 @@ def rotate(pseg: list, n: int):
     :param pseg: The pseg
     :param n: The index of rotation
     :return: The rotated pseg
+    *Compatible with all Pitch modulos
     """
     pseg2 = []
-    t = type(next(iter(pseg)))
+    if len(pseg) > 0:
+        mod = pseg[0].mod
     for i in range(len(pseg)):
-        pseg2.append(t(pseg[(i - n) % len(pseg)].p))
+        pseg2.append(pitch.Pitch(pseg[(i - n) % len(pseg)].p, mod))
     return pseg2
 
 
@@ -117,11 +134,13 @@ def to_pcseg(pseg: list):
     Makes a pcseg out of a pseg
     :param pseg: A pseg
     :return: A pcseg
+    *Compatible with all Pitch modulos
     """
-    if type(next(iter(pseg))) == pitch.Pitch12:
-        return [pitch.PitchClass12(p.pc) for p in pseg]
+    if len(pseg) > 0:
+        mod = pseg[0].mod
+        return [pitch.PitchClass(p.pc, mod) for p in pseg]
     else:
-        return [pitch.PitchClass24(p.pc) for p in pseg]
+        return []
 
 
 def transpose(pseg: list, n: int):
@@ -130,9 +149,11 @@ def transpose(pseg: list, n: int):
     :param pseg: The pseg
     :param n: The index of transposition
     :return: The transposed pseg
+    *Compatible with all Pitch modulos
     """
     pseg2 = []
-    t = type(next(iter(pseg)))
-    for p in pseg:
-        pseg2.append(t(p.p + n))
+    if len(pseg) > 0:
+        mod = pseg[0].mod
+        for p in pseg:
+            pseg2.append(pitch.Pitch(p.p + n, mod))
     return pseg2
