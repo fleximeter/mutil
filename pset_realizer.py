@@ -10,16 +10,17 @@ This file contains functionality for realizing psets in scores.
 from pctheory import pcset, pset
 from mgen import xml_gen
 
-# The set-class we are going to use
+# We'll generate several different realizations of this pcset within a specified registral range
 base_set = pcset.make_pcset12(0, 1, 4, 6)
-
-# generate 10 different spacings of the chord
+LOWEST_NOTE = -12
+HIGHEST_NOTE = 24
+NUM_DUPLICATE_PITCHES = 2
 NUM_CHORDS = 10
-realizations = pset.generate_random_pset_realizations(base_set, -24, 24, 4, NUM_CHORDS)
+realizations = pset.generate_random_pset_realizations(base_set, LOWEST_NOTE, HIGHEST_NOTE, NUM_DUPLICATE_PITCHES, NUM_CHORDS)
 
 # Split the chord for rendering on a grand staff
 for i, chord in enumerate(realizations):
-    realizations[i] = xml_gen.split_chord_piano(chord)
+    realizations[i] = xml_gen.split_pset_for_grand_staff(chord)
 top_staff = [chord[0] for chord in realizations]
 bottom_staff = [chord[1] for chord in realizations]
 

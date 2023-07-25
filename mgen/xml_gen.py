@@ -16,7 +16,7 @@ from pctheory import pitch
 
 def add_item(part, item, measure_no, offset=0):
     """
-    Adds a clef to a Part or PartStaff
+    Adds an item such as a Clef, KeySignature, or TimeSignature to a Part or PartStaff
     :param part: The Part or PartStaff
     :param item: The item (can be anything, including Clef, KeySignature, TimeSignature, Note, Rest, etc.
     :param measure_no: The measure number
@@ -130,7 +130,7 @@ def add_instrument(score, name, abbreviation):
 
 def add_instrument_multi(score, name, abbreviation, num_staves, symbol="brace", bar_together=True):
     """
-    Adds a part with multiple staves to a score
+    Adds a part with multiple staves (such as a piano) to a score
     :param score: The score
     :param name: The name of the instrument
     :param abbreviation: The abbreviation of the instrument
@@ -287,7 +287,10 @@ def make_music21_list(items, durations):
 
 def make_semi_closed(chord):
     """
-    Makes a chord semi-closed and cleans up the notation
+    Makes a chord semi-closed and cleans up the notation. This is useful if you made 
+    a chord directly from a PitchClass set without adjusting the spacing. It uses
+    the music21 semiClosedPosition algorithm to space the chord, and then cleans up
+    some common mistakes this algorithm makes with accidentals.
     :param chord: A chord
     :return: A semi-closed position rendering
     """
@@ -299,20 +302,11 @@ def make_semi_closed(chord):
             item.midi += 12
         if item.midi > 84:
             item.midi -= 12
-    
-
-def open_in_reader(score):
-    """
-    Opens a score
-    :param score: The score
-    :return:
-    """
-    score.show()
 
 
-def split_chord_piano(chord):
+def split_pset_for_grand_staff(chord):
     """
-    Splits a chord for distribution across a grand staff
+    Splits a Pitch set for distribution across a grand staff
     :param chord: A set or list of pitches
     :return: Two lists of pitches, one for each staff. The first list is for the top staff,
     and the second list is for the bottom staff.
@@ -349,4 +343,4 @@ def test():
     s[1][3].append(music21.note.Note("E4", offset=2, quarterLength=1))
     s[1][4].append(music21.note.Note("C#4", offset=0, quarterLength=2))
 
-    open_in_reader(s)
+    s.show()

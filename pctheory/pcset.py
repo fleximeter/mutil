@@ -900,7 +900,7 @@ def make_pcset24(*args):
     """
     if type(args[0]) == list:
         args = args[0]
-    return {pitch.PitchClass(pc, 12) for pc in args}
+    return {pitch.PitchClass(pc, 24) for pc in args}
 
 
 def make_subset_graph(set_class, smallest_cardinality=1, show_graph=False, size=(800, 1100)):
