@@ -24,6 +24,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from . import pcset, pitch, tables, transformations
 import random
 
+_rng = random.Random()
+_rng.seed()
+
 
 def are_combinatorial2(row1: list, row2: list):
     """
@@ -164,8 +167,7 @@ def generate_pcseg12_from_interval_list(interval_list: list, starting_pc=None):
     *Compatible only with chromatic pcsegs
     """
     if starting_pc is None:
-        random.seed()
-        pcseg = [pitch.PitchClass(random.randrange(12), 12)]
+        pcseg = [pitch.PitchClass(_rng.randrange(12), 12)]
         for i in range(len(interval_list)):
             pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i], 12))
         return pcseg
@@ -185,8 +187,7 @@ def generate_pcseg24_from_interval_list(interval_list: list, starting_pc=None):
     *Compatible only with microtonal pcsegs
     """
     if starting_pc is None:
-        random.seed()
-        pcseg = [pitch.PitchClass(random.randrange(24), 24)]
+        pcseg = [pitch.PitchClass(_rng.randrange(24), 24)]
         for i in range(len(interval_list)):
             pcseg.append(pitch.PitchClass(pcseg[i].pc + interval_list[i], 24))
         return pcseg
@@ -205,7 +206,6 @@ def generate_random_all_interval_row(starting_pc=None):
     *Compatible only with chromatic pcsegs
     """
     name_tables = tables.create_tables_eleven_interval()
-    random.seed()
     row = []
 
     # Establish the starting pitch of the row
@@ -215,12 +215,12 @@ def generate_random_all_interval_row(starting_pc=None):
         else:
             row.append(pitch.PitchClass(starting_pc, 12))
     else:
-        row.append(pitch.PitchClass(random.randrange(12), 12))
-    generator = name_tables["elevenIntervalRowGenerators"][random.randrange(
+        row.append(pitch.PitchClass(_rng.randrange(12), 12))
+    generator = name_tables["elevenIntervalRowGenerators"][_rng.randrange(
         len(name_tables["elevenIntervalRowGenerators"]))]
 
     # Randomly choose to invert the row generator
-    if random.randrange(1) == 1:
+    if _rng.randrange(1) == 1:
         generator = [i * 11 % 12 for i in generator]
 
     # Build the row
@@ -237,17 +237,16 @@ def generate_random_all_trichord_row(starting_pc=None):
     *Compatible only with chromatic pcsegs
     """
     name_tables = tables.create_tables_all_trichord()
-    random.seed()
     if starting_pc is not None:
         if type(starting_pc) == pitch.PitchClass:
             starting_pc = starting_pc.pc
     else:
         starting_pc = 0
-    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["allTrichordRows"][random.randrange(
+    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["allTrichordRows"][_rng.randrange(
         len(name_tables["allTrichordRows"]))]]
 
     # Randomly choose to invert the row generator
-    if random.randrange(1) == 1:
+    if _rng.randrange(1) == 1:
         row = invert(row)
 
     return row
@@ -261,17 +260,16 @@ def generate_random_all_trichord_babbitt_row(starting_pc=None):
     *Compatible only with chromatic pcsegs
     """
     name_tables = tables.create_tables_all_trichord_babbitt()
-    random.seed()
     if starting_pc is not None:
         if type(starting_pc) == pitch.PitchClass:
             starting_pc = starting_pc.pc
     else:
         starting_pc = 0
-    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["allTrichordBabbittRows"][random.randrange(
+    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["allTrichordBabbittRows"][_rng.randrange(
         len(name_tables["allTrichordBabbittRows"]))]]
 
     # Randomly choose to invert the row generator
-    if random.randrange(1) == 1:
+    if _rng.randrange(1) == 1:
         row = invert(row)
 
     return row
@@ -286,18 +284,17 @@ def generate_random_pcseg12(length: int, non_duplicative=False, starting_pc=None
     :return: A random pcseg
     *Compatible only with chromatic pcsegs
     """
-    random.seed()
-    pcseg = [pitch.PitchClass(random.randrange(12) if starting_pc is None else starting_pc, 12)]
+    pcseg = [pitch.PitchClass(_rng.randrange(12) if starting_pc is None else starting_pc, 12)]
     if non_duplicative and 0 < length <= 12:
         pcs = [i for i in range(12)]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
-            j = random.randrange(len(pcs))
+            j = _rng.randrange(len(pcs))
             pcseg.append(pitch.PitchClass(pcs[j], 12))
             del pcs[j]
     elif not non_duplicative and 0 < length:
         for i in range(length - 1):
-            pcseg.append(pitch.PitchClass(random.randrange(12), 12))
+            pcseg.append(pitch.PitchClass(_rng.randrange(12), 12))
     else:
         raise ValueError("Invalid length")
     return pcseg
@@ -312,18 +309,17 @@ def generate_random_pcseg24(length: int, non_duplicative=False, starting_pc=None
     :return: A random pcseg
     *Compatible only with microtonal pcsegs
     """
-    random.seed()
-    pcseg = [pitch.PitchClass(random.randrange(24) if starting_pc is None else starting_pc, 24)]
+    pcseg = [pitch.PitchClass(_rng.randrange(24) if starting_pc is None else starting_pc, 24)]
     if non_duplicative and 0 < length <= 24:
         pcs = [i for i in range(24)]
         del pcs[pcseg[0].pc]
         for i in range(length - 1):
-            j = random.randrange(len(pcs))
+            j = _rng.randrange(len(pcs))
             pcseg.append(pitch.PitchClass(pcs[j], 24))
             del pcs[j]
     elif not non_duplicative and 0 < length:
         for i in range(length - 1):
-            pcseg.append(pitch.PitchClass(random.randrange(24), 24))
+            pcseg.append(pitch.PitchClass(_rng.randrange(24), 24))
     else:
         raise ValueError("Invalid length")
     return pcseg
@@ -336,13 +332,12 @@ def generate_random_pcseg_from_pcset(pcset: set):
     :return: A pcseg
     *Compatible with all PitchClass modulos    
     """
-    random.seed()
     pcseg = []
     if len(pcset) > 0:
         setseg = list(pcset)
         mod = setseg[0].mod
         for i in range(len(setseg)):
-            j = random.randrange(len(setseg))
+            j = _rng.randrange(len(setseg))
             pcseg.append(pitch.PitchClass(setseg[j].pc, mod))
             del setseg[j]
     return pcseg
@@ -356,17 +351,16 @@ def generate_random_ten_trichord_row(starting_pc=None):
     *Compatible only with chromatic pcsegs
     """
     name_tables = tables.create_tables_ten_trichord()
-    random.seed()
     if starting_pc is not None:
         if type(starting_pc) == pitch.PitchClass:
             starting_pc = starting_pc.pc
     else:
         starting_pc = 0
-    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["tenTrichordRows"][random.randrange(
+    row = [pitch.PitchClass(pc + starting_pc, 12) for pc in name_tables["tenTrichordRows"][_rng.randrange(
         len(name_tables["tenTrichordRows"]))]]
 
     # Randomly choose to invert the row generator
-    if random.randrange(1) == 1:
+    if _rng.randrange(1) == 1:
         row = invert(row)
 
     return row
