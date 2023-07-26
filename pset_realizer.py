@@ -11,12 +11,22 @@ from pctheory import pcset, pset
 from mgen import xml_gen
 
 # We'll generate several different realizations of this pcset within a specified registral range
-base_set = pcset.make_pcset12(0, 1, 4, 6)
-LOWEST_NOTE = -12
+base_set = pcset.make_pcset12(0, 1, 2, 4, 7, 8)
+LOWEST_NOTE = -24
 HIGHEST_NOTE = 24
-NUM_DUPLICATE_PITCHES = 2
+NUM_DUPLICATE_PITCHES = 4
 NUM_CHORDS = 10
-realizations = pset.generate_random_pset_realizations(base_set, LOWEST_NOTE, HIGHEST_NOTE, NUM_DUPLICATE_PITCHES, NUM_CHORDS)
+
+# only include psets that don't have large intervals
+def filter_func(x):
+    pseg = list(x)
+    pseg.sort()
+    for i in range(1, len(pseg)):
+        if pseg[i].p - pseg[i-1].p > 11:
+            return False
+    return True
+
+realizations = pset.generate_random_pset_realizations(base_set, LOWEST_NOTE, HIGHEST_NOTE, NUM_CHORDS, NUM_DUPLICATE_PITCHES, filter_func)
 
 # Split the chord for rendering on a grand staff
 for i, chord in enumerate(realizations):

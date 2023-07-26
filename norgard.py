@@ -4,8 +4,8 @@ Author: Jeff Martin
 Date: 11/13/21
 """
 
-import mgen.xml_gen as xml_gen
-from ..pctheory.util import util
+from mgen import xml_gen
+from pctheory import util
 
 
 if __name__ == "__main__":
@@ -16,4 +16,4 @@ if __name__ == "__main__":
     xml_gen.add_instrument(s, "Violin", "Vln.")
     xml_gen.add_measures(s, 100, 1, 1, "4/4")
     xml_gen.add_sequence(s[1], xml_gen.make_music21_list(pseq, [1 for i in range(len(pseq))]))
-    xml_gen.export_to_xml(s, r"H:\My Drive\Composition\Dorico\draft10.xml")
+    s.show()

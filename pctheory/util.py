@@ -86,7 +86,9 @@ def lcm(integers):
 
 def map_to_chromatic(scale_map, sequence):
     """
-    Maps a diatonic collection to the chromatic collection
+    Maps one sequence of items to another sequence of items. This is useful for doing 
+    things like mapping scale degrees 0-6 to actual chromatic pitches. You only need
+    to provide a map for one octave, and all transpositions will be accounted for.
     :param scale_map: The scale map
     :param sequence: The sequence to map
     :return: The mapped sequence

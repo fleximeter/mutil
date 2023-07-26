@@ -179,34 +179,41 @@ class Sieve:
         return Sieve(t, self._base_pitch, self._pc_mod)
 
 
-def get_fb_class(pset: set, p0: int) -> list:
+def calculate_pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=None) -> tuple:
     """
-    Gets the FB-class of a pset
-    :param pset: The pset
-    :param p0: The lowest pitch
-    :return: The FB-class as a list of integers
+    Gets the pitch-measure (PM) similarity between pset1 and pset2
+    :param pset1: A pset
+    :param pset2: A pset
+    :param ic_roster1: The ic_roster for pset 1. If None, will be calculated.
+    :param ic_roster2: The ic_roster for pset 2. If None, will be calculated.
+    :return: The PM similarity as a tuple of integers
     *Compatible with all Pitch modulos
     """
-    intlist = []
-    if len(pset) > 0 and p0 >= 0:
-        mod = pset[0].mod
-        for p in pset:
-            intlist.append((p.p - p0) % mod)
-        intlist.sort()
-        if len(intlist) > 0:
-            del intlist[0]
-    return intlist
+    cint = len(pset1.intersection(pset2))
+    ic_shared = 0
+    if ic_roster1 is None:
+        ic_roster1 = get_ic_roster(pset1)
+    if ic_roster2 is None:
+        ic_roster2 = get_ic_roster(pset2)
+    for ic in ic_roster1:
+        if ic in ic_roster2:
+            if ic_roster1[ic] < ic_roster2[ic]:
+                ic_shared += ic_roster1[ic]
+            else:
+                ic_shared += ic_roster2[ic]
+    return (cint, ic_shared)
 
 
-def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_boundary: int, num_duplicate_pitches: int=0, num_realizations: int=1):
+def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_boundary: int, num_realizations: int=1, num_duplicate_pitches: int=0, filter_func=None):
     """
     Generates random pset realizations of a given pcset, 
     within the specified upper and lower boundaries
     :param pcset: The pcset to realize
     :param lower_boundary: The lower boundary
     :param upper_boundary: The upper boundary
-    :param num_duplicate_pitches: The number of additional duplicate pitches to include (for doubling)
     :param num_realizations: The number of random realizations to generate
+    :param num_duplicate_pitches: The number of additional duplicate pitches to include (for doubling)
+    :param filter_func: A function for filtering the pset realizations to force them to match specified criteria
     :return: One or more random pset realizations of the pcset within the given boundaries. If the number of realizations
     is greater than 1, returns a list of psets. Otherwise returns a single pset.
     *Compatible with all Pitch modulos
@@ -251,7 +258,10 @@ def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_bou
                 realization.add(unused_pitches[idx])
                 del unused_pitches[idx]
 
-            realizations[str(realization)] = realization
+            if filter_func is None:
+                realizations[str(realization)] = realization
+            elif filter_func(realization):
+                realizations[str(realization)] = realization
             i += 1
         realizations = [realizations[key] for key in realizations]
 
@@ -259,6 +269,93 @@ def generate_random_pset_realizations(pcset: set, lower_boundary: int, upper_bou
             return realizations[0]
         else:
             return realizations
+
+
+def get_fb_class(pset: set, p0: int) -> list:
+    """
+    Gets the FB-class of a pset
+    :param pset: The pset
+    :param p0: The lowest pitch
+    :return: The FB-class as a list of integers
+    *Compatible with all Pitch modulos
+    """
+    intlist = []
+    if len(pset) > 0 and p0 >= 0:
+        mod = pset[0].mod
+        for p in pset:
+            intlist.append((p.p - p0) % mod)
+        intlist.sort()
+        if len(intlist) > 0:
+            del intlist[0]
+    return intlist
+
+
+def get_ic_matrix(pset: set) -> np.array:
+    """
+    Gets the pitch ic-matrix
+    :param pset: The pset
+    :return: The ic-matrix as a list of lists
+    *Compatible with all Pitch modulos
+    """
+    mx = np.empty((len(pset), len(pset)))
+    pseg = list(pset)
+    pseg.sort()
+    for i in range(mx.shape[0]):
+        for j in range(mx.shape[1]):
+            mx[i][j] = abs(pseg[i].p - pseg[j].p)
+    return mx
+
+
+def get_ic_roster(pset: set) -> dict:
+    """
+    Gets the pitch ic-roster
+    :param pset: The pset
+    :return: The ic-roster as a dictionary
+    *Compatible with all Pitch modulos
+    """
+    pseg = list(pset)
+    roster = {}
+    pseg.sort()
+    for i in range(len(pseg) - 1, -1, -1):
+        for j in range(i - 1, -1, -1):
+            interval = abs(pseg[i].p - pseg[j].p)
+            if interval not in roster:
+                roster[interval] = 1
+            else:
+                roster[interval] += 1
+    return roster
+
+
+def get_pcint_class(pset: set) -> list:
+    """
+    Gets the PCINT-class of a pset
+    :param pset: The pset
+    :return: The PCINT-class as a list of integers
+    *Compatible with all Pitch modulos
+    """
+    intlist = []
+    if len(pset) > 0:
+        pseg = list(pset)
+        pseg.sort()
+        mod = pseg[0].mod
+        for i in range(1, len(pseg)):
+            intlist.append((pseg[i].p - pseg[i - 1].p) % mod)
+    return intlist
+
+
+def get_set_class(pset: set) -> list:
+    """
+    Gets the set-class of a pset
+    :param pset: The pset
+    :return: The set-class as a list of integers
+    *Compatible with all Pitch modulos
+    """
+    pseg = list(pset)
+    pseg.sort()
+    intlist = []
+    for i in range(1, len(pseg)):
+        intlist.append(pseg[i].p - pseg[i - 1].p)
+    return intlist
 
 
 def invert(pset: set) -> set:
@@ -318,99 +415,6 @@ def make_pset24(*args) -> set:
     if type(args[0]) == list:
         args = args[0]
     return {pitch.Pitch(p, 24) for p in args}
-
-
-def get_ic_matrix(pset: set) -> np.array:
-    """
-    Gets the pitch ic-matrix
-    :param pset: The pset
-    :return: The ic-matrix as a list of lists
-    *Compatible with all Pitch modulos
-    """
-    mx = np.empty((len(pset), len(pset)))
-    pseg = list(pset)
-    pseg.sort()
-    for i in range(mx.shape[0]):
-        for j in range(mx.shape[1]):
-            mx[i][j] = abs(pseg[i].p - pseg[j].p)
-    return mx
-
-
-def get_ic_roster(pset: set) -> dict:
-    """
-    Gets the pitch ic-roster
-    :param pset: The pset
-    :return: The ic-roster as a dictionary
-    *Compatible with all Pitch modulos
-    """
-    pseg = list(pset)
-    roster = {}
-    pseg.sort()
-    for i in range(len(pseg) - 1, -1, -1):
-        for j in range(i - 1, -1, -1):
-            interval = abs(pseg[i].p - pseg[j].p)
-            if interval not in roster:
-                roster[interval] = 1
-            else:
-                roster[interval] += 1
-    return roster
-
-
-def get_set_class(pset: set) -> list:
-    """
-    Gets the set-class of a pset
-    :param pset: The pset
-    :return: The set-class as a list of integers
-    *Compatible with all Pitch modulos
-    """
-    pseg = list(pset)
-    pseg.sort()
-    intlist = []
-    for i in range(1, len(pseg)):
-        intlist.append(pseg[i].p - pseg[i - 1].p)
-    return intlist
-
-
-def get_pcint_class(pset: set) -> list:
-    """
-    Gets the PCINT-class of a pset
-    :param pset: The pset
-    :return: The PCINT-class as a list of integers
-    *Compatible with all Pitch modulos
-    """
-    intlist = []
-    if len(pset) > 0:
-        pseg = list(pset)
-        pseg.sort()
-        mod = pseg[0].mod
-        for i in range(1, len(pseg)):
-            intlist.append((pseg[i].p - pseg[i - 1].p) % mod)
-    return intlist
-
-
-def calculate_pm_similarity(pset1: set, pset2: set, ic_roster1=None, ic_roster2=None) -> tuple:
-    """
-    Gets the pitch-measure (PM) similarity between pset1 and pset2
-    :param pset1: A pset
-    :param pset2: A pset
-    :param ic_roster1: The ic_roster for pset 1. If None, will be calculated.
-    :param ic_roster2: The ic_roster for pset 2. If None, will be calculated.
-    :return: The PM similarity as a tuple of integers
-    *Compatible with all Pitch modulos
-    """
-    cint = len(pset1.intersection(pset2))
-    ic_shared = 0
-    if ic_roster1 is None:
-        ic_roster1 = get_ic_roster(pset1)
-    if ic_roster2 is None:
-        ic_roster2 = get_ic_roster(pset2)
-    for ic in ic_roster1:
-        if ic in ic_roster2:
-            if ic_roster1[ic] < ic_roster2[ic]:
-                ic_shared += ic_roster1[ic]
-            else:
-                ic_shared += ic_roster2[ic]
-    return (cint, ic_shared)
 
 
 def subsets(pset: set) -> list:
