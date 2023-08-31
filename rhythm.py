@@ -42,5 +42,5 @@ divisions = [
 
 divisions.reverse()
 
-tempo.plot_tempo_table([44, 52, 60, 72, 84, 96, 108, 120], divisions)
+tempo.plot_tempo_table([42, 48, 60, 72, 84, 96, 108, 120], divisions)
 
