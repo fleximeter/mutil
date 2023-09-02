@@ -367,7 +367,7 @@ def invert(pset: set) -> set:
     """
     pset2 = set()
     if len(pset) > 0:
-        mod = pset[0].mod
+        mod = next(iter(pset)).mod
         for p in pset:
             pset2.add(pitch.Pitch(p.p * -1, mod))
     return pset2
