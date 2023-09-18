@@ -235,7 +235,7 @@ def create_score_piano(title="Score", composer="Jeff Martin", num_measures: int=
     add_instrument_multi(s, "Piano", "Pno.", 2)
     if key is None:
         key = 0
-    add_measures(s, 10, 1, key, time_signature)
+    add_measures(s, num_measures, 1, key, time_signature)
     add_item(s[1], music21.clef.TrebleClef(), 1)
     add_item(s[2], music21.clef.BassClef(), 1)
     return s
@@ -262,26 +262,30 @@ def make_music21_list(items, durations):
     :return: A list of music21 items
     """
     m_list = []
-    for i in range(len(items)):
-        current_item = items[i]
-        if type(current_item) == set:
-            current_item = list(current_item)
-        if type(current_item) == int:
-            m_list.append(music21.note.Note(current_item + 60, quarterLength=durations[i]))
-        elif type(current_item) == float:
-            if current_item == -numpy.inf:
-                m_list.append(music21.note.Rest(quarterLength=durations[i]))
-            else:
-                m_list.append(music21.note.Note(current_item + 60, quarterLength=durations[i]))
-        elif type(current_item) == list:
-            if len(current_item) == 0:
-                m_list.append(music21.note.Rest(durations[i]))
-            elif type(current_item[0]) == int:
-                m_list.append(music21.chord.Chord([j + 60 for j in current_item], quarterLength=durations[i]))
-            elif type(current_item[0]) == pitch.Pitch:
-                m_list.append(music21.chord.Chord([music21.pitch.Pitch(p.p / (p.mod / 12) + 60) for p in current_item], quarterLength=durations[i]))
-        elif type(current_item) == pitch.Pitch:
-            m_list.append(music21.note.Note(music21.pitch.Pitch(items[i].p / (items[i].mod / 12) + 60), quarterLength=durations[i]))
+    if len(items) == len(durations):
+        for i in range(len(items)):
+            current_item = items[i]
+            current_duration = durations[i]
+
+            # Handles chords            
+            if type(current_item) == set:
+                current_item = list(current_item)
+            if type(current_item) == list:
+                if len(current_item) == 0:
+                    m_list.append(music21.note.Rest(current_duration))
+                elif type(current_item[0]) == int or type(current_item[0]) == float:
+                    m_list.append(music21.chord.Chord([j + 60 for j in current_item], quarterLength=current_duration))
+                elif type(current_item[0]) == pitch.Pitch:
+                    m_list.append(music21.chord.Chord([music21.pitch.Pitch(p.p / (p.mod / 12) + 60) for p in current_item], quarterLength=current_duration))
+            
+            elif type(current_item) == float or type(current_item) == int:
+                if current_item == -numpy.inf:
+                    m_list.append(music21.note.Rest(quarterLength=current_duration))
+                else:
+                    m_list.append(music21.note.Note(current_item + 60, quarterLength=current_duration))
+            
+            elif type(current_item) == pitch.Pitch:
+                m_list.append(music21.note.Note(music21.pitch.Pitch(items[i].p / (items[i].mod / 12) + 60), quarterLength=current_duration))
     return m_list
 
 
@@ -303,6 +307,34 @@ def make_semi_closed(chord):
         if item.midi > 84:
             item.midi -= 12
 
+
+def remove_empty_measures(score):
+    """
+    Removes empty measures from a score. For a measure to be empty, 
+    it must have no entries (notes, chords, or rests) in any voice or part.
+    :param score: A score to remove empty measures from
+    """
+    non_empty_measures = set()
+
+    # Find all measures that are definitely not empty
+    for item in score:
+        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
+            for item2 in item:
+                if type(item2) == music21.stream.Measure:
+                    if len(item2) > 0:
+                        non_empty_measures.add(item2.number)
+
+    # Remove all other measures
+    for item in score:
+        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
+            i = 0
+            while i < len(item):
+                if type(item[i]) == music21.stream.Measure:
+                    if item[i].number not in non_empty_measures:
+                        del item[i]
+                        i -= 1
+                i += 1
+    
 
 def split_pset_for_grand_staff(chord):
     """
