@@ -5,7 +5,7 @@ from pctheory import pitch, pcset, tables
 
 random.seed()
 
-a = pcset.make_pcset(0, 1, 4, 6)
+a = pcset.make_pcset12(0, 1, 4, 6)
 g = networkx.Graph()
 
 for i in range(20):
