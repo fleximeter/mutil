@@ -1072,6 +1072,36 @@ def subsets(pcset: set):
     return sub
 
 
+def transform(pcset, string):
+    """
+    Transforms a pcset with a provided transformation string
+    - Tn: transpose
+    - I: invert
+    - Mn: multiply
+    :param pcset: The pcset to transform
+    :param string: The transformation string
+    :return: The transformed pcset
+    """
+    pcset2 = set.copy(pcset)
+    i = len(string) - 1
+    while i >= 0:
+        num = 0
+        place_exp = 0
+        while str.isdigit(string[i]) and i > 0:
+            num += int(string[i]) * 10 ** place_exp
+            place_exp += 1
+            i -= 1
+        match string[i]:
+            case 'T':
+                pcset2 = transpose(pcset2, num)
+            case 'I':
+                pcset2 = invert(pcset2)
+            case 'M':
+                pcset2 = multiply(pcset2, num)
+        i -= 1
+    return pcset2
+
+
 def transpose(pcset: set, n: int):
     """
     Transposes a pcset

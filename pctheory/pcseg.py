@@ -702,6 +702,42 @@ def rotate(pcseg: list, n: int):
     return pcseg2
 
 
+def transform(pcseg, string):
+    """
+    Transforms a pcseg with a provided transformation string
+    - Tn: transpose
+    - I: invert
+    - Mn: multiply
+    - R: retrograde
+    - rn: rotate
+    :param pcseg: The pcseg to transform
+    :param string: The transformation string
+    :return: The transformed pcseg
+    """
+    pcseg2 = list.copy(pcseg)
+    i = len(string) - 1
+    while i >= 0:
+        num = 0
+        place_exp = 0
+        while str.isdigit(string[i]) and i > 0:
+            num += int(string[i]) * 10 ** place_exp
+            place_exp += 1
+            i -= 1
+        match string[i]:
+            case 'T':
+                pcseg2 = transpose(pcseg2, num)
+            case 'I':
+                pcseg2 = invert(pcseg2)
+            case 'M':
+                pcseg2 = multiply(pcseg2, num)
+            case 'R':
+                pcseg2.reverse()
+            case 'r':
+                pcseg2 = rotate(pcseg2, num)
+        i -= 1
+    return pcseg2
+
+
 def transpose(pcseg: list, n: int):
     """
     Transposes a pcseg
