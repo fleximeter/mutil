@@ -738,6 +738,19 @@ def transform(pcseg, string):
     return pcseg2
 
 
+def transform_hstack(pcseg, transformation_list):
+    """
+    Generates a really long pcseg by horizontally stacking transformed versions of it
+    :param pcseg: The pcseg to stack
+    :param transformation_list: A list of transformations to stack
+    :return: The stacked and transformed pcseg
+    """
+    pcseg1 = []
+    for t in transformation_list:
+        pcseg1 += transform(pcseg, t)
+    return pcseg1
+
+
 def transpose(pcseg: list, n: int):
     """
     Transposes a pcseg
