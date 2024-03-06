@@ -500,13 +500,27 @@ class Results:
         valid_durations_for_spacing = 0
         if len(self._slices) > 0:
             # Establish basic information
-            self._lower_bound = self._slices[0].lower_bound
-            self._lps_card = self._slices[0].upper_bound - self._slices[0].lower_bound + 1
-            self._upper_bound = self._slices[0].upper_bound
-            self._ins_min = self._lps_card
-            self._lns_min = self._lps_card
-            self._mediant_max = self._lower_bound
-            self._mediant_min = self._upper_bound
+            self._lower_bound = 0
+            self._lps_card = 0
+            self._upper_bound = 0
+            self._ins_min = 0
+            self._lns_min = 0
+            self._mediant_max = 0
+            self._mediant_min = 0
+            
+            i = 0
+            while i < len(self._slices):
+                if self._slices[i].lower_bound is not None and self._slices[i].upper_bound is not None:
+                    self._lower_bound = self._slices[0].lower_bound
+                    self._lps_card = self._slices[0].upper_bound - self._slices[0].lower_bound + 1
+                    self._upper_bound = self._slices[0].upper_bound
+                    self._ins_min = self._lps_card
+                    self._lns_min = self._lps_card
+                    self._mediant_max = self._lower_bound
+                    self._mediant_min = self._upper_bound
+                    break
+                i += 1
+            
             self._cseg_duration = {}  # The duration of each cseg
             self._cseg_frequency = {}  # The number of occurrences of each cseg
             self._pc_duration = {}  # The total number of seconds that this pitch-class is active
@@ -649,14 +663,20 @@ class Results:
                     self._pcsc_duration[s.sc_name] += s.duration
 
         # Finalize average calculation
-        non_null = self._get_non_null()
-        self._ins_avg /= non_null
-        self._lns_avg /= non_null
-        self._mediant_avg /= non_null
         self._ps_avg /= len(self._slices)
         self._pset_card_avg = float(self._pset_card_avg / self._duration)
-        self._pset_spacing_index_avg = float(self._pset_spacing_index_avg / valid_durations_for_spacing)
-        self._uns_avg /= non_null
+    
+        if valid_durations_for_spacing != 0:
+            self._pset_spacing_index_avg = float(self._pset_spacing_index_avg / valid_durations_for_spacing)
+        else:
+            self._pset_spacing_index_avg = 0.5
+
+        non_null = self._get_non_null()
+        if non_null != 0:
+            self._ins_avg /= non_null
+            self._lns_avg /= non_null
+            self._mediant_avg /= non_null
+            self._uns_avg /= non_null
 
     def _get_non_null(self):
         """

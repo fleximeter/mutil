@@ -30,20 +30,33 @@ from pctheory import pitch, pcset
 from decimal import Decimal
 
 
-def analyze(input_xml, first=-1, last=-1, use_local=False):
+def analyze(input_xml, first=-1, last=-1, use_local=False, staff_indices=None):
     """
     Performs a vertical analysis on the given stream and writes a report to CSV
     :param input_xml: The musicxml file to analyze
     :param first: The first measure to analyze
     :param last: The last measure to analyze
     :param use_local: Whether or not to use local bounds for register analysis
+    :param staff_indices: Whether to only analyze some of the staves or analyze 
+    the whole score (a value of None means to analyze the whole score)
     :return: A Results object containing the results of the analysis
     """
     stream = music21.converter.parse(input_xml)
     parts = []
-    for item in stream:
-        if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
-            parts.append(item)
+    
+    if staff_indices is not None:
+        i = 0
+        for item in stream:
+            if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
+                if i in staff_indices:
+                    parts.append(item)
+                i += 1
+    
+    else:            
+        for item in stream:
+            if type(item) == music21.stream.Part or type(item) == music21.stream.PartStaff:
+                parts.append(item)
+    
     results = slice_parts(parts, get_slice_num(parts), [], [use_local], first, last)
     return results
 

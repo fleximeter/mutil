@@ -34,7 +34,7 @@ def c_analyze():
     # Path names
     path = "D:\\chin_paper\\"
     path_laptop = "C:\\Users\\jeffr\\chin_paper\\"
-    path = path_laptop
+    # path = path_laptop
     xml = f"{path}chin_etude_1_6staff.musicxml"
     output = f"{path}analysis\\entire_piece.csv"
     output_general = f"{path}analysis\\statistics.csv"
@@ -42,17 +42,13 @@ def c_analyze():
     
     # Record starting time
     start = time.time()
-    use_cache = False
 
     # Analyze
     print("Analyzing entire piece...")
     results = None
 
-    if use_cache:
-        results = salami_slice_analyze.read_analysis_from_file(results_path)
-    else:
-        results = salami_slice_analyze.analyze(xml)
-        salami_slice_analyze.write_analysis_to_file(results, results_path)
+    results = salami_slice_analyze.analyze(xml)
+    results_staff = [salami_slice_analyze.analyze(xml, staff_indices=[i]) for i in range(0, 6)]
 
     salami_slice_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
@@ -65,9 +61,14 @@ def c_analyze():
                                [results[0].psc_frequency, results[0].psc_duration])
     salami_slice_analyze.write_statistics(f"{path}\\analysis\\pcscs.csv", "SC,Frequency,Duration\n",
                                [results[0].pcsc_frequency, results[0].pcsc_duration])
-    
-    # Make charts
+
     make_charts_general(results[0], path)
+
+    for i, result in enumerate(results_staff):
+        salami_slice_analyze.write_report(f"{path}analysis\\entire_piece_staff{i}.csv", result[0])
+        salami_slice_analyze.write_statistics(f"{path}\\analysis\\psets_staff{i}.csv", "Pset,Frequency,Duration\n",
+                                [result[0].pset_frequency, result[0].pset_duration])
+        # make_charts_general(result, path)
 
     # Print elapsed time
     finish = time.time() - start
