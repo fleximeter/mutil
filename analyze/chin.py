@@ -30,13 +30,6 @@ def c_analyze():
     """
     Analyzes Chin's "In C" without analyzing each section separately
     """
-    xml = r"D:\Carter Paper\Flows from String Quartet No. 5\Carter " \
-          r"String Quartet 5 - Full score - 01 Introduction.xml "
-    output = r"D:\Carter Paper\RegisterAnalyzer\results_carter.csv"
-    start = time.time()
-    salami_slice_analyze.analyze(xml, output)
-    finish = time.time() - start
-    print(int(finish / 60), "minutes,", round(finish % 60, 3), "seconds")
     
     # Path names
     path = "D:\\chin_paper\\"
