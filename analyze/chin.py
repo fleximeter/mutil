@@ -34,7 +34,7 @@ def c_analyze():
     # Path names
     path = "D:\\chin_paper\\"
     path_laptop = "C:\\Users\\jeffr\\chin_paper\\"
-    # path = path_laptop
+    path = path_laptop
     xml = f"{path}chin_etude_1_6staff.musicxml"
     output = f"{path}analysis\\entire_piece.csv"
     output_general = f"{path}analysis\\statistics.csv"
@@ -74,12 +74,11 @@ def c_analyze():
     print(f"\nTotal elapsed time: {int(finish / 60)} minutes, {round(finish % 60, 3)} seconds")
 
 
-def make_charts_general(results, path, voices):
+def make_charts_general(results, path):
     """
     Makes general charts
     :param results: A Results object
     :param path: The file path
-    :param voices: A list of voices
     :return:
     """
     chart.chart_cardinality(results, False, "Pset Cardinality Graph for Unsuk Chin’s \"In C\"",
@@ -92,31 +91,15 @@ def make_charts_general(results, path, voices):
                                    (6.5, 3), f"{path}analysis\\graphs\\pset_spacing_index_m")
     chart.chart_pset_spacing_index(results, True, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
                                    (6.5, 3), f"{path}analysis\\graphs\\pset_spacing_index_t")
-    for i in range(len(voices)):
-        chart.chart_pitch_onset(results, False, f"Pitch Onsets in Unsuk Chin’s \"In C\" "
-                                                   f"({voices[i]})", (6.5, 3),
-                                f"{path}analysis\\graphs\\onset_measure_{voices[i]}", i)
     chart.chart_pitch_onset(results, True, "Pitch Onsets in Unsuk Chin’s \"In C\"", (6.5, 3),
                             f"{path}analysis\\graphs\\onset_time")
-    for i in range(len(voices)):
-        chart.chart_pitch_onset(results, True, f"Pitch Onsets in Unsuk Chin’s \"In C\" "
-                                                  f"({voices[i]})", (6.5, 3),
-                                f"{path}analysis\\graphs\\onset_time_{voices[i]}", i)
     chart.chart_pitch_duration(results, "Pitch Duration in Unsuk Chin’s \"In C\"", (6.5, 3),
                                f"{path}analysis\\graphs\\pitch_duration")
-    for i in range(len(voices)):
-        chart.chart_pitch_duration(results, f"Pitch Duration in Unsuk Chin’s \"In C\" "
-                                               f"({voices[i]})", (6.5, 3),
-                                   f"{path}analysis\\graphs\\pitch_duration_{voices[i]}", i)
     chart.chart_pc_duration(results, "Pitch-Class Duration in Unsuk Chin’s \"In C\"", (3, 3),
                             f"{path}analysis\\graphs\\pc_duration")
-    for i in range(len(voices)):
-        chart.chart_pc_duration(results, f"Pitch-Class Duration in Unsuk Chin’s \"In C\" "
-                                            f"({voices[i]})", (3, 3),
-                                f"{path}analysis\\graphs\\pc_duration_{voices[i]}", i)
-
+    
 
 if __name__ == "__main__":
-    print("################### Vertical Analyzer ####################\n" + \
-          "Copyright (c) 2022 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
+    print("################### Salami Slice Analyzer ####################\n" + \
+          "Copyright (c) 2024 by Jeffrey Martin. All rights reserved.\nhttps://www.jeffreymartincomposer.com\n")
     c_analyze()

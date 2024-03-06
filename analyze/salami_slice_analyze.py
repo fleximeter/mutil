@@ -359,15 +359,16 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
 
                     # Update the tempo if we find a new one
                     if type(item) == music21.tempo.MetronomeMark:
-                        tempo = Decimal(item.number)
+                        if item.number is not None:
+                            tempo = Decimal(item.number)
 
-                        # Specific adjustments for Carter 5
-                        if parts[a][next_indices[a]].number == 46:
-                            tempo = Decimal(512) / Decimal(7)
-                        elif parts[a][next_indices[a]].number == 66:
-                            tempo = Decimal(384) / Decimal(7)
-                        elif parts[a][next_indices[a]].number == 128:
-                            tempo = Decimal(1152) / Decimal(10)
+                        # # Specific adjustments for Carter 5
+                        # if parts[a][next_indices[a]].number == 46:
+                        #     tempo = Decimal(512) / Decimal(7)
+                        # elif parts[a][next_indices[a]].number == 66:
+                        #     tempo = Decimal(384) / Decimal(7)
+                        # elif parts[a][next_indices[a]].number == 128:
+                        #     tempo = Decimal(1152) / Decimal(10)
                         # print(f"Tempo: {tempo}, Measure {parts[a][next_indices[a]].number}")
                         # deprecated:
                         # tempo_multiplier = 10 ** str(tempo)[::-1].find(".")

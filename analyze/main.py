@@ -1,5 +1,5 @@
 """
-File: VerticalAnalyzer.py
+File: main.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains functionality for analyzing MusicXML scores.
@@ -24,8 +24,8 @@ import chart
 import time
 
 if __name__ == "__main__":
-    print("################### Vertical Analyzer ####################\n" + \
-          "Copyright (c) 2021 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
+    print("################### Salami Slice Analyzer ####################\n" + \
+          "Copyright (c) 2021 by Jeffrey Martin. All rights reserved.\nhttps://www.jeffreymartincomposer.com\n")
     print("Enter path of MusicXML file to analyze:")
     xml = input()
     print("Enter destination file name (should end in .csv or .txt):")
