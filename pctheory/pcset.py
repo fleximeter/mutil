@@ -49,8 +49,8 @@ class SetClass:
         self._ic_vector_long = [0 for i in range(self._NUM_PC // 2 + 1)]
         self._name_carter = None
         self._name_forte = None
-        self._name_morris = None
-        self._name_prime = ""
+        self._name_morris = "()[]"
+        self._name_prime = "[]"
         self._num_forte = None
         self._pcset = set()
         self._weight_right = True
@@ -90,12 +90,16 @@ class SetClass:
         # return f"<pctheory.pcset.SetClass object at {(id(self))}>: {repr(self._pcset)}"
         if self._NUM_PC == 12:
             return self._name_morris
+        elif self._NUM_PC == None or self._NUM_PC <= 0:
+            return "()[]"
         else:
             return self._name_prime
 
     def __str__(self):
         if self._NUM_PC == 12:
             return self._name_morris
+        elif self._NUM_PC == None or self._NUM_PC <= 0:
+            return "()[]"
         else:
             return self._name_prime
     

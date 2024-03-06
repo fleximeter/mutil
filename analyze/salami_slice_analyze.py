@@ -1,8 +1,9 @@
 """
-File: v_analyze.py
+File: salami_slice_analyze.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
-This file contains functions for analyzing vertical slices.
+This file contains functions for analyzing salami slices (distinct vertical 
+simultaneities) of a score
 Copyright (c) 2022 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
@@ -18,10 +19,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import fractions
+
+
 import json
 import music21
-from vslice2 import VSlice
+from salami_slice import SalamiSlice
 from results import Results
 from fractions import Fraction
 from pctheory import pitch, pcset
@@ -297,7 +299,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     :return: A list of v_slices
     """
 
-    sc = pcset.SetClass12()  # A set-class for calculating names, etc.
+    sc = pcset.SetClass()  # A set-class for calculating names, etc.
     final_slices = []      # Holds the finalized slices to return
     first_measure = -1     # We assume that the first measure is -1
     last_measure = -1      # We assume that the last measure is -1
@@ -403,7 +405,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                                 for j in range(num_slices):
                                     if num_slices_taken >= len(measure_slices):
                                         measure_slices.append(
-                                            VSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
+                                            SalamiSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
                                                    len(parts)))
                                     measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                                     measure_slices[num_slices_taken].time_signature = time_signature
@@ -448,7 +450,7 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
                         for j in range(num_slices):
                             if num_slices_taken >= len(measure_slices):
                                 measure_slices.append(
-                                    VSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
+                                    SalamiSlice(tempo, Fraction(1, n.numerator), parts[a][next_indices[a]].number,
                                            len(parts)))
                             measure_slices[num_slices_taken].add_pitches(pitches_in_item, p_names_in_item, a)
                             measure_slices[num_slices_taken].time_signature = time_signature
@@ -536,7 +538,7 @@ def read_analysis_from_file(path):
     for item in data:
         slices = []
         for dslice in item["slices"]:
-            cslice = VSlice()
+            cslice = SalamiSlice()
             cslice._cseg = dslice["cseg"]
             cslice._pset_spacing_index = float(dslice["chord_spread"])
             cslice._core = bool(dslice["core"])
@@ -548,9 +550,9 @@ def read_analysis_from_file(path):
             cslice._p_cardinality = dslice["p_cardinality"]
             cslice._p_count = dslice["p_count"]
             cslice._pc_cardinality = dslice["pc_cardinality"]
-            cslice._pcseg = [pitch.PitchClass12(pc) for pc in dslice["pcseg"]]
+            cslice._pcseg = [pitch.PitchClass(pc) for pc in dslice["pcseg"]]
             cslice._pcset = set(cslice.pcseg)
-            cslice._pcsegs = [[pitch.PitchClass12(pc) for pc in dslice["pcsegs"][v]]
+            cslice._pcsegs = [[pitch.PitchClass(pc) for pc in dslice["pcsegs"][v]]
                               for v in range(len(dslice["pcsegs"]))]
             cslice._pcset = set(cslice.pcseg)
             cslice._pcsets = [set(cslice.pcsegs[v]) for v in range(len(cslice.pcsegs))]
@@ -558,8 +560,8 @@ def read_analysis_from_file(path):
             cslice._pitchsegs = dslice["pitchsegs"]
             cslice._pnameseg = dslice["pnameseg"]
             cslice._pnamesegs = dslice["pnamesegs"]
-            cslice._pseg = [pitch.Pitch12(p) for p in dslice["pseg"]]
-            cslice._psegs = [[pitch.Pitch12(p) for p in dslice["psegs"][v]] for v in range(len(dslice["psegs"]))]
+            cslice._pseg = [pitch.Pitch(p) for p in dslice["pseg"]]
+            cslice._psegs = [[pitch.Pitch(p) for p in dslice["psegs"][v]] for v in range(len(dslice["psegs"]))]
             cslice._pset = set(cslice.pseg)
             cslice._psets = [set(cslice.psegs[v]) for v in range(len(cslice.psegs))]
             cslice._quarter_duration = Fraction(dslice["quarter_duration"][0], dslice["quarter_duration"][1])

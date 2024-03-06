@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import v_analyze
+import analyze.salami_slice_analyze as salami_slice_analyze
 import chart
 import time
 from fractions import Fraction
@@ -34,7 +34,7 @@ def c_analyze():
           r"String Quartet 5 - Full score - 01 Introduction.xml "
     output = r"D:\Carter Paper\RegisterAnalyzer\results_carter.csv"
     start = time.time()
-    v_analyze.analyze(xml, output)
+    salami_slice_analyze.analyze(xml, output)
     finish = time.time() - start
     print(int(finish / 60), "minutes,", round(finish % 60, 3), "seconds")
 
@@ -97,39 +97,39 @@ def c_analyze_with_sections():
     results = None
 
     if use_cache:
-        results = v_analyze.read_analysis_from_file(results_path)
+        results = salami_slice_analyze.read_analysis_from_file(results_path)
     else:
-        results = v_analyze.analyze_with_sections(xml, sections, bound_prefs)
-        v_analyze.write_analysis_to_file(results, results_path)
+        results = salami_slice_analyze.analyze_with_sections(xml, sections, bound_prefs)
+        salami_slice_analyze.write_analysis_to_file(results, results_path)
 
-    v_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
+    salami_slice_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
-    v_analyze.write_report(output, results[0])
-    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs.csv", "Cseg,Frequency,Duration\n",
+    salami_slice_analyze.write_report(output, results[0])
+    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs.csv", "Cseg,Frequency,Duration\n",
                                [results[0].cseg_frequency, results[0].cseg_duration])
-    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets.csv", "Pset,Frequency,Duration\n",
+    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets.csv", "Pset,Frequency,Duration\n",
                                [results[0].pset_frequency, results[0].pset_duration])
-    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs.csv", "PSC,Frequency,Duration\n",
+    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs.csv", "PSC,Frequency,Duration\n",
                                [results[0].psc_frequency, results[0].psc_duration])
-    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs.csv", "SC,Frequency,Duration\n",
+    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs.csv", "SC,Frequency,Duration\n",
                                [results[0].pcsc_frequency, results[0].pcsc_duration])
     for i in range(1, len(output_global) + 1):
-        v_analyze.write_general_report(f"Section {i} global", output_general, "a", results[i],
+        salami_slice_analyze.write_general_report(f"Section {i} global", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)
-        v_analyze.write_report(output_global[i - 1], results[i])
-        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs_{i}.csv", "Cseg,Frequency,Duration\n",
+        salami_slice_analyze.write_report(output_global[i - 1], results[i])
+        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs_{i}.csv", "Cseg,Frequency,Duration\n",
                                    [results[i].cseg_frequency, results[i].cseg_duration])
-        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets_{i}.csv", "Pset,Frequency,Duration\n",
+        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets_{i}.csv", "Pset,Frequency,Duration\n",
                                    [results[i].pset_frequency, results[i].pset_duration])
-        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs_{i}.csv", "PSC,Frequency,Duration\n",
+        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs_{i}.csv", "PSC,Frequency,Duration\n",
                                    [results[i].psc_frequency, results[i].psc_duration])
-        v_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs_{i}.csv", "SC,Frequency,Duration\n",
+        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs_{i}.csv", "SC,Frequency,Duration\n",
                                    [results[i].pcsc_frequency, results[i].pcsc_duration])
 
     for i in range(13, len(output_local) + 13):
-        v_analyze.write_general_report(f"Section {i - 12} local", output_general, "a", results[i],
+        salami_slice_analyze.write_general_report(f"Section {i - 12} local", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)
-        v_analyze.write_report(output_local[i - 13], results[i])
+        salami_slice_analyze.write_report(output_local[i - 13], results[i])
 
     # Make charts
     make_charts_general(results[0], path, voices)
@@ -174,19 +174,19 @@ def c_analyze_reduction():
     results = None
 
     if use_cache:
-        results = v_analyze.read_analysis_from_file(results_path)
+        results = salami_slice_analyze.read_analysis_from_file(results_path)
     else:
-        results = v_analyze.analyze(xml)
-        v_analyze.write_analysis_to_file(results, results_path)
+        results = salami_slice_analyze.analyze(xml)
+        salami_slice_analyze.write_analysis_to_file(results, results_path)
 
-    v_analyze.write_general_report("Section 12", output_general, "w", results[0], results[0].lower_bound,
+    salami_slice_analyze.write_general_report("Section 12", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
-    v_analyze.write_report(output, results[0])
-    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\csegs.csv",
+    salami_slice_analyze.write_report(output, results[0])
+    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\csegs.csv",
                                "Cseg,Frequency,Duration\n", [results[0].cseg_frequency, results[0].cseg_duration])
-    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\psets.csv",
+    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\psets.csv",
                                "Pset,Frequency,Duration\n", [results[0].pset_frequency, results[0].pset_duration])
-    v_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\pscs.csv",
+    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\pscs.csv",
                                "PSC,Frequency,Duration\n", [results[0].psc_frequency, results[0].psc_duration])
 
     # Print elapsed time

@@ -1,8 +1,8 @@
 """
-File: vslice.py
+File: salami_slice.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
-This file contains the v_slice class for vertical slicing with music21.
+This file contains the SalamiSlice class for salami slicing with music21.
 Copyright (c) 2022 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
@@ -43,10 +43,10 @@ def sort_pnameseg(pnameseg):
     return [p[0] for p in sorted(pnameseg2, key=lambda x: x[1])]
 
 
-class VSlice:
+class SalamiSlice:
     def __init__(self, tempo=1, quarter_duration=1, measure=None, num_voices=1):
         """
-        Creates a v_slice
+        Creates a SalamiSlice
         :param duration: The duration of the slice, in seconds
         :param quarter_duration: The duration of the slice, in quarter notes
         :param measure: The measure number
@@ -455,7 +455,7 @@ class VSlice:
         Copies the VSlice
         :return: A copy of the VSlice
         """
-        v = VSlice(self._tempo, self._quarter_duration, self._measure, self._num_voices)
+        v = SalamiSlice(self._tempo, self._quarter_duration, self._measure, self._num_voices)
 
     def get_cseg_string(self):
         """
@@ -526,16 +526,16 @@ class VSlice:
         self._pcseg = []
         self._pcset = set()
         for p in self._pitchseg:
-            self._pset.add(pitch.Pitch12(p))
-            self._pcset.add(pitch.PitchClass12(p))
+            self._pset.add(pitch.Pitch(p))
+            self._pcset.add(pitch.PitchClass(p))
         for v in range(self._num_voices):
             for p in self._pitchsegs[v]:
-                self._psets[v].add(pitch.Pitch12(p))
-                self._pcsets[v].add(pitch.PitchClass12(p))
+                self._psets[v].add(pitch.Pitch(p))
+                self._pcsets[v].add(pitch.PitchClass(p))
             self._psegs.append(list(self._psets[v]))
             self._psegs[v].sort()
             for p in self._psegs[v]:
-                self._pcsegs[v].append(pitch.PitchClass12(p.pc))
+                self._pcsegs[v].append(pitch.PitchClass(p.pc))
         self._pseg = list(self._pset)
         self._pseg.sort()
         self._pnameseg = sort_pnameseg(self._pnameseg)
@@ -543,7 +543,7 @@ class VSlice:
             self._pitchsegs[v].sort()
             self._pnamesegs[v] = sort_pnameseg(self._pnamesegs[v])
         for p in self._pseg:
-            self._pcseg.append(pitch.PitchClass12(p.pc))
+            self._pcseg.append(pitch.PitchClass(p.pc))
         if len(self._ipseg) > 0:
             self._ipseg.clear()
         for i in range(1, len(self._pseg)):

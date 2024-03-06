@@ -1,3 +1,7 @@
 from pctheory import pitch, pcset, pcseg
 
-x = pcseg.make_pcseg12(0, 5, 1, 2)
+x = pcset.SetClass()
+print(x._NUM_PC)
+print(x.name_prime)
+print(x.name_morris)
+print(x)

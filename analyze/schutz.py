@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import v_analyze
+import analyze.salami_slice_analyze as salami_slice_analyze
 import chart
 import music21
 import time
@@ -38,8 +38,8 @@ if __name__ == "__main__":
     output2 = r"C:\Users\Jeffrey Martin\Desktop\mozart.csv"
     output3 = r"C:\Users\Jeffrey Martin\Desktop\beethoven.csv"
     start = time.time()
-    results = v_analyze.analyze(xml)
-    v_analyze.write_report(output, results)
+    results = salami_slice_analyze.analyze(xml)
+    salami_slice_analyze.write_report(output, results)
     finish = time.time() - start
     print(int(finish / 60), "minutes,", finish % 60, "seconds")
     #chart.chart_cardinality(results)
