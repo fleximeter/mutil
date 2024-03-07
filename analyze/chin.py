@@ -34,7 +34,7 @@ def c_analyze():
     # Path names
     path = "D:\\chin_paper\\"
     path_laptop = "C:\\Users\\jeffr\\chin_paper\\"
-    # path = path_laptop
+    path = path_laptop
     xml = f"{path}chin_etude_1_6staff.musicxml"
     output = f"{path}analysis\\entire_piece.csv"
     output_general = f"{path}analysis\\statistics.csv"
@@ -62,14 +62,14 @@ def c_analyze():
     salami_slice_analyze.write_statistics(f"{path}\\analysis\\pcscs.csv", "SC,Frequency,Duration\n",
                                [results[0].pcsc_frequency, results[0].pcsc_duration])
 
-    make_charts_general(results[0], path)
-
+    make_charts_general(results[0], f"{path}analysis\\graphs")
+    
     for i, result in enumerate(results_staff):
-        salami_slice_analyze.write_report(f"{path}analysis\\entire_piece_staff{i}.csv", result[0])
-        salami_slice_analyze.write_statistics(f"{path}\\analysis\\psets_staff{i}.csv", "Pset,Frequency,Duration\n",
+        salami_slice_analyze.write_report(f"{path}analysis\\entire_piece_staff{i+1}.csv", result[0])
+        salami_slice_analyze.write_statistics(f"{path}\\analysis\\psets_staff{i+1}.csv", "Pset,Frequency,Duration\n",
                                 [result[0].pset_frequency, result[0].pset_duration])
-        # make_charts_general(result, path)
-
+        make_charts_specific(result[0], f"{path}analysis\\graphs_staff{i+1}")
+    
     # Print elapsed time
     finish = time.time() - start
     print(f"\nTotal elapsed time: {int(finish / 60)} minutes, {round(finish % 60, 3)} seconds")
@@ -83,21 +83,42 @@ def make_charts_general(results, path):
     :return:
     """
     chart.chart_cardinality(results, False, "Pset Cardinality Graph for Unsuk Chin’s \"In C\"",
-                            size=(6.5, 3), path=f"{path}analysis\\graphs\\card_m")
+                            size=(6.5, 3), path=f"{path}\\card_m")
     chart.chart_cardinality(results, True, "Pset Cardinality Graph for Unsuk Chin’s \"In C\"",
-                            size=(6.5, 3), path=f"{path}analysis\\graphs\\card_t")
+                            size=(6.5, 3), path=f"{path}\\card_t")
     chart.chart_pitch_onset(results, False, "Pitch Onsets in Unsuk Chin’s \"In C\"", (6.5, 3),
-                            f"{path}analysis\\graphs\\onset_measure")
-    chart.chart_pset_spacing_index(results, False, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
-                                   (6.5, 3), f"{path}analysis\\graphs\\pset_spacing_index_m")
-    chart.chart_pset_spacing_index(results, True, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
-                                   (6.5, 3), f"{path}analysis\\graphs\\pset_spacing_index_t")
+                            f"{path}\\onset_measure")
+    chart.chart_pset_spacing_index(results, False, "Pset Spacing Indices in Unsuk Chin’s \"In C\"",
+                                   (6.5, 3), f"{path}\\pset_spacing_index_m")
+    chart.chart_pset_spacing_index(results, True, "Pset Spacing Indices in Unsuk Chin’s \"In C\"",
+                                   (6.5, 3), f"{path}\\pset_spacing_index_t")
     chart.chart_pitch_onset(results, True, "Pitch Onsets in Unsuk Chin’s \"In C\"", (6.5, 3),
-                            f"{path}analysis\\graphs\\onset_time")
+                            f"{path}\\onset_time")
     chart.chart_pitch_duration(results, "Pitch Duration in Unsuk Chin’s \"In C\"", (6.5, 3),
-                               f"{path}analysis\\graphs\\pitch_duration")
-    chart.chart_pc_duration(results, "Pitch-Class Duration in Unsuk Chin’s \"In C\"", (3, 3),
-                            f"{path}analysis\\graphs\\pc_duration")
+                               f"{path}\\pitch_duration")
+    chart.chart_pc_duration(results, "Pitch-Class Duration in Unsuk Chin’s \"In C\"", (6.5, 3),
+                            f"{path}\\pc_duration")
+                            
+
+def make_charts_specific(results, path):
+    """
+    Make specific charts
+    :param results: A Results object
+    :param path: The file path
+    :return:
+    """
+    chart.chart_cardinality(results, False, "Pset Cardinality Graph for Unsuk Chin’s \"In C\"",
+                            size=(6.5, 3), path=f"{path}\\card_m")
+    chart.chart_cardinality(results, True, "Pset Cardinality Graph for Unsuk Chin’s \"In C\"",
+                            size=(6.5, 3), path=f"{path}\\card_t")
+    chart.chart_pitch_onset(results, False, "Pitch Onsets in Unsuk Chin’s \"In C\"", (6.5, 3),
+                            f"{path}\\onset_measure")
+    chart.chart_pitch_onset(results, True, "Pitch Onsets in Unsuk Chin’s \"In C\"", (6.5, 3),
+                            f"{path}\\onset_time")
+    chart.chart_pitch_duration(results, "Pitch Duration in Unsuk Chin’s \"In C\"", (6.5, 3),
+                               f"{path}\\pitch_duration")
+    chart.chart_pc_duration(results, "Pitch-Class Duration in Unsuk Chin’s \"In C\"", (6.5, 3),
+                            f"{path}\\pc_duration")
     
 
 if __name__ == "__main__":
