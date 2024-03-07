@@ -319,7 +319,6 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
     next_indices = [0 for i in range(len(parts))]  # The index of the next measure, for each part
     next_measure = -1      # The number of the next measure
     tempo = Decimal(60)    # We assume a tempo of 60 to begin
-    tempo_multiplier = 10  # This is in place to avoid floats
     time_signature = None  # The current time signature
     transpose = [0 for i in range(len(parts))]  # The amount by which to transpose, for each part
 
@@ -353,6 +352,13 @@ def slice_parts(parts, n, section_divisions, use_local, first=-1, last=-1):
             for a in range(len(parts)):
                 # Tracks the number of slices taken for the current part in the current measure
                 num_slices_taken = 0
+
+                # Hack for Chin piece
+                if parts[a][next_indices[a]].number == 1:
+                    tempo = Decimal(80)
+                if parts[a][next_indices[a]].number == 26:
+                    tempo = Decimal(108)
+                
                 for item in parts[a][next_indices[a]]:
                     last_item_was_voice = False
                     furthest_voice_slice = 0
