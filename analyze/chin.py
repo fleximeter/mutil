@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import salami_slice_analyze
+import staff_analyze
 import chart
 import time
 from fractions import Fraction
@@ -34,9 +35,9 @@ def c_analyze():
     # Path names
     path = "D:\\chin_paper\\"
     path_laptop = "C:\\Users\\jeffr\\chin_paper\\"
-    path = path_laptop
+    # path = path_laptop
     xml = f"{path}chin_etude_1_6staff.musicxml"
-    output = f"{path}analysis\\entire_piece.csv"
+    output = f"{path}analysis\\entire_piece.xlsx"
     output_general = f"{path}analysis\\statistics.csv"
     results_path = f"{path}analysis\\data.json"
     
@@ -65,10 +66,14 @@ def c_analyze():
     make_charts_general(results[0], f"{path}analysis\\graphs")
     
     for i, result in enumerate(results_staff):
-        salami_slice_analyze.write_report(f"{path}analysis\\entire_piece_staff{i+1}.csv", result[0])
+        salami_slice_analyze.write_report(f"{path}analysis\\entire_piece_staff{i+1}.xlsx", result[0])
         salami_slice_analyze.write_statistics(f"{path}\\analysis\\psets_staff{i+1}.csv", "Pset,Frequency,Duration\n",
                                 [result[0].pset_frequency, result[0].pset_duration])
         make_charts_specific(result[0], f"{path}analysis\\graphs_staff{i+1}")
+    
+    # Perform IOI analysis
+    ioi_analysis = staff_analyze.parser(xml)
+    staff_analyze.write_analysis_to_file(f"{path}\\analysis\\ioi.xlsx", ioi_analysis)
     
     # Print elapsed time
     finish = time.time() - start

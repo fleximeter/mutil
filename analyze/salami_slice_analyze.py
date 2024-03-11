@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
 import music21
+import pandas as pd
 from salami_slice import SalamiSlice
 from results import Results
 from fractions import Fraction
@@ -905,93 +906,78 @@ def write_statistics(file, headings, dictionaries):
 
 def write_report(file, results):
     """
-    Writes a report to CSV
+    Writes a report to Excel
     :param file: A file name (and path if necessary)
     :param results: A Results object
     """
-    with open(file, "w") as output:
-        if len(results.slices) > 0:
-            # Track the onset position in seconds
-            position = 0
+    report = {
+        "measure_no": [],
+        "start_time": [],
+        "duration": [],
+        "quarter_length": [],
+        "chord_cardinality": [],
+        "ps": [],
+        "match": [],
+        "ns": [],
+        "uns": [],
+        "ins": [],
+        "lns": [],
+        "mt": [],
+        "morris_name": [],
+        "carter_name": [],
+        "core": [],
+        "derived_core": [],
+        "dc_associations": [],
+        "pcset": [],
+        "pset": [],
+        "psc": [],
+        "cseg": [],
+        "psi": []
+    }
+    for i in range(results.max_p_count):
+        report[f"pitch_{i + 1}"] = []
+    for i in range(results.ps_max):
+        report[f"pn_{i + 1}"] = []
 
-            # Output column headings
-            line = "Measure #,Start Time (seconds),Duration (seconds),Quarter duration,Chord cardinality," + \
-                   "PS,Match,NS,UNS,INS,LNS,MT,Morris name,Carter name,Core,Derived core,DC associations,pcset,pset," \
-                   "psc,cseg,Chord Spread"
+    if len(results.slices) > 0:
+        # Track the onset position in seconds
+        position = 0
+
+        # Output each slice
+        for item in results.slices:
+            report["measure_no"].append(item.measure)
+            report["start_time"].append(float(position))
+            report["duration"].append(float(item.duration))
+            report["quarter_length"].append(item.quarter_duration)
+            report["chord_cardinality"].append(item.p_count)
+            report["ps"].append(item.ps)
+            report["match"].append(item.p_count == item.ps)
+            report["ns"].append(item.ns)
+            report["uns"].append(item.uns)
+            report["ins"].append(item.ins)
+            report["lns"].append(item.lns)
+            report["mt"].append(item.mediant)
+            report["morris_name"].append(item.sc_name)
+            report["carter_name"].append(item.sc_name_carter)
+            report["core"].append(item.core)
+            report["derived_core"].append(item.derived_core)
+            report["dc_associations"].append(item.derived_core_associations)
+            report["pcset"].append(item.get_pcset_string())
+            report["pset"].append(item.get_pset_string())
+            report["psc"].append(item.get_ipseg_string())
+            report["cseg"].append(item.get_cseg_string())
+            report["psi"].append(item.pset_spacing_index)
             for i in range(results.max_p_count):
-                line += f",Pitch {i + 1}"
+                if i < len(item.pitchseg):
+                    report[f"pitch_{i + 1}"].append(item.pnameseg[i])
+                else:
+                    report[f"pitch_{i + 1}"].append(None)
             for i in range(results.ps_max):
-                line += f",Pn_{i + 1}"
-            line += "\n"
-            output.write(line)
+                if i < len(item.pseg):
+                    report[f"pn_{i + 1}"].append(item.pseg[i])
+                else:
+                    report[f"pn_{i + 1}"].append(None)
+            position += item.duration
 
-            # Output each slice
-            for item in results.slices:
-                line = f"{item.measure}"
-                line += f",{float(position)}"
-                line += f",{float(item.duration)}"
-                line += f",\'{item.quarter_duration}"
-                line += f",{item.p_count}"
-                line += f",{item.ps}"
-                if item.p_count == item.ps:
-                    line += ",TRUE"
-                else:
-                    line += ",FALSE"
-                if item.ns is not None:
-                    line += f",{item.ns}"
-                else:
-                    line += ",N/A"
-                if item.uns is not None:
-                    line += f",{item.uns}"
-                else:
-                    line += ",N/A"
-                line += f",{item.ins}"
-                if item.lns is not None:
-                    line += f",{item.lns}"
-                else:
-                    line += ",N/A"
-                if item.mediant is not None:
-                    line += f",{item.mediant}"
-                else:
-                    line += ",N/A"
-                if item.sc_name is not None:
-                    line += f",{item.sc_name}"
-                else:
-                    line += ",N/A"
-                if item.sc_name_carter is not None:
-                    line += f",\"{item.sc_name_carter}\""
-                else:
-                    line += ",N/A"
-                line += f",{item.core},{item.derived_core}"
-                if item.derived_core:
-                    line += f",\"{item.derived_core_associations}\""
-                else:
-                    line += ",N/A"
-                if item.pcset is not None:
-                    line += f",\"{item.get_pcset_string()}\""
-                else:
-                    line += ",N/A"
-                if item.pset is not None:
-                    line += f",\"{item.get_pset_string()}\""
-                else:
-                    line += ",N/A"
-                line += f",\"{item.get_ipseg_string()}\""
-                line += f",\"{item.get_cseg_string()}\""
-                line += f",{item.pset_spacing_index}"
-                for i in range(results.max_p_count):
-                    if i < len(item.pitchseg):
-                        line += f",{item.pnameseg[i]}"
-                    else:
-                        line += ","
-                for i in range(results.ps_max):
-                    if i < len(item.pseg):
-                        line += f",{item.pseg[i]}"
-                    else:
-                        line += ","
-                line += "\n"
-                output.write(line)
-                position += item.duration
-
-        # If we have no slices to write, just write a newline
-        else:
-            output.write("\n")
+    report_df = pd.DataFrame(report)
+    report_df.to_excel(file, index=False)
