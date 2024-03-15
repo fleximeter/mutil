@@ -5,7 +5,6 @@ Date: 3/14/24
 This file contains standard functionality for interactive pctheory calculations.
 """
 
-import re
 import pctheory.pitch as pitch
 import pctheory.pcset as pcset
 import pctheory.transformations as transformations
@@ -24,17 +23,26 @@ def calculate():
     """
     Enters continuous calculation mode
     """
-    pass
+    user_input = input("...> ")
+    while user_input not in ["quit", "q", "exit", "x"]:
+        load(user_input)
+        info()
+        user_input = input("...> ")
 
 
 def info():
     """
     Displays info about the set class
     """
-    print("{0: <20}{1}".format("Prime form name:", sc.name_prime),
-        "\n{0: <20}{1}".format("Forte name:", sc.name_forte),
-        "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
-        "\n{0: <20}{1}".format("Dsym:", sc.dsym))
+    if sc.mod == 12:
+        print("{0: <20}{1}".format("Prime form name:", sc.name_prime),
+            "\n{0: <20}{1}".format("Forte name:", sc.name_forte),
+            "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
+            "\n{0: <20}{1}".format("Dsym:", sc.dsym))
+    else:
+        print("{0: <20}{1}".format("Prime form name:", sc.name_prime),
+            "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
+            "\n{0: <20}{1}".format("Dsym:", sc.dsym))
 
 
 def load(command):
@@ -42,7 +50,11 @@ def load(command):
     Loads the set class
     :param command: The set class prime form
     """
-    sc.pcset = {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)}
+    try:
+        pcs = {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)}
+        sc.pcset = pcs
+    except Exception:
+        print("Please enter a valid pcset to load...")
 
 
 def mod(command):
@@ -51,8 +63,11 @@ def mod(command):
     :param command: The mod number
     """
     global sc
-    command = int(command)
-    sc = pcset.SetClass(pc_mod=command)
+    try:
+        command = int(command)
+        sc = pcset.SetClass(pc_mod=command)
+    except Exception:
+        print("Please enter a valid number for the mod value...")
 
 
 def search(command):
@@ -60,8 +75,12 @@ def search(command):
     Searches transformations of the set class
     :param command: The pcs to search for
     """
-    utos = transformations.find_utos(sc.pcset, pcset.make_pcset12(*parser(command)))
-    print(utos)
+    try:
+        utos = transformations.find_utos(sc.pcset, {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)})
+        utos = sorted(list(utos))
+        print(utos)
+    except Exception:
+        print("Please enter a valid pcset to search for...")
 
 
 def subsets():
@@ -69,6 +88,7 @@ def subsets():
     Calculates the subsets of the set class
     """
     s = pcset.subsets(sc.pcset)
+    s = sorted(list(s))
     print(s)
 
 
@@ -77,6 +97,7 @@ def subsets_prime():
     Calculates the abstract subsets of the set class
     """
     sp = sc.get_abstract_subset_classes()
+    sp = sorted(list(sp))
     print(sp)
 
 
@@ -86,7 +107,17 @@ def transform(command):
     :command: The transformation string
     """
     tr = pcset.transform(sc.pcset, command)
-    print(tr)
+    tr = sorted(list(tr))
+    print("{", end="")
+    for i, pc in enumerate(tr):
+        if sc.mod == 12:
+            print(f"{pc}", end="")
+        else:
+            if i < len(tr) - 1:
+                print(f"{pc}, ", end="")
+            else:
+                print(f"{pc}", end="")
+    print("}")
 
 
 def menu():
