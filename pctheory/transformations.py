@@ -191,17 +191,17 @@ class UTO:
         return self._uto[item]
 
     def __ge__(self, other):
-        if self._oto[1] > other._oto[1]:
+        if self._uto[1] > other._uto[1]:
             return True
-        elif self._oto[1] == other._oto[1] and self._oto[0] >= other._oto[0]:
+        elif self._uto[1] == other._uto[1] and self._uto[0] >= other._uto[0]:
             return True
         else:
             return False
 
     def __gt__(self, other):
-        if self._oto[1] > other._oto[1]:
+        if self._uto[1] > other._uto[1]:
             return True
-        elif self._oto[1] == other._oto[1] and self._oto[0] > other._oto[0]:
+        elif self._uto[1] == other._uto[1] and self._uto[0] > other._uto[0]:
             return True
         else:
             return False
@@ -210,17 +210,17 @@ class UTO:
         return self._uto[0] * 100 + self._uto[1]
 
     def __le__(self, other):
-        if self._oto[1] < other._oto[1]:
+        if self._uto[1] < other._uto[1]:
             return True
-        elif self._oto[1] == other._oto[1] and self._oto[0] <= other._oto[0]:
+        elif self._uto[1] == other._uto[1] and self._uto[0] <= other._uto[0]:
             return True
         else:
             return False
 
     def __lt__(self, other):
-        if self._oto[1] < other._oto[1]:
+        if self._uto[1] < other._uto[1]:
             return True
-        elif self._oto[1] == other._oto[1] and self._oto[0] < other._oto[0]:
+        elif self._uto[1] == other._uto[1] and self._uto[0] < other._uto[0]:
             return True
         else:
             return False
@@ -348,7 +348,7 @@ def find_otos(pcseg1: list, pcseg2: list):
 
 def find_utos(pcset1: set, pcset2: set):
     """
-    Finds the UTOS that transform pcset2 into pcset1. pcset2 can be a subset of pcset1.
+    Finds the UTOS that transform pcset1 so it contains pcset2. pcset2 can be a subset of pcset1.
     :param pcset1: A pcset
     :param pcset2: A pcset
     :return: A list of UTOS
@@ -365,14 +365,14 @@ def find_utos(pcset1: set, pcset2: set):
             return utos_final
         
         for uto in utos:
-            pcset3 = utos[uto].transform(pcset2)
+            pcset1_transformed = utos[uto].transform(pcset1)
             valid = True
-            for pc in pcset3:
-                if pc not in pcset1:
+            for pc in pcset2:
+                if pc not in pcset1_transformed:
                     valid = False
                     break
             if valid:
-                utos_final.add(uto)
+                utos_final.add(utos[uto])
 
     return utos_final
 
