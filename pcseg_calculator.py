@@ -1,5 +1,5 @@
 """
-File: pcset_calculator.py
+File: pcseg_calculator.py
 Date: 3/14/24
 
 This file contains standard functionality for interactive pctheory calculations.
@@ -7,51 +7,47 @@ This file contains standard functionality for interactive pctheory calculations.
 
 import pctheory.pitch as pitch
 import pctheory.pcset as pcset
+import pctheory.pcseg as pcseg
 import pctheory.transformations as transformations
 
 HEX_MAP = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15}
 
-VALID_COMMANDS = {"calculate", "c", "exit", "x", "info", "n", "load", "l", "mod", "quit", "q", "search", "h", "subsets", "s", "subsets prime", "sp"}
-NON_NUMERIC_TRANSFORMATIONS = {"I"}
-NUMERIC_TRANSFORMATIONS = {"T", "M"}
+VALID_COMMANDS = {"exit", "x", "info", "n", "load", "l", "mod", "ordered search", "oh", "quit", "q", "search", "h", "subsets", "s", "subsets prime", "sp"}
+NON_NUMERIC_TRANSFORMATIONS = {"I", "R"}
+NUMERIC_TRANSFORMATIONS = {"T", "M", "r"}
 VALID_TRANSFORMATIONS = NUMERIC_TRANSFORMATIONS.union(NON_NUMERIC_TRANSFORMATIONS)
 sc = pcset.SetClass(pc_mod=12)
-
-
-def calculate():
-    """
-    Enters continuous calculation mode
-    """
-    user_input = input("...> ")
-    while user_input not in ["quit", "q", "exit", "x"]:
-        load(user_input)
-        info()
-        user_input = input("...> ")
+pcseg_local = []
 
 
 def info():
     """
-    Displays info about the set class
+    Displays info about the pcseg
     """
+    global pcseg_local, sc
     if sc.mod == 12:
-        print("{0: <20}{1}".format("Prime form name:", sc.name_prime),
+        print("{0: <20}{1}".format("Pcseg:", pcseg_local),
+            "\n{0: <20}{1}".format("Prime form name:", sc.name_prime),
             "\n{0: <20}{1}".format("Forte name:", sc.name_forte),
             "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
             "\n{0: <20}{1}".format("Dsym:", sc.dsym))
     else:
-        print("{0: <20}{1}".format("Prime form name:", sc.name_prime),
+        print(
+            "{0: <20}{1}".format("Pcseg:", pcseg_local),
+            "\n{0: <20}{1}".format("Prime form name:", sc.name_prime),
             "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
             "\n{0: <20}{1}".format("Dsym:", sc.dsym))
 
 
 def load(command):
     """
-    Loads the set class
+    Loads the pcseg
     :param command: The set class prime form
     """
     try:
-        pcs = {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)}
-        sc.pcset = pcs
+        global pcseg_local, sc
+        pcseg_local = [pitch.PitchClass(n, mod=sc.mod) for n in parser(command)]
+        sc.pcset = set(pcseg_local)
     except Exception:
         print("Please enter a valid pcset to load...")
 
@@ -61,12 +57,28 @@ def mod(command):
     Sets the mod of the set class
     :param command: The mod number
     """
-    global sc
+    global pcseg_local, sc
     try:
+        global pcseg_local, sc
         command = int(command)
         sc = pcset.SetClass(pc_mod=command)
+        pcseg_local = []
     except Exception:
         print("Please enter a valid number for the mod value...")
+
+
+def ordered_search(command):
+    """
+    Searches transformations of the set class, with wraparound capability
+    :param command: The pcs to search for
+    """
+    global pcseg_local, sc
+    try:
+        otos = transformations.find_otos(pcseg_local + pcseg_local, [pitch.PitchClass(n, mod=sc.mod) for n in parser(command)])
+        otos = sorted(list(otos))
+        print(otos)
+    except Exception:
+        print("Please enter a valid pcseg to search for...")
 
 
 def search(command):
@@ -74,6 +86,7 @@ def search(command):
     Searches transformations of the set class
     :param command: The pcs to search for
     """
+    global pcseg_local, sc
     try:
         utos = transformations.find_utos(sc.pcset, {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)})
         utos = sorted(list(utos))
@@ -86,6 +99,7 @@ def subsets():
     """
     Calculates the subsets of the set class
     """
+    global pcseg_local, sc
     s = pcset.subsets(sc.pcset)
     s = sorted(list(s))
     print(s)
@@ -95,6 +109,7 @@ def subsets_prime():
     """
     Calculates the abstract subsets of the set class
     """
+    global pcseg_local, sc
     sp = sc.get_abstract_subset_classes()
     sp = sorted(list(sp))
     print(sp)
@@ -105,9 +120,9 @@ def transform(command):
     Transforms the prime form of the set class
     :command: The transformation string
     """
-    tr = pcset.transform(sc.pcset, command)
-    tr = sorted(list(tr))
-    print("{", end="")
+    global pcseg_local, sc
+    tr = pcseg.transform(pcseg_local, command)
+    print("[", end="")
     for i, pc in enumerate(tr):
         if sc.mod == 12:
             print(f"{pc}", end="")
@@ -116,7 +131,7 @@ def transform(command):
                 print(f"{pc}, ", end="")
             else:
                 print(f"{pc}", end="")
-    print("}")
+    print("]")
 
 
 def menu():
@@ -179,16 +194,18 @@ def process_command(command: str) -> None:
                 match command2:
                     case "subsets prime":
                         subsets_prime()
+                    case "ordered search":
+                        ordered_search(" ".join(command_words[2:]))
             else:
                 match command1:
-                    case "calculate" | "c":
-                        calculate()
                     case "info" | "n":
                         info()
                     case "load" | "l":
                         load(" ".join(command_words[1:]))
                     case "mod":
                         mod(" ".join(command_words[1:]))
+                    case "oh":
+                        ordered_search(" ".join(command_words[1:]))
                     case "search" | "h":
                         search(" ".join(command_words[1:]))
                     case "subsets" | "s":
@@ -275,7 +292,7 @@ def validate_transformation(transformation: str) -> bool:
 
 
 if __name__ == "__main__":
-    print(("#################### pcset calculator #####################\n"
+    print(("#################### pcseg calculator #####################\n"
            "Copyright (c) 2024 by Jeffrey Martin. All rights reserved.\n"
            "https://www.jeffreymartincomposer.com\n"
            "This program is licensed under the GNU GPL v3 and comes\n"

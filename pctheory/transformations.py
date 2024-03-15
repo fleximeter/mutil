@@ -46,9 +46,49 @@ class OTO:
 
     def __getitem__(self, item):
         return self._oto[item]
-
+    
+    def __ge__(self, other):
+        if self._oto[1] > other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] > other._oto[2]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] == other._oto[2] and self._oto[0] >= other._oto[0]:
+            return True
+        else:
+            return False
+        
+    def __gt__(self, other):
+        if self._oto[1] > other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] > other._oto[2]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] == other._oto[2] and self._oto[0] > other._oto[0]:
+            return True
+        else:
+            return False
+    
     def __hash__(self):
         return self._oto[0] * 1000 + self._oto[1] * 100 + self._oto[2]
+
+    def __le__(self, other):
+        if self._oto[1] < other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] < other._oto[2]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] == other._oto[2] and self._oto[0] <= other._oto[0]:
+            return True
+        else:
+            return False
+    
+    def __lt__(self, other):
+        if self._oto[1] < other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] < other._oto[2]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[2] == other._oto[2] and self._oto[0] < other._oto[0]:
+            return True
+        else:
+            return False
 
     def __ne__(self, other):
         return self._oto[0] != other.oto[0] or self._oto[1] != other.oto[1] or self._oto[2] != other.oto[2]
@@ -151,19 +191,39 @@ class UTO:
         return self._uto[item]
 
     def __ge__(self, other):
-        return self._uto[1] > other.uto[1] or (self._uto[0] >= other.uto[0] and self._uto[1] == other.uto[1])
+        if self._oto[1] > other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[0] >= other._oto[0]:
+            return True
+        else:
+            return False
 
     def __gt__(self, other):
-        return self._uto[1] > other.uto[1] or (self._uto[0] > other.uto[0] and self._uto[1] == other.uto[1])
+        if self._oto[1] > other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[0] > other._oto[0]:
+            return True
+        else:
+            return False
 
     def __hash__(self):
         return self._uto[0] * 100 + self._uto[1]
 
     def __le__(self, other):
-        return self._uto[1] < other.uto[1] or (self._uto[0] <= other.uto[0] and self._uto[1] == other.uto[1])
+        if self._oto[1] < other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[0] <= other._oto[0]:
+            return True
+        else:
+            return False
 
     def __lt__(self, other):
-        return self._uto[1] < other.uto[1] or (self._uto[0] < other.uto[0] and self._uto[1] == other.uto[1])
+        if self._oto[1] < other._oto[1]:
+            return True
+        elif self._oto[1] == other._oto[1] and self._oto[0] < other._oto[0]:
+            return True
+        else:
+            return False
 
     def __ne__(self, other):
         return self._uto[0] != other.uto[0] or self._uto[1] != other.uto[1]
