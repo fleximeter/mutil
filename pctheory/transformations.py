@@ -235,7 +235,7 @@ class UTO:
         """
         t = type(item)
         if t == pitch.PitchClass:
-            return pitch.PitchClass12(item.pc * self._uto[1] + self._uto[0], item.mod)
+            return pitch.PitchClass(item.pc * self._uto[1] + self._uto[0], item.mod)
         else:
             new_item = t()
             if t == set:
@@ -247,18 +247,73 @@ class UTO:
             return new_item
 
 
-def find_utos12(pcset1: set, pcset2: set):
+def find_otos(pcseg1: list, pcseg2: list):
     """
-    Finds the 12 tone UTOS that transform pcset1 into pcset2
+    Gets all OTO transformations of pcseg1 that contain pcseg2 as an ordered subseg
+    :param pcseg1: A pcseg
+    :param pcseg2: A pcseg
+    :return: A set of OTOs that transform pcseg1 so that it contains pcseg2.
+    *Compatible with PitchClasses mod 12 and 24
+    """
+    otos = None
+    oto_set = set()
+
+    if len(pcseg1) > 0 and len(pcseg2) > 0:
+        mod = pcseg1[0].mod
+        if mod == 12:
+            otos = get_otos12()
+        elif mod == 24:
+            otos = get_otos24()
+        else:
+            return oto_set
+        
+        for oto in otos:
+            pcseg3 = otos[oto].transform(pcseg1)
+            # Search each transformation in t
+            done_searching = False
+            for i in range(len(pcseg3)):
+                if len(pcseg2) > len(pcseg3) - i:
+                    break
+                done_searching = True
+                for j in range(i, i + len(pcseg2)):
+                    if pcseg3[j] != pcseg2[j - i]:
+                        done_searching = False
+                        break
+                if done_searching:
+                    oto_set.add(otos[oto])
+                    break
+
+    return oto_set
+
+
+def find_utos(pcset1: set, pcset2: set):
+    """
+    Finds the UTOS that transform pcset2 into pcset1. pcset2 can be a subset of pcset1.
     :param pcset1: A pcset
-    :param pcset2: A transformed pcset
+    :param pcset2: A pcset
     :return: A list of UTOS
     """
-    utos = get_utos12()
-    utos_final = {}
-    for u in utos:
-        if utos[u].transform(pcset1) == pcset2:
-            utos_final[u] = utos[u]
+    utos_final = set()
+
+    if len(pcset1) > 0 and len(pcset2) > 0:
+        mod = next(iter(pcset1)).mod
+        if mod == 12:
+            utos = get_utos12()
+        elif mod == 24:
+            utos = get_utos24()
+        else:
+            return utos_final
+        
+        for uto in utos:
+            pcset3 = utos[uto].transform(pcset2)
+            valid = True
+            for pc in pcset3:
+                if pc not in pcset1:
+                    valid = False
+                    break
+            if valid:
+                utos_final.add(uto)
+
     return utos_final
 
 

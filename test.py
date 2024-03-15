@@ -1,7 +1,12 @@
-from pctheory import pitch, pcset, pcseg
+import pctheory.pitch as pitch
+import pctheory.pcset as pcset
+import pctheory.pcseg as pcseg
+import pctheory.transformations as transformations
 
-x = pcset.SetClass()
-print(x._NUM_PC)
-print(x.name_prime)
-print(x.name_morris)
-print(x)
+pcseg1 = pcseg.make_pcseg12(0, 3, 5, 1, 5, 0, 3)
+pcseg2 = pcseg.make_pcseg12(0, 1, 5, 3, 0, 3, 5)
+
+pcseg3 = pcseg.make_pcseg12(0, 3)
+
+t = transformations.find_otos(pcseg1, pcseg3)
+print(t)
