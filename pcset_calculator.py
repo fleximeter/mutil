@@ -24,7 +24,7 @@ def calculate():
     """
     user_input = input("...> ")
     while user_input not in ["quit", "q", "exit", "x"]:
-        load(user_input)
+        load(user_input, True)
         info()
         user_input = input("...> ")
 
@@ -44,14 +44,20 @@ def info():
             "\n{0: <20}{1}".format("Dsym:", sc.dsym))
 
 
-def load(command):
+def load(command, print_tn=False):
     """
     Loads the set class
     :param command: The set class prime form
+    :param print_tn: Whether or not to print the transformation that was entered
     """
     try:
-        pcs = {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)}
-        sc.pcset = pcs
+        if '-' in command:
+            sc.load_from_name(command)
+        else:
+            pcs = {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)}
+            sc.pcset = pcs
+            if print_tn:
+                print("You entered", transformations.find_utos(sc.pcset, pcs))
     except Exception:
         print("Please enter a valid pcset to load...")
 
