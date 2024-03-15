@@ -22,11 +22,12 @@ def calculate():
     """
     Enters continuous calculation mode
     """
-    user_input = input("...> ")
+    print("Continuous calculation mode (enter \'q\' to quit)...")
+    user_input = input("...> ").lower()
     while user_input not in ["quit", "q", "exit", "x"]:
-        load(user_input, True)
-        info()
-        user_input = input("...> ")
+        if load(user_input, True):
+            info()
+        user_input = input("...> ").lower()
 
 
 def info():
@@ -34,14 +35,14 @@ def info():
     Displays info about the set class
     """
     if sc.mod == 12:
-        print("{0: <20}{1}".format("Prime form name:", sc.name_prime),
-            "\n{0: <20}{1}".format("Forte name:", sc.name_forte),
-            "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
-            "\n{0: <20}{1}".format("Dsym:", sc.dsym))
+        print("{0: <17}{1}".format("Prime form name:", sc.name_prime),
+            "\n{0: <17}{1}".format("Forte name:", sc.name_forte),
+            "\n{0: <17}{1}".format("IC vector:", sc.ic_vector_str),
+            "\n{0: <17}{1}".format("Dsym:", sc.dsym))
     else:
-        print("{0: <20}{1}".format("Prime form name:", sc.name_prime),
-            "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
-            "\n{0: <20}{1}".format("Dsym:", sc.dsym))
+        print("{0: <17}{1}".format("Prime form name:", sc.name_prime),
+            "\n{0: <17}{1}".format("IC vector:", sc.ic_vector_str),
+            "\n{0: <17}{1}".format("Dsym:", sc.dsym))
 
 
 def load(command, print_tn=False):
@@ -57,9 +58,11 @@ def load(command, print_tn=False):
             pcs = {pitch.PitchClass(n, mod=sc.mod) for n in parser(command)}
             sc.pcset = pcs
             if print_tn:
-                print("You entered", transformations.find_utos(sc.pcset, pcs))
+                print("You entered", sorted(list(transformations.find_utos(sc.pcset, pcs))))
+        return True
     except Exception:
         print("Please enter a valid pcset to load...")
+        return False
 
 
 def mod(command):

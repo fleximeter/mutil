@@ -26,17 +26,17 @@ def info():
     """
     global pcseg_local, sc
     if sc.mod == 12:
-        print("{0: <20}{1}".format("Pcseg:", pcseg_local),
-            "\n{0: <20}{1}".format("Prime form name:", sc.name_prime),
-            "\n{0: <20}{1}".format("Forte name:", sc.name_forte),
-            "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
-            "\n{0: <20}{1}".format("Dsym:", sc.dsym))
+        print("{0: <17}{1}".format("Pcseg:", pcseg_local),
+            "\n{0: <17}{1}".format("Prime form name:", sc.name_prime),
+            "\n{0: <17}{1}".format("Forte name:", sc.name_forte),
+            "\n{0: <17}{1}".format("IC vector:", sc.ic_vector_str),
+            "\n{0: <17}{1}".format("Dsym:", sc.dsym))
     else:
         print(
-            "{0: <20}{1}".format("Pcseg:", pcseg_local),
-            "\n{0: <20}{1}".format("Prime form name:", sc.name_prime),
-            "\n{0: <20}{1}".format("IC vector:", sc.ic_vector_str),
-            "\n{0: <20}{1}".format("Dsym:", sc.dsym))
+            "{0: <17}{1}".format("Pcseg:", pcseg_local),
+            "\n{0: <17}{1}".format("Prime form name:", sc.name_prime),
+            "\n{0: <17}{1}".format("IC vector:", sc.ic_vector_str),
+            "\n{0: <17}{1}".format("Dsym:", sc.dsym))
 
 
 def load(command):

@@ -386,22 +386,12 @@ def get_otos12():
     for i in range(12):
         otos[f"T{i}"] = OTO(i, 0, 1)
         otos[f"T{i}R"] = OTO(i, 1, 1)
-        otos[f"T{i}M1"] = otos[f"T{i}"]
-        otos[f"T{i}RM1"] = otos[f"T{i}R"]
-        otos[f"T{i}M11"] = OTO(i, 0, 11)
-        otos[f"T{i}RM11"] = OTO(i, 1, 11)
-        otos[f"T{i}M5"] = OTO(i, 0, 5)
-        otos[f"T{i}RM5"] = OTO(i, 1, 5)
-        otos[f"T{i}M"] = otos[f"T{i}M5"]
-        otos[f"T{i}RM"] = otos[f"T{i}RM5"]
-        otos[f"T{i}M7"] = OTO(i, 0, 7)
-        otos[f"T{i}RM7"] = OTO(i, 1, 7)
-        otos[f"T{i}MI"] = otos[f"T{i}M7"]
-        otos[f"T{i}RMI"] = otos[f"T{i}RM7"]
-        otos[f"T{i}M11"] = OTO(i, 0, 11)
-        otos[f"T{i}RM11"] = OTO(i, 1, 11)
-        otos[f"T{i}I"] = otos[f"T{i}M11"]
-        otos[f"T{i}RI"] = otos[f"T{i}RM11"]
+        otos[f"T{i}M"] = OTO(i, 0, 5)
+        otos[f"T{i}RM"] = OTO(i, 1, 5)
+        otos[f"T{i}MI"] = OTO(i, 0, 7)
+        otos[f"T{i}RMI"] = OTO(i, 1, 7)
+        otos[f"T{i}I"] = OTO(i, 0, 11)
+        otos[f"T{i}RI"] = OTO(i, 1, 11)
     return otos
 
 
@@ -414,8 +404,6 @@ def get_otos24():
     for i in range(24):
         otos[f"T{i}"] = OTO(i, 0, 1)
         otos[f"T{i}R"] = OTO(i, 1, 1)
-        otos[f"T{i}M1"] = otos[f"T{i}"]
-        otos[f"T{i}RM1"] = otos[f"T{i}R"]
         otos[f"T{i}M5"] = OTO(i, 0, 5)
         otos[f"T{i}RM5"] = OTO(i, 1, 5)
         otos[f"T{i}M7"] = OTO(i, 0, 7)
@@ -428,10 +416,8 @@ def get_otos24():
         otos[f"T{i}RM17"] = OTO(i, 1, 17)
         otos[f"T{i}M19"] = OTO(i, 0, 19)
         otos[f"T{i}RM19"] = OTO(i, 1, 19)
-        otos[f"T{i}M23"] = OTO(i, 0, 23)
-        otos[f"T{i}RM23"] = OTO(i, 1, 23)
-        otos[f"T{i}I"] = otos[f"T{i}M23"]
-        otos[f"T{i}RI"] = otos[f"T{i}RM23"]
+        otos[f"T{i}I"] = OTO(i, 0, 23)
+        otos[f"T{i}RI"] = OTO(i, 1, 23)
     return otos
 
 
@@ -443,13 +429,9 @@ def get_utos12():
     utos = {}
     for i in range(12):
         utos[f"T{i}"] = UTO(i, 1)
-        utos[f"T{i}M1"] = utos[f"T{i}"]
-        utos[f"T{i}M5"] = UTO(i, 5)
-        utos[f"T{i}M"] = utos[f"T{i}M5"]
-        utos[f"T{i}M7"] = UTO(i, 7)
-        utos[f"T{i}MI"] = utos[f"T{i}M7"]
-        utos[f"T{i}M11"] = UTO(i, 11)
-        utos[f"T{i}I"] = utos[f"T{i}M11"]
+        utos[f"T{i}M"] = UTO(i, 5)
+        utos[f"T{i}MI"] = UTO(i, 7)
+        utos[f"T{i}I"] = UTO(i, 11)
     return utos
 
 
@@ -461,15 +443,13 @@ def get_utos24():
     utos = {}
     for i in range(24):
         utos[f"T{i}"] = UTO(i, 1)
-        utos[f"T{i}M1"] = utos[f"T{i}"]
         utos[f"T{i}M5"] = UTO(i, 5)
         utos[f"T{i}M7"] = UTO(i, 7)
         utos[f"T{i}M11"] = UTO(i, 11)
         utos[f"T{i}M13"] = UTO(i, 13)
         utos[f"T{i}M17"] = UTO(i, 17)
         utos[f"T{i}M19"] = UTO(i, 19)
-        utos[f"T{i}M23"] = UTO(i, 23)
-        utos[f"T{i}I"] = utos[f"T{i}M23"]
+        utos[f"T{i}I"] = UTO(i, 23)
     return utos
 
 
