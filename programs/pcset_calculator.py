@@ -11,11 +11,28 @@ import pctheory.transformations as transformations
 
 HEX_MAP = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15}
 
-VALID_COMMANDS = {"calculate", "c", "exit", "x", "info", "n", "load", "l", "mod", "quit", "q", "search", "h", "subsets", "s", "subsets prime", "sp"}
+VALID_COMMANDS = {"about", "a", "calculate", "c", "exit", "x", "info", "n", "load", "l", "mod", "quit", "q", "search", "h", "subsets", "s", "subsets prime", "sp"}
 NON_NUMERIC_TRANSFORMATIONS = {"I"}
 NUMERIC_TRANSFORMATIONS = {"T", "M"}
 VALID_TRANSFORMATIONS = NUMERIC_TRANSFORMATIONS.union(NON_NUMERIC_TRANSFORMATIONS)
 sc = pcset.SetClass(pc_mod=12)
+
+
+def about():
+    """
+    Displays info about the program
+    """
+    print(("pcset calculator copyright (c) 2024 by Jeffrey Martin. All rights reserved.\n"
+        "This program is free software: you can redistribute it and/or modify\n"
+        "it under the terms of the GNU General Public License as published by\n"
+        "the Free Software Foundation, either version 3 of the License, or\n"
+        "(at your option) any later version.\n\n"
+        "This program is distributed in the hope that it will be useful,\n"
+        "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+        "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\n"
+        "GNU General Public License for more details.\n\n"
+        "You should have received a copy of the GNU General Public License\n"
+        "along with this program. If not, see https://www.gnu.org/licenses/."))
 
 
 def calculate():
@@ -190,6 +207,8 @@ def process_command(command: str) -> None:
                         subsets_prime()
             else:
                 match command1:
+                    case "about" | "a":
+                        about()
                     case "calculate" | "c":
                         calculate()
                     case "info" | "n":
