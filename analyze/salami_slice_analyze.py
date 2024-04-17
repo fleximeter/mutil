@@ -4,7 +4,7 @@ Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains functions for analyzing salami slices (distinct vertical 
 simultaneities) of a score
-Copyright (c) 2022 by Jeff Martin.
+Copyright (c) 2022, 2024 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -560,8 +560,8 @@ def read_analysis_from_file(path):
         slices = []
         for dslice in item["slices"]:
             cslice = SalamiSlice()
-            cslice._cseg = dslice["cseg"]
-            cslice._chord_spacing_index = float(dslice["chord_spread"])
+            cslice._chord_spacing_contour = dslice["chord_spacing_contour"]
+            cslice._chord_spacing_index = float(dslice["chord_spacing_index"])
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
@@ -601,8 +601,8 @@ def read_analysis_from_file(path):
             slices.append(cslice)
         result = Results(slices, item["measure_num_first"], item["measure_num_last"], len(item["pitch_highest_voices"]))
         result._max_p_count = item["max_p_count"]
-        result._cseg_duration = {}
-        result._cseg_frequency = item["cseg_frequency"]
+        result._chord_spacing_contour_duration = {}
+        result._chord_spacing_contour_frequency = item["chord_spacing_contour_frequency"]
         result._duration = Decimal(item["duration"])
         result._ins_avg = item["ins_avg"]
         result._ins_max = item["ins_max"]
@@ -641,8 +641,8 @@ def read_analysis_from_file(path):
         result._pc_frequency = {}
         result._pitch_duration = {}
         result._pitch_frequency = {}
-        for key, val in item["cseg_duration"].items():
-            result.cseg_duration[key] = Decimal(val)
+        for key, val in item["chord_spacing_contour_duration"].items():
+            result.chord_spacing_contour_duration[key] = Decimal(val)
         for key, val in item["pc_duration"].items():
             result.pc_duration[int(key)] = Decimal(val)
         for v in range(len(item["pc_duration_voices"])):
@@ -688,8 +688,8 @@ def write_analysis_to_file(results, path):
     for i in range(len(results)):
         data.append({})
         data[i]["max_p_count"] = results[i].max_p_count
-        data[i]["cseg_duration"] = {}
-        data[i]["cseg_frequency"] = results[i].cseg_frequency
+        data[i]["chord_spacing_contour_duration"] = {}
+        data[i]["chord_spacing_contour_frequency"] = results[i].chord_spacing_contour_frequency
         data[i]["duration"] = str(results[i].duration)
         data[i]["ins_avg"] = results[i].ins_avg
         data[i]["ins_max"] = results[i].ins_max
@@ -735,8 +735,8 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_frequency"] = results[i].pitch_frequency
         data[i]["pitch_frequency_voices"] = results[i].pitch_frequency_voices
         data[i]["slices"] = []
-        for key, val in results[i].cseg_duration.items():
-            data[i]["cseg_duration"][key] = str(val)
+        for key, val in results[i].chord_spacing_contour_duration.items():
+            data[i]["chord_spacing_contour_duration"][key] = str(val)
         for key, val in results[i].pc_duration.items():
             data[i]["pc_duration"][key] = str(val)
         for v in range(len(results[i].pc_duration_voices)):
@@ -757,8 +757,8 @@ def write_analysis_to_file(results, path):
             data[i]["psc_duration"][key] = str(val)
         for rslice in results[i].slices:
             cslice = {}
-            cslice["cseg"] = rslice.cseg
-            cslice["chord_spread"] = rslice.chord_spacing_index
+            cslice["chord_spacing_contour"] = rslice.chord_spacing_contour
+            cslice["chord_spacing_index"] = rslice.chord_spacing_index
             cslice["core"] = int(rslice.core)
             cslice["derived_core"] = int(rslice.derived_core)
             cslice["derived_core_associations"] = rslice.derived_core_associations
@@ -996,8 +996,8 @@ def write_report(file, results):
         "pcset": [],
         "pset": [],
         "psc": [],
-        "cseg": [],
-        "psi": []
+        "chord_spacing_contour": [],
+        "chord_spacing_index": []
     }
     for i in range(results.max_p_count):
         report[f"pitch_{i + 1}"] = []
@@ -1030,8 +1030,8 @@ def write_report(file, results):
             report["pcset"].append(item.get_pcset_string())
             report["pset"].append(item.get_pset_string())
             report["psc"].append(item.get_ipseg_string())
-            report["cseg"].append(item.get_cseg_string())
-            report["psi"].append(item.chord_spacing_index)
+            report["chord_spacing_contour"].append(item.get_chord_spacing_contour_string())
+            report["chord_spacing_index"].append(item.chord_spacing_index)
             for i in range(results.max_p_count):
                 if i < len(item.pitchseg):
                     report[f"pitch_{i + 1}"].append(item.pnameseg[i])

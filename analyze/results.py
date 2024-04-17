@@ -3,7 +3,7 @@ File: results.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains the Results class for analysis results.
-Copyright (c) 2022 by Jeff Martin.
+Copyright (c) 2022, 2024 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ class Results:
         :param measure_num_last: The last measure number analyzed
         """
         self._max_p_count = 0  # The maximum number of pitches in a chord (may be greater than PS)
-        self._cseg_duration = None
-        self._cseg_frequency = None
+        self._chord_spacing_contour_duration = None
+        self._chord_spacing_contour_frequency = None
         self._duration = 0
         self._ins_avg = 0  # The INS average
         self._ins_max = 0
@@ -93,22 +93,22 @@ class Results:
         return self._max_p_count
 
     @property
-    def cseg_duration(self):
+    def chord_spacing_contour_duration(self):
         """
-        A dictionary in which the csegs that occur in the analyzed measures are the keys,
+        A dictionary in which the chord spacing contours that occur in the analyzed measures are the keys,
         and their cumulative durations in the analyzed measures (in seconds) are the values
         :return: A dictionary
         """
-        return self._cseg_duration
+        return self._chord_spacing_contour_duration
 
     @property
-    def cseg_frequency(self):
+    def chord_spacing_contour_frequency(self):
         """
-        A dictionary in which the csegs that occur in the analyzed measures are the keys,
+        A dictionary in which the chord spacing contours that occur in the analyzed measures are the keys,
         and the number of nonconsecutive occurrences in the analyzed measures are the values
         :return: A dictionary
         """
-        return self._cseg_frequency
+        return self._chord_spacing_contour_frequency
 
     @property
     def duration(self):
@@ -521,8 +521,8 @@ class Results:
                     break
                 i += 1
             
-            self._cseg_duration = {}  # The duration of each cseg
-            self._cseg_frequency = {}  # The number of occurrences of each cseg
+            self._chord_spacing_contour_duration = {}  # The duration of each cseg
+            self._chord_spacing_contour_frequency = {}  # The number of occurrences of each cseg
             self._pc_duration = {}  # The total number of seconds that this pitch-class is active
             self._pc_duration_voices = [{} for v in range(self._num_voices)]
             self._pc_frequency = {}  # The total number of distinct (nonadjacent) occurrences of this pitch-class
@@ -634,15 +634,15 @@ class Results:
 
             # Calculate cseg frequency
             for s in self._slices:
-                cseg = s.get_cseg_string()
+                cseg = s.get_chord_spacing_contour_string()
                 pset = s.get_pset_string()
                 psc = str(s.ipseg)
-                if cseg not in self._cseg_frequency:
-                    self._cseg_frequency[cseg] = 1
-                    self._cseg_duration[cseg] = s.duration
+                if cseg not in self._chord_spacing_contour_frequency:
+                    self._chord_spacing_contour_frequency[cseg] = 1
+                    self._chord_spacing_contour_duration[cseg] = s.duration
                 else:
-                    self._cseg_frequency[cseg] += 1
-                    self._cseg_duration[cseg] += s.duration
+                    self._chord_spacing_contour_frequency[cseg] += 1
+                    self._chord_spacing_contour_duration[cseg] += s.duration
                 if pset not in self._pset_frequency:
                     self._pset_frequency[pset] = 1
                     self._pset_duration[pset] = s.duration

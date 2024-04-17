@@ -3,7 +3,7 @@ File: carter.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains functionality for analyzing register for Carter's fifth string quartet.
-Copyright (c) 2021 by Jeff Martin.
+Copyright (c) 2024 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ def c_analyze_with_sections():
 
     # Record starting time
     start = time.time()
-    use_cache = True
+    use_cache = False
 
     # Analyze
     print("Analyzing entire piece...")
@@ -107,25 +107,25 @@ def c_analyze_with_sections():
     salami_slice_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
     salami_slice_analyze.write_report(output, results[0])
-    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\csegs.xlsx"), ["Cseg", "Frequency", "Duration"],
-                               [results[0].cseg_frequency, results[0].cseg_duration])
-    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\psets.xlsx"), ["Pset", "Frequency", "Duration"],
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\chord_spacing_contours.xlsx"), ["chord_spacing_contour", "frequency", "duration"],
+                               [results[0].chord_spacing_contour_frequency, results[0].chord_spacing_contour_duration])
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\psets.xlsx"), ["pset", "frequency", "duration"],
                                [results[0].pset_frequency, results[0].pset_duration])
-    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\pscs.xlsx"), ["PSC", "Frequency", "Duration"],
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\pscs.xlsx"), ["psc", "frequency", "duration"],
                                [results[0].psc_frequency, results[0].psc_duration])
-    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\pcscs.xlsx"), ["SC", "Frequency", "Duration"],
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\pcscs.xlsx"), ["sc", "frequency", "duration"],
                                [results[0].pcsc_frequency, results[0].pcsc_duration])
     for i in range(1, len(output_global) + 1):
         salami_slice_analyze.write_general_report(f"Section {i} global", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)
         salami_slice_analyze.write_report(output_global[i - 1], results[i])
-        salami_slice_analyze.write_statistics(os.path.join(path,f"register_analysis_files\\csegs_{i}.xlsx"), ["Cseg", "Frequency", "Duration"],
-                                   [results[i].cseg_frequency, results[i].cseg_duration])
-        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\psets_{i}.xlsx"), ["Pset", "Frequency", "Duration"],
+        salami_slice_analyze.write_statistics(os.path.join(path,f"register_analysis_files\\chord_spacing_contours_{i}.xlsx"), ["chord_spacing_contour", "frequency", "duration"],
+                                   [results[i].chord_spacing_contour_frequency, results[i].chord_spacing_contour_duration])
+        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\psets_{i}.xlsx"), ["pset", "frequency", "duration"],
                                    [results[i].pset_frequency, results[i].pset_duration])
-        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\pscs_{i}.xlsx"), ["PSC", "Frequency", "Duration"],
+        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\pscs_{i}.xlsx"), ["psc", "frequency", "duration"],
                                    [results[i].psc_frequency, results[i].psc_duration])
-        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\pcscs_{i}.xlsx"), ["SC", "Frequency", "Duration"],
+        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\pcscs_{i}.xlsx"), ["sc", "frequency", "duration"],
                                    [results[i].pcsc_frequency, results[i].pcsc_duration])
 
     for i in range(13, len(output_local) + 13):
@@ -182,12 +182,12 @@ def c_analyze_reduction():
     salami_slice_analyze.write_general_report("Section 12", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
     salami_slice_analyze.write_report(output, results[0])
-    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\reduction_section_12\\csegs.xlsx"),
-                               ["Cseg", "Frequency", "Duration"], [results[0].cseg_frequency, results[0].cseg_duration])
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\reduction_section_12\\chord_spacing_contours.xlsx"),
+                               ["chord_spacing_contour", "frequency", "duration"], [results[0].chord_spacing_contour_frequency, results[0].chord_spacing_contour_duration])
     salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\reduction_section_12\\psets.xlsx"),
-                               ["Pset", "Frequency", "Duration"], [results[0].pset_frequency, results[0].pset_duration])
+                               ["pset", "frequency", "duration"], [results[0].pset_frequency, results[0].pset_duration])
     salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\reduction_section_12\\pscs.xlsx"),
-                               ["PSC", "Frequency", "Duration"], [results[0].psc_frequency, results[0].psc_duration])
+                               ["psc", "frequency", "duration"], [results[0].psc_frequency, results[0].psc_duration])
 
     # Print elapsed time
     finish = time.time() - start

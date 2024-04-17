@@ -3,7 +3,7 @@ File: salami_slice.py
 Author: Jeff Martin
 Email: jeffreymartin@outlook.com
 This file contains the SalamiSlice class for salami slicing with music21.
-Copyright (c) 2022 by Jeff Martin.
+Copyright (c) 2022, 2024 by Jeff Martin.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,26 +21,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from pctheory import cseg, pitch
 from decimal import Decimal
-import numpy
+import numpy as np
 
 
-def sort_pnameseg(pnameseg):
+def sort_pitch_name_list(pitch_name_list):
     """
     Sorts a pnameseg
     :param pnameseg: A pnameseg
     :return: None
     """
     lmap = {'C': 1, 'D': 4, 'E': 7, 'F': 10, 'G': 13, 'A': 16, 'B': 19}
-    pnameseg2 = []
-    for p in pnameseg:
+    pitch_name_list2 = []
+    for p in pitch_name_list:
         p1 = int(p[-1]) * 21 + lmap[p[0]]
         if len(p) > 2:
             if p[1] == '#':
                 p1 += 1
             elif p[1] == '-':
                 p1 -= 1
-        pnameseg2.append((p, p1))
-    return [p[0] for p in sorted(pnameseg2, key=lambda x: x[1])]
+        pitch_name_list2.append((p, p1))
+    return [p[0] for p in sorted(pitch_name_list2, key=lambda x: x[1])]
 
 
 class SalamiSlice:
@@ -53,8 +53,8 @@ class SalamiSlice:
         :param aslice: An existing slice if using copy constructor functionality
         """
         self._core = False                      # Whether or not the chord is a core harmony
-        self._cseg = None                       # The contour of the pset
-        self._chord_spacing_index = 0            # The spread measure of the chord
+        self._chord_spacing_contour = None      # The contour of the pset
+        self._chord_spacing_index = 0           # The spread measure of the chord
         self._derived_core = False              # Whether or not the chord is a derived core harmony
         self._derived_core_associations = None  # Derived core associations, if any
         self._duration = 0           # The duration of the slice in seconds
@@ -94,17 +94,17 @@ class SalamiSlice:
         self._upper_bound = None  # The upper bound of the slice.
 
     @property
-    def cseg(self):
+    def chord_spacing_contour(self):
         """
         The contour of the pseg
         :return: The contour
         """
-        return self._cseg
+        return self._chord_spacing_contour
 
     @property
     def chord_spacing_index(self):
         """
-        The pset spacing index of the VSlice
+        The pset spacing index of the SalamiSlice
         :return: The pset spacing index
         """
         return self._chord_spacing_index
@@ -218,7 +218,7 @@ class SalamiSlice:
     @property
     def p_cardinality(self):
         """
-        The pitch cardinality of the VSlice (excludes duplicates)
+        The pitch cardinality of the SalamiSlice (excludes duplicates)
         :return: The pitch cardinality
         """
         return self._p_cardinality
@@ -226,7 +226,7 @@ class SalamiSlice:
     @property
     def p_count(self):
         """
-        The pitch count of the VSlice (contains duplicates)
+        The pitch count of the SalamiSlice (contains duplicates)
         :return: The pitch count
         """
         return self._p_count
@@ -234,7 +234,7 @@ class SalamiSlice:
     @property
     def pc_cardinality(self):
         """
-        The pitch-class cardinality of the VSlice (excludes duplicates)
+        The pitch-class cardinality of the SalamiSlice (excludes duplicates)
         :return:
         """
         return self._pc_cardinality
@@ -250,7 +250,7 @@ class SalamiSlice:
     @property
     def pcseg(self):
         """
-        The pcseg of the VSlice
+        The pcseg of the SalamiSlice
         :return: The pcseg
         """
         return self._pcseg
@@ -258,7 +258,7 @@ class SalamiSlice:
     @property
     def pcset(self):
         """
-        The pcset of the VSlice
+        The pcset of the SalamiSlice
         :return: The pcset
         """
         return self._pcset
@@ -266,7 +266,7 @@ class SalamiSlice:
     @property
     def pcsegs(self):
         """
-        The pcseg of the VSlice
+        The pcseg of the SalamiSlice
         :return: The pcseg
         """
         return self._pcsegs
@@ -274,7 +274,7 @@ class SalamiSlice:
     @property
     def pcsets(self):
         """
-        The pcset of the VSlice
+        The pcset of the SalamiSlice
         :return: The pcset
         """
         return self._pcsets
@@ -282,7 +282,7 @@ class SalamiSlice:
     @property
     def pitchseg(self):
         """
-        The pitchseg of the VSlice
+        The pitchseg of the SalamiSlice
         :return: The pitchseg
         """
         return self._pitchseg
@@ -298,7 +298,7 @@ class SalamiSlice:
     @property
     def pitchsegs(self):
         """
-        The pitchseg of the VSlice
+        The pitchseg of the SalamiSlice
         :return: The pitchseg
         """
         return self._pitchsegs
@@ -314,7 +314,7 @@ class SalamiSlice:
     @property
     def pseg(self):
         """
-        The pseg of the VSlice (contains duplicates)
+        The pseg of the SalamiSlice (contains duplicates)
         :return: The pseg
         """
         return self._pseg
@@ -322,7 +322,7 @@ class SalamiSlice:
     @property
     def pset(self):
         """
-        The pset of the VSlice
+        The pset of the SalamiSlice
         :return: The pset
         """
         return self._pset
@@ -330,7 +330,7 @@ class SalamiSlice:
     @property
     def psegs(self):
         """
-        The pseg of the VSlice (contains duplicates)
+        The pseg of the SalamiSlice (contains duplicates)
         :return: The pseg
         """
         return self._psegs
@@ -338,7 +338,7 @@ class SalamiSlice:
     @property
     def psets(self):
         """
-        The pset of the VSlice
+        The pset of the SalamiSlice
         :return: The pset
         """
         return self._psets
@@ -363,7 +363,7 @@ class SalamiSlice:
     @property
     def sc_name(self):
         """
-        The set-class name of the VSlice
+        The set-class name of the SalamiSlice
         :return: The set-class name
         """
         return self._sc_name
@@ -371,7 +371,7 @@ class SalamiSlice:
     @property
     def sc_name_carter(self):
         """
-        The Carter name of the VSlice
+        The Carter name of the SalamiSlice
         :return: The Carter name
         """
         return self._sc_name_carter
@@ -452,18 +452,18 @@ class SalamiSlice:
 
     def copy(self):
         """
-        Copies the VSlice
-        :return: A copy of the VSlice
+        Copies the SalamiSlice
+        :return: A copy of the SalamiSlice
         """
         v = SalamiSlice(self._tempo, self._quarter_duration, self._measure, self._num_voices)
 
-    def get_cseg_string(self):
+    def get_chord_spacing_contour_string(self):
         """
-        Gets the cseg as a string
-        :return: The cseg as a string
+        Gets the chord spacing contour as a string
+        :return: The chord spacing contour as a string
         """
         cseg = "<"
-        for cp in self._cseg:
+        for cp in self._chord_spacing_contour:
             cseg += str(cp) + ", "
         if cseg[-1] == " ":
             cseg = cseg[:-2]
@@ -538,17 +538,17 @@ class SalamiSlice:
                 self._pcsegs[v].append(pitch.PitchClass(p.pc))
         self._pseg = list(self._pset)
         self._pseg.sort()
-        self._pnameseg = sort_pnameseg(self._pnameseg)
+        self._pnameseg = sort_pitch_name_list(self._pnameseg)
         for v in range(self._num_voices):
             self._pitchsegs[v].sort()
-            self._pnamesegs[v] = sort_pnameseg(self._pnamesegs[v])
+            self._pnamesegs[v] = sort_pitch_name_list(self._pnamesegs[v])
         for p in self._pseg:
             self._pcseg.append(pitch.PitchClass(p.pc))
         if len(self._ipseg) > 0:
             self._ipseg.clear()
         for i in range(1, len(self._pseg)):
             self._ipseg.append(self._pseg[i].p - self._pseg[i - 1].p)
-        self._cseg = cseg.simplify([ip for ip in self._ipseg])
+        self._chord_spacing_contour = cseg.simplify([ip for ip in self._ipseg])
 
         # Calculate values
         self._p_cardinality = len(self._pset)
@@ -557,14 +557,7 @@ class SalamiSlice:
                                                                  Decimal(self._quarter_duration.denominator))
 
         # Calculate pset spacing index
-        if len(self._pseg) < 3:
-            self._chord_spacing_index = numpy.nan
-        else:
-            avg = 0
-            for p in self._pset:
-                avg += p.p
-            avg /= self._p_cardinality
-            self._chord_spacing_index = (avg - self._pseg[0].p) / (self._pseg[-1].p - self._pseg[0].p)
+        self._chord_spacing_index = calculate_chord_spacing_index(self._pset)
 
         # Calculate set theory info
         sc.pcset = self._pcset
@@ -606,3 +599,20 @@ class SalamiSlice:
                 self._lns = self._pseg[0].p - self._lower_bound
                 self._uns = self._upper_bound - self._pseg[-1].p
                 self._mediant = (self._lns - self._uns) / 2
+
+
+def calculate_chord_spacing_index(pset):
+    """
+    Calculates the chord spacing index (CSI) of a pset
+    :param pset: The pset
+    :return: The CSI
+    """
+    if len(pset) < 3:
+        return np.nan
+    else:
+        avg = 0
+        pseg = sorted(list(pset))
+        for p in pseg:
+            avg += p.p
+        avg /= len(pset)
+        return (avg - pseg[0].p) / (pseg[-1].p - pseg[0].p)
