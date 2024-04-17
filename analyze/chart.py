@@ -49,7 +49,7 @@ def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", siz
             ps_s.append(s.p_cardinality)
         else:
             ps_s.append(0)
-    fig = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    fig = matplotlib.pyplot.figure(figsize=size, dpi=600)
     matplotlib.pyplot.rc("font", size=8)
     matplotlib.pyplot.rc("axes", titlesize=8)
     matplotlib.pyplot.rc("axes", labelsize=8)
@@ -65,7 +65,7 @@ def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", siz
         matplotlib.pyplot.xlabel("Time (minutes)")
     else:
         matplotlib.pyplot.xlabel("Measure No.")
-    matplotlib.pyplot.ylabel("Pset Cardinality")
+    matplotlib.pyplot.ylabel("Chord Cardinality")
     matplotlib.pyplot.tight_layout()
     if path is None:
         matplotlib.pyplot.show()
@@ -74,9 +74,9 @@ def chart_cardinality(results, x_axis_time=False, title="Cardinality Chart", siz
         matplotlib.pyplot.close()
 
 
-def chart_pset_spacing_index(results, x_axis_time=False, title="Pset Spacing Index Chart", size=(8, 6), path=None):
+def chart_chord_spacing_index(results, x_axis_time=False, title="Chord Spacing Index Chart", size=(8, 6), path=None):
     """
-    Makes a step plot of pset spacing index
+    Makes a step plot of chord spacing index
     :param results: A Results object
     :param x_axis_time: Whether or not to use time as the x axis (default is measure number)
     :param title: The title of the plot
@@ -97,10 +97,10 @@ def chart_pset_spacing_index(results, x_axis_time=False, title="Pset Spacing Ind
             position = s.measure + float(s.start_position / s.time_signature.barDuration.quarterLength)
             x.append(position)
         if s.p_cardinality > 0:
-            ps_s.append(s.pset_spacing_index)
+            ps_s.append(s.chord_spacing_index)
         else:
             ps_s.append(numpy.nan)
-    fig = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    fig = matplotlib.pyplot.figure(figsize=size, dpi=600)
     matplotlib.pyplot.rc("font", size=8)
     matplotlib.pyplot.rc("axes", titlesize=8)
     matplotlib.pyplot.rc("axes", labelsize=8)
@@ -116,7 +116,7 @@ def chart_pset_spacing_index(results, x_axis_time=False, title="Pset Spacing Ind
         matplotlib.pyplot.xlabel("Time (minutes)")
     else:
         matplotlib.pyplot.xlabel("Measure No.")
-    matplotlib.pyplot.ylabel("Pset Spacing Index")
+    matplotlib.pyplot.ylabel("Chord Spacing Index")
     matplotlib.pyplot.tight_layout()
     if path is None:
         matplotlib.pyplot.show()
@@ -177,7 +177,7 @@ def chart_pitch_onset(results, x_axis_time=False, title="Pitch Onset Graph", siz
                         pitches[i].append(numpy.nan)
                 else:
                     pitches[i].append(numpy.nan)
-    draw = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    draw = matplotlib.pyplot.figure(figsize=size, dpi=600)
     matplotlib.pyplot.rc("font", size=8)
     matplotlib.pyplot.rc("axes", titlesize=8)
     matplotlib.pyplot.rc("axes", labelsize=8)
@@ -235,7 +235,7 @@ def chart_pitch_duration(results, title="Pitch Duration Graph", size=(8, 6), pat
                 y.append(float(results.pitch_duration_voices[voice][p]))
             else:
                 y.append(0)
-    draw = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    draw = matplotlib.pyplot.figure(figsize=size, dpi=600)
     axes = draw.add_subplot(111)
     axes.bar(x, y)
     xtick_tick = []
@@ -281,7 +281,7 @@ def chart_pc_duration(results, title="Pitch-Class Duration Graph", size=(8, 6), 
                 y.append(float(results.pc_duration_voices[voice][pc]))
             else:
                 y.append(0)
-    draw = matplotlib.pyplot.figure(figsize=size, dpi=300)
+    draw = matplotlib.pyplot.figure(figsize=size, dpi=600)
     axes = draw.add_subplot(111)
     axes.bar(x, y)
     xtick_tick = [i for i in range(12)]
@@ -352,7 +352,7 @@ def chart_spaces(results, size=(8, 6), path=None):
     labels = ["NS", "LNS", "INS", "PS", "UNS"]
     colors = ["#000000", "#333333", "#555555", "#DDDDDD", "#333333"]
     fig, ax = matplotlib.pyplot.subplots()
-    matplotlib.pyplot.figure(figsize=size, dpi=300)
+    matplotlib.pyplot.figure(figsize=size, dpi=600)
     ax.stackplot(x, ns, lns, ins, ps, uns, labels=labels, colors=colors)
     ax.legend(loc="upper left")
     if path is None:

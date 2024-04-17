@@ -19,20 +19,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import analyze.salami_slice_analyze as salami_slice_analyze
+import salami_slice_analyze
 import chart
 import time
 from fractions import Fraction
 from decimal import Decimal
+import os
 
 
 def c_analyze():
     """
     Analyzes Carter's fifth string quartet without analyzing each section separately
     """
-    xml = r"D:\Carter Paper\Flows from String Quartet No. 5\Carter " \
-          r"String Quartet 5 - Full score - 01 Introduction.xml "
-    output = r"D:\Carter Paper\RegisterAnalyzer\results_carter.csv"
+    xml = r"D:\carter_paper\xml\Carter String Quartet 5 - Full score - 01 Introduction.xml"
+    output = r"D:\carter_paper\register_analysis_files\results_carter.xlsx"
     start = time.time()
     salami_slice_analyze.analyze(xml, output)
     finish = time.time() - start
@@ -64,28 +64,30 @@ def c_analyze_with_sections():
     voices = ["Violin 1", "Violin 2", "Viola", "Cello"]
 
     # Path names
-    path = "D:\\Carter Paper\\"
-    path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
-    # path = path_laptop
-    xml = f"{path}Flows from String Quartet No. 5\\Carter String Quartet 5 - Full score - 01 Introduction.xml"
-    output = f"{path}Register Analysis Files\\entire_piece.csv"
-    output_general = f"{path}Register Analysis Files\\statistics.csv"
-    results_path = f"{path}Register Analysis Files\\data.json"
+    path = "D:\\carter_paper\\"
+    xml = os.path.join(path, "xml\\Carter String Quartet 5 - Full score - 01 Introduction.xml")
+    output = os.path.join(path, "register_analysis_files\\entire_piece.xlsx")
+    output_general = os.path.join(path, "register_analysis_files\\statistics.xlsx")
+    results_path = os.path.join(path, "register_analysis_files\\data.json")
+
+    # the global output data
     output_global = []
     for i in range(12):
         cname = section_names[i].split(" ")
-        c_path = f"{path}Register Analysis Files\\{i + 1}_"
+        c_path = os.path.join(path, f"register_analysis_files\\{i + 1}_")
         for j in range(len(cname) - 1):
             c_path += f"{cname[j]}_"
-        c_path += f"{cname[len(cname) - 1]}_broad.csv"
+        c_path += f"{cname[len(cname) - 1]}_broad.xlsx"
         output_global.append(c_path)
+
+    # the local output data
     output_local = []
     for i in range(12):
         cname = section_names[i].split(" ")
-        c_path = f"{path}Register Analysis Files\\{i + 1}_"
+        c_path = os.path.join(path, f"register_analysis_files\\{i + 1}_")
         for j in range(len(cname) - 1):
             c_path += f"{cname[j]}_"
-        c_path += f"{cname[len(cname) - 1]}_local.csv"
+        c_path += f"{cname[len(cname) - 1]}_local.xlsx"
         output_local.append(c_path)
 
     # Record starting time
@@ -105,25 +107,25 @@ def c_analyze_with_sections():
     salami_slice_analyze.write_general_report("Full piece", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
     salami_slice_analyze.write_report(output, results[0])
-    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs.csv", "Cseg,Frequency,Duration\n",
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\csegs.xlsx"), ["Cseg", "Frequency", "Duration"],
                                [results[0].cseg_frequency, results[0].cseg_duration])
-    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets.csv", "Pset,Frequency,Duration\n",
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\psets.xlsx"), ["Pset", "Frequency", "Duration"],
                                [results[0].pset_frequency, results[0].pset_duration])
-    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs.csv", "PSC,Frequency,Duration\n",
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\pscs.xlsx"), ["PSC", "Frequency", "Duration"],
                                [results[0].psc_frequency, results[0].psc_duration])
-    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs.csv", "SC,Frequency,Duration\n",
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\pcscs.xlsx"), ["SC", "Frequency", "Duration"],
                                [results[0].pcsc_frequency, results[0].pcsc_duration])
     for i in range(1, len(output_global) + 1):
         salami_slice_analyze.write_general_report(f"Section {i} global", output_general, "a", results[i],
                                        results[0].lower_bound, results[0].upper_bound)
         salami_slice_analyze.write_report(output_global[i - 1], results[i])
-        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\csegs_{i}.csv", "Cseg,Frequency,Duration\n",
+        salami_slice_analyze.write_statistics(os.path.join(path,f"register_analysis_files\\csegs_{i}.xlsx"), ["Cseg", "Frequency", "Duration"],
                                    [results[i].cseg_frequency, results[i].cseg_duration])
-        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\psets_{i}.csv", "Pset,Frequency,Duration\n",
+        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\psets_{i}.xlsx"), ["Pset", "Frequency", "Duration"],
                                    [results[i].pset_frequency, results[i].pset_duration])
-        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pscs_{i}.csv", "PSC,Frequency,Duration\n",
+        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\pscs_{i}.xlsx"), ["PSC", "Frequency", "Duration"],
                                    [results[i].psc_frequency, results[i].psc_duration])
-        salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\pcscs_{i}.csv", "SC,Frequency,Duration\n",
+        salami_slice_analyze.write_statistics(os.path.join(path, f"register_analysis_files\\pcscs_{i}.xlsx"), ["SC", "Frequency", "Duration"],
                                    [results[i].pcsc_frequency, results[i].pcsc_duration])
 
     for i in range(13, len(output_local) + 13):
@@ -157,13 +159,11 @@ def c_analyze_reduction():
     Analyzes a separate reduction for Section 12
     :return: None
     """
-    path = "D:\\Carter Paper\\"
-    path_laptop = "C:\\Users\\Jeff Martin\\Documents\\Carter Paper\\"
-    # path = path_laptop
-    xml = f"{path}Flows from String Quartet No. 5\\Section 12 Reduction - Full score - 01 12. Capriccioso.xml"
-    output = f"{path}Register Analysis Files\\Reduction Section 12\\sec12_reduction.csv"
-    output_general = f"{path}Register Analysis Files\\Reduction Section 12\\sec12_reduction_statistics.csv"
-    results_path = f"{path}Register Analysis Files\\data12.json"
+    path = "D:\\carter_paper\\"
+    xml = os.path.join(path, "xml\\Section 12 Reduction - Full score - 01 12. Capriccioso.xml")
+    output = os.path.join(path, "register_analysis_files\\reduction_section_12\\sec12_reduction.xlsx")
+    output_general = os.path.join(path, "register_analysis_files\\reduction_section_12\\sec12_reduction_statistics.xlsx")
+    results_path = os.path.join(path, "register_analysis_files\\data12.json")
 
     # Record starting time
     start = time.time()
@@ -182,12 +182,12 @@ def c_analyze_reduction():
     salami_slice_analyze.write_general_report("Section 12", output_general, "w", results[0], results[0].lower_bound,
                                    results[0].upper_bound)
     salami_slice_analyze.write_report(output, results[0])
-    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\csegs.csv",
-                               "Cseg,Frequency,Duration\n", [results[0].cseg_frequency, results[0].cseg_duration])
-    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\psets.csv",
-                               "Pset,Frequency,Duration\n", [results[0].pset_frequency, results[0].pset_duration])
-    salami_slice_analyze.write_statistics(f"{path}\\Register Analysis Files\\Reduction Section 12\\pscs.csv",
-                               "PSC,Frequency,Duration\n", [results[0].psc_frequency, results[0].psc_duration])
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\reduction_section_12\\csegs.xlsx"),
+                               ["Cseg", "Frequency", "Duration"], [results[0].cseg_frequency, results[0].cseg_duration])
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\reduction_section_12\\psets.xlsx"),
+                               ["Pset", "Frequency", "Duration"], [results[0].pset_frequency, results[0].pset_duration])
+    salami_slice_analyze.write_statistics(os.path.join(path, "register_analysis_files\\reduction_section_12\\pscs.xlsx"),
+                               ["PSC", "Frequency", "Duration"], [results[0].psc_frequency, results[0].psc_duration])
 
     # Print elapsed time
     finish = time.time() - start
@@ -202,38 +202,38 @@ def make_charts_general(results, path, voices):
     :param voices: A list of voices
     :return:
     """
-    chart.chart_cardinality(results, False, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
-                            size=(6.5, 3), path=f"{path}Register Analysis Files\\Graphs\\card_m")
-    chart.chart_cardinality(results, True, "Pset Cardinality Graph for Elliott Carter’s Fifth String Quartet",
-                            size=(6.5, 3), path=f"{path}Register Analysis Files\\Graphs\\card_t")
+    chart.chart_cardinality(results, False, "Chord Cardinality Graph for Elliott Carter’s Fifth String Quartet",
+                            size=(6.5, 3), path=os.path.join(path, "register_analysis_files\\graphs\\card_m"))
+    chart.chart_cardinality(results, True, "Chord Cardinality Graph for Elliott Carter’s Fifth String Quartet",
+                            size=(6.5, 3), path=os.path.join(path, "register_analysis_files\\graphs\\card_t"))
     chart.chart_pitch_onset(results, False, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (6.5, 3),
-                            f"{path}Register Analysis Files\\Graphs\\onset_measure")
-    chart.chart_pset_spacing_index(results, False, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
-                                   (6.5, 3), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_m")
-    chart.chart_pset_spacing_index(results, True, "Pset Spacing Indices in Elliott Carter's Fifth String Quartet",
-                                   (6.5, 3), f"{path}Register Analysis Files\\Graphs\\pset_spacing_index_t")
+                            os.path.join(path, "register_analysis_files\\graphs\\onset_measure"))
+    chart.chart_chord_spacing_index(results, False, "Chord Spacing Indices in Elliott Carter's Fifth String Quartet",
+                                   (6.5, 3), os.path.join(path, "register_analysis_files\\graphs\\chord_spacing_index_m"))
+    chart.chart_chord_spacing_index(results, True, "Chord Spacing Indices in Elliott Carter's Fifth String Quartet",
+                                   (6.5, 3), os.path.join(path, "register_analysis_files\\graphs\\chord_spacing_index_t"))
     for i in range(len(voices)):
         chart.chart_pitch_onset(results, False, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
                                                    f"({voices[i]})", (6.5, 3),
-                                f"{path}Register Analysis Files\\Graphs\\onset_measure_{voices[i]}", i)
+                                os.path.join(path, f"register_analysis_files\\graphs\\onset_measure_{voices[i]}"), i)
     chart.chart_pitch_onset(results, True, "Pitch Onsets in Elliott Carter’s Fifth String Quartet", (6.5, 3),
-                            f"{path}Register Analysis Files\\Graphs\\onset_time")
+                            os.path.join(path, "register_analysis_files\\graphs\\onset_time"))
     for i in range(len(voices)):
         chart.chart_pitch_onset(results, True, f"Pitch Onsets in Elliott Carter’s Fifth String Quartet "
                                                   f"({voices[i]})", (6.5, 3),
-                                f"{path}Register Analysis Files\\Graphs\\onset_time_{voices[i]}", i)
+                                os.path.join(path, f"register_analysis_files\\graphs\\onset_time_{voices[i]}"), i)
     chart.chart_pitch_duration(results, "Pitch Duration in Elliott Carter’s Fifth String Quartet", (6.5, 3),
-                               f"{path}Register Analysis Files\\Graphs\\pitch_duration")
+                               os.path.join(path, "register_analysis_files\\graphs\\pitch_duration"))
     for i in range(len(voices)):
         chart.chart_pitch_duration(results, f"Pitch Duration in Elliott Carter’s Fifth String Quartet "
                                                f"({voices[i]})", (6.5, 3),
-                                   f"{path}Register Analysis Files\\Graphs\\pitch_duration_{voices[i]}", i)
+                                   os.path.join(path, f"register_analysis_files\\graphs\\pitch_duration_{voices[i]}"), i)
     chart.chart_pc_duration(results, "Pitch-Class Duration in Elliott Carter’s Fifth String Quartet", (3, 3),
-                            f"{path}Register Analysis Files\\Graphs\\pc_duration")
+                            os.path.join(path, "register_analysis_files\\graphs\\pc_duration"))
     for i in range(len(voices)):
         chart.chart_pc_duration(results, f"Pitch-Class Duration in Elliott Carter’s Fifth String Quartet "
                                             f"({voices[i]})", (3, 3),
-                                f"{path}Register Analysis Files\\Graphs\\pc_duration_{voices[i]}", i)
+                                os.path.join(path, f"register_analysis_files\\graphs\\pc_duration_{voices[i]}"), i)
 
 
 def make_charts_sections(results, i, path, voices, section_names):
@@ -248,14 +248,14 @@ def make_charts_sections(results, i, path, voices, section_names):
     """
     # Create file names
     cname = section_names[i - 1].split(" ")
-    cm_path = f"{path}Register Analysis Files\\Graphs\\card_m_{i}_"
-    ct_path = f"{path}Register Analysis Files\\Graphs\\card_t_{i}_"
-    psim_path = f"{path}Register Analysis Files\\Graphs\\psi_m_{i}_"
-    psit_path = f"{path}Register Analysis Files\\Graphs\\psi_t_{i}_"
-    om_path = f"{path}Register Analysis Files\\Graphs\\onset_m_{i}_"
-    ot_path = f"{path}Register Analysis Files\\Graphs\\onset_t_{i}_"
-    dp_path = f"{path}Register Analysis Files\\Graphs\\dur_pitch_{i}_"
-    dpc_path = f"{path}Register Analysis Files\\Graphs\\dur_pc_{i}_"
+    cm_path = os.path.join(path, f"register_analysis_files\\graphs\\card_m_{i}_")
+    ct_path = os.path.join(path, f"register_analysis_files\\graphs\\card_t_{i}_")
+    csim_path = os.path.join(path, f"register_analysis_files\\graphs\\csi_m_{i}_")
+    csit_path = os.path.join(path, f"register_analysis_files\\graphs\\csi_t_{i}_")
+    om_path = os.path.join(path, f"register_analysis_files\\graphs\\onset_m_{i}_")
+    ot_path = os.path.join(path, f"register_analysis_files\\graphs\\onset_t_{i}_")
+    dp_path = os.path.join(path, f"register_analysis_files\\graphs\\dur_pitch_{i}_")
+    dpc_path = os.path.join(path, f"register_analysis_files\\graphs\\dur_pc_{i}_")
     for j in range(len(cname) - 1):
         cm_path += f"{cname[j]}_"
         ct_path += f"{cname[j]}_"
@@ -271,14 +271,14 @@ def make_charts_sections(results, i, path, voices, section_names):
     dpc_path += cname[len(cname) - 1]
 
     # Create charts
-    chart.chart_cardinality(results[i], False, f"Pset Cardinality Graph for Section {i} – {section_names[i - 1]}",
+    chart.chart_cardinality(results[i], False, f"Chord Cardinality Graph for Section {i} – {section_names[i - 1]}",
                             path=cm_path)
-    chart.chart_cardinality(results[i], True, f"Pset Cardinality Graph for Section {i} – {section_names[i - 1]}",
+    chart.chart_cardinality(results[i], True, f"Chord Cardinality Graph for Section {i} – {section_names[i - 1]}",
                             path=ct_path)
-    chart.chart_pset_spacing_index(results[i], False, f"Pset Spacing Indices in Section {i} – {section_names[i - 1]}",
-                                   path=psim_path)
-    chart.chart_pset_spacing_index(results[i], True, f"Pset Spacing Indices in Section {i} – {section_names[i - 1]}",
-                                   path=psit_path)
+    chart.chart_chord_spacing_index(results[i], False, f"Chord Spacing Indices in Section {i} – {section_names[i - 1]}",
+                                   path=csim_path)
+    chart.chart_chord_spacing_index(results[i], True, f"Chord Spacing Indices in Section {i} – {section_names[i - 1]}",
+                                   path=csit_path)
     chart.chart_pitch_onset(results[i], False, f"Pitch Onsets in Section {i} – {section_names[i - 1]}",
                             path=om_path)
     for j in range(len(voices)):
@@ -326,9 +326,8 @@ def metric_modulation():
 
 
 if __name__ == "__main__":
-    print("################### Vertical Analyzer ####################\n" + \
-          "Copyright (c) 2022 by Jeffrey Martin. All rights reserved.\nhttps://jeffreymartincomposer.com\n")
-    # c_analyze()
+    print("################### Salami Slice Analyzer ####################\n" + \
+          "Copyright (c) 2024 by Jeffrey Martin. All rights reserved.\nhttps://www.jeffreymartincomposer.com\n")
     c_analyze_with_sections()
     # c_analyze_reduction()
     # metric_modulation()

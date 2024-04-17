@@ -561,7 +561,7 @@ def read_analysis_from_file(path):
         for dslice in item["slices"]:
             cslice = SalamiSlice()
             cslice._cseg = dslice["cseg"]
-            cslice._pset_spacing_index = float(dslice["chord_spread"])
+            cslice._chord_spacing_index = float(dslice["chord_spread"])
             cslice._core = bool(dslice["core"])
             cslice._derived_core = bool(dslice["derived_core"])
             cslice._derived_core_associations = dslice["derived_core_associations"]
@@ -622,7 +622,7 @@ def read_analysis_from_file(path):
         result._pitch_lowest = item["pitch_lowest"]
         result._pitch_lowest_voices = item["pitch_lowest_voices"]
         result._pset_card_avg = item["pset_card_avg"]
-        result._pset_spacing_index_avg = item["pset_spacing_index_avg"]
+        result._chord_spacing_index_avg = item["chord_spacing_index_avg"]
         result._pset_duration = {}
         result._pset_frequency = item["pset_frequency"]
         result._psc_duration = {}
@@ -710,7 +710,7 @@ def write_analysis_to_file(results, path):
         data[i]["pitch_lowest"] = results[i].pitch_lowest
         data[i]["pitch_lowest_voices"] = results[i].pitch_lowest_voices
         data[i]["pset_card_avg"] = results[i].pset_card_avg
-        data[i]["pset_spacing_index_avg"] = results[i].pset_spacing_index_avg
+        data[i]["chord_spacing_index_avg"] = results[i].chord_spacing_index_avg
         data[i]["pset_duration"] = {}
         data[i]["pset_frequency"] = results[i].pset_frequency
         data[i]["pcsc_duration"] = {}
@@ -758,7 +758,7 @@ def write_analysis_to_file(results, path):
         for rslice in results[i].slices:
             cslice = {}
             cslice["cseg"] = rslice.cseg
-            cslice["chord_spread"] = rslice.pset_spacing_index
+            cslice["chord_spread"] = rslice.chord_spacing_index
             cslice["core"] = int(rslice.core)
             cslice["derived_core"] = int(rslice.derived_core)
             cslice["derived_core_associations"] = rslice.derived_core_associations
@@ -806,76 +806,137 @@ def write_general_report(section_name, file, file_command, results, lowest_pitch
     :param highest_pitch: The highest pitch analyzed
     :return: None
     """
-    with open(file, file_command) as general:
-        if file_command == "w":
-            # Write column headings
-            general.write("Section,Starting Time,Duration,Pset card avg,PSI avg,LPS,P_U,P_L,PS avg,PS min,PS max," +
-                          "UNS avg,UNS min,UNS max,LNS avg,LNS min,LNS max,INS avg,INS min,INS max,MT avg,MT min," +
-                          "MT max")
-            for i in range(0, 12):
-                general.write(f",pc{i} dur")
-            for i in range(0, 12):
-                general.write(f",pc{i} freq")
-            for i in range(lowest_pitch, highest_pitch + 1):
-                general.write(f",p{i} dur")
-            for i in range(lowest_pitch, highest_pitch + 1):
-                general.write(f",p{i} freq")
-            general.write("\n")
-        general.write(f"{section_name},{results.start_time},{results.duration},{results.pset_card_avg}," +
-                      f"{results.pset_spacing_index_avg},{results.lps_card},{results.pitch_highest}," +
-                      f"{results.pitch_lowest},{results.ps_avg},{results.ps_min},{results.ps_max}," +
-                      f"{results.uns_avg},{results.uns_min},{results.uns_max}," +
-                      f"{results.lns_avg},{results.lns_min},{results.lns_max}," +
-                      f"{results.ins_avg},{results.ins_min},{results.ins_max}," +
-                      f"{results.mediant_avg},{results.mediant_min},{results.mediant_max}")
+    report = {
+        "section": [],
+        "start_time": [], 
+        "duration": [], 
+        "pset_card_avg": [], 
+        "csi_avg": [], 
+        "lps": [], 
+        "p_u": [], 
+        "p_l": [], 
+        "ps_avg": [], 
+        "ps_min": [], 
+        "ps_max": [],
+        "uns_avg": [], 
+        "uns_min": [], 
+        "uns_max": [], 
+        "lns_avg": [], 
+        "lns_min": [], 
+        "lns_max": [], 
+        "ins_avg": [], 
+        "ins_min": [], 
+        "ins_max": [], 
+        "mt_avg": [], 
+        "mt_min": [],
+        "mt_max": []
+    }
+    for i in range(0, 12):
+        report[f"pc{i}_dur"] = []
+    for i in range(0, 12):
+        report[f"pc{i}_freq"] = []
+    for i in range(lowest_pitch, highest_pitch + 1):
+        report[f"p{i}_dur"] = []
+    for i in range(lowest_pitch, highest_pitch + 1):
+        report[f"p{i}_freq"] = []
+
+    report["section"].append(section_name)
+    report["start_time"].append(float(results.start_time))
+    report["duration"].append(float(results.duration))
+    report["pset_card_avg"].append(results.pset_card_avg)
+    report["csi_avg"].append(results.chord_spacing_index_avg)
+    report["lps"].append(results.lps_card)
+    report["p_u"].append(results.pitch_highest)
+    report["p_l"].append(results.pitch_lowest)
+    report["ps_avg"].append(results.ps_avg)
+    report["ps_min"].append(results.ps_min)
+    report["ps_max"].append(results.ps_max)
+    report["uns_avg"].append(results.uns_avg)
+    report["uns_min"].append(results.uns_min)
+    report["uns_max"].append(results.uns_max)
+    report["lns_avg"].append(results.lns_avg)
+    report["lns_min"].append(results.lns_min)
+    report["lns_max"].append(results.lns_max)
+    report["ins_avg"].append(results.ins_avg)
+    report["ins_min"].append(results.ins_min)
+    report["ins_max"].append(results.ins_max)
+    report["mt_avg"].append(results.mediant_avg)
+    report["mt_min"].append(results.mediant_min)
+    report["mt_max"].append(results.mediant_max)
+    
+    for i in range(0, 12):
+        if i in results.pc_duration.keys():
+            report[f"pc{i}_dur"].append(float(results.pc_duration[i]))
+        else:
+            report[f"pc{i}_dur"].append(0)
+    for i in range(0, 12):
+        if i in results.pc_frequency.keys():
+            report[f"pc{i}_freq"].append(results.pc_frequency[i])
+        else:
+            report[f"pc{i}_freq"].append(0)
+    for i in range(lowest_pitch, highest_pitch + 1):
+        if i in results.pitch_duration.keys():
+            report[f"p{i}_dur"].append(float(results.pitch_duration[i]))
+        else:
+            report[f"p{i}_dur"].append(0)
+    for i in range(lowest_pitch, highest_pitch + 1):
+        if i in results.pitch_frequency.keys():
+            report[f"p{i}_freq"].append(results.pitch_frequency[i])
+        else:
+            report[f"p{i}_freq"].append(0)
+
+    for v in range(results.num_voices):
+        report["section"].append(f"{section_name} (Voice {v})")
+        report["start_time"].append(None)
+        report["duration"].append(None)
+        report["pset_card_avg"].append(None)
+        report["csi_avg"].append(None)
+        report["lps"].append(results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1)
+        report["p_u"].append(results.pitch_highest_voices[v])
+        report["p_l"].append(results.pitch_lowest_voices[v])
+        report["ps_avg"].append(None)
+        report["ps_min"].append(None)
+        report["ps_max"].append(None)
+        report["uns_avg"].append(None)
+        report["uns_min"].append(None)
+        report["uns_max"].append(None)
+        report["lns_avg"].append(None)
+        report["lns_min"].append(None)
+        report["lns_max"].append(None)
+        report["ins_avg"].append(None)
+        report["ins_min"].append(None)
+        report["ins_max"].append(None)
+        report["mt_avg"].append(None)
+        report["mt_min"].append(None)
+        report["mt_max"].append(None)
         for i in range(0, 12):
-            if i in results.pc_duration.keys():
-                general.write(f",{results.pc_duration[i]}")
+            if i in results.pc_duration_voices[v].keys():
+                report[f"pc{i}_dur"].append(float(results.pc_duration_voices[v][i]))
             else:
-                general.write(",0")
+                report[f"pc{i}_dur"].append(0)
         for i in range(0, 12):
-            if i in results.pc_frequency.keys():
-                general.write(f",{results.pc_frequency[i]}")
+            if i in results.pc_frequency_voices[v].keys():
+                report[f"pc{i}_freq"].append(results.pc_frequency_voices[v][i])
             else:
-                general.write(",0")
+                report[f"pc{i}_freq"].append(0)
         for i in range(lowest_pitch, highest_pitch + 1):
-            if i in results.pitch_duration.keys():
-                general.write(f",{results.pitch_duration[i]}")
+            if i in results.pitch_duration_voices[v].keys():
+                report[f"p{i}_dur"].append(float(results.pitch_duration_voices[v][i]))
             else:
-                general.write(",0")
+                report[f"p{i}_dur"].append(0)
         for i in range(lowest_pitch, highest_pitch + 1):
-            if i in results.pitch_frequency.keys():
-                general.write(f",{results.pitch_frequency[i]}")
+            if i in results.pitch_frequency_voices[v].keys():
+                report[f"p{i}_freq"].append(results.pitch_frequency_voices[v][i])
             else:
-                general.write(",0")
-        general.write("\n")
-        for v in range(results.num_voices):
-            general.write(f"{section_name} (Voice {v}),,,,,")
-            general.write(f"{results.pitch_highest_voices[v] - results.pitch_lowest_voices[v] + 1},")
-            general.write(f"{results.pitch_highest_voices[v]},")
-            general.write(f"{results.pitch_lowest_voices[v]},")
-            general.write(",,,,,,,,,,,,,,")
-            for i in range(0, 12):
-                if i in results.pc_duration_voices[v].keys():
-                    general.write(f",{results.pc_duration_voices[v][i]}")
-                else:
-                    general.write(",0")
-            for i in range(0, 12):
-                if i in results.pc_frequency_voices[v].keys():
-                    general.write(f",{results.pc_frequency_voices[v][i]}")
-                else:
-                    general.write(",0")
-            for i in range(lowest_pitch, highest_pitch + 1):
-                if i in results.pitch_duration_voices[v].keys():
-                    general.write(f",{results.pitch_duration_voices[v][i]}")
-                else:
-                    general.write(",0")
-            for i in range(lowest_pitch, highest_pitch + 1):
-                if i in results.pitch_frequency_voices[v].keys():
-                    general.write(f",{results.pitch_frequency_voices[v][i]}")
-                else:
-                    general.write(",0")
-            general.write("\n")
+                report[f"p{i}_freq"].append(0)
+        
+    output_df = pd.DataFrame(report)
+    if file_command == 'a':
+        contents = pd.read_excel(file)
+        new_df = pd.concat([contents, output_df])
+        new_df.to_excel(file, index=False)
+    else:
+        output_df.to_excel(file, index=False)
 
 
 def write_statistics(file, headings, dictionaries):
@@ -894,14 +955,18 @@ def write_statistics(file, headings, dictionaries):
             stat_list[j].append(dictionaries[i][stat_list[j][0]])
     stat_list = sorted(stat_list, key=lambda x: x[0])
     stat_list = sorted(stat_list, key=lambda x: len(x[0]))
-    with open(file, "w") as output:
-        output.write(headings)
-        for line in stat_list:
-            if len(line) > 0:
-                output.write(f"\"{line[0]}\"")
-            for i in range(1, len(line)):
-                output.write(f",{line[i]}")
-            output.write("\n")
+
+    output = [[] for heading in headings]
+    for line in stat_list:
+        if len(line) > 0:
+            output[0].append(f"{line[0]}")
+        for i in range(1, len(line)):
+            if type(line[i]) == Decimal:
+                output[i].append(float(line[i]))
+            else:
+                output[i].append(line[i])
+    output_df = pd.DataFrame({headings[i]: output[i] for i in range(len(output))})
+    output_df.to_excel(file, index=False)
 
 
 def write_report(file, results):
@@ -966,7 +1031,7 @@ def write_report(file, results):
             report["pset"].append(item.get_pset_string())
             report["psc"].append(item.get_ipseg_string())
             report["cseg"].append(item.get_cseg_string())
-            report["psi"].append(item.pset_spacing_index)
+            report["psi"].append(item.chord_spacing_index)
             for i in range(results.max_p_count):
                 if i < len(item.pitchseg):
                     report[f"pitch_{i + 1}"].append(item.pnameseg[i])

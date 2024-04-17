@@ -65,7 +65,7 @@ class Results:
         self._pset_card_avg = 0
         self._pset_duration = None
         self._pset_frequency = None
-        self._pset_spacing_index_avg = 0
+        self._chord_spacing_index_avg = 0
         self._pcsc_duration = None
         self._pcsc_frequency = None
         self._psc_duration = None
@@ -351,12 +351,12 @@ class Results:
         return self._pset_card_avg
 
     @property
-    def pset_spacing_index_avg(self):
+    def chord_spacing_index_avg(self):
         """
         The average pset spacing index of the analyzed measures (by duration)
         :return: The average pset spacing index
         """
-        return self._pset_spacing_index_avg
+        return self._chord_spacing_index_avg
 
     @property
     def pset_duration(self):
@@ -549,8 +549,8 @@ class Results:
                 self._quarter_duration += s.quarter_duration
                 if s.p_cardinality > 0:
                     self._pset_card_avg += len(s.pset) * s.duration
-                    if s.pset_spacing_index is not numpy.nan:
-                        self._pset_spacing_index_avg += Decimal(s.pset_spacing_index) * s.duration
+                    if s.chord_spacing_index is not numpy.nan:
+                        self._chord_spacing_index_avg += Decimal(s.chord_spacing_index) * s.duration
                         valid_durations_for_spacing += s.duration
                     self._ps_avg += s.ps
                     if self._ps_max < s.ps:
@@ -667,9 +667,9 @@ class Results:
         self._pset_card_avg = float(self._pset_card_avg / self._duration)
     
         if valid_durations_for_spacing != 0:
-            self._pset_spacing_index_avg = float(self._pset_spacing_index_avg / valid_durations_for_spacing)
+            self._chord_spacing_index_avg = float(self._chord_spacing_index_avg / valid_durations_for_spacing)
         else:
-            self._pset_spacing_index_avg = 0.5
+            self._chord_spacing_index_avg = 0.5
 
         non_null = self._get_non_null()
         if non_null != 0:

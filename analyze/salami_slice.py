@@ -33,7 +33,7 @@ def sort_pnameseg(pnameseg):
     lmap = {'C': 1, 'D': 4, 'E': 7, 'F': 10, 'G': 13, 'A': 16, 'B': 19}
     pnameseg2 = []
     for p in pnameseg:
-        p1 = int(p[len(p)-1]) * 21 + lmap[p[0]]
+        p1 = int(p[-1]) * 21 + lmap[p[0]]
         if len(p) > 2:
             if p[1] == '#':
                 p1 += 1
@@ -54,7 +54,7 @@ class SalamiSlice:
         """
         self._core = False                      # Whether or not the chord is a core harmony
         self._cseg = None                       # The contour of the pset
-        self._pset_spacing_index = 0            # The spread measure of the chord
+        self._chord_spacing_index = 0            # The spread measure of the chord
         self._derived_core = False              # Whether or not the chord is a derived core harmony
         self._derived_core_associations = None  # Derived core associations, if any
         self._duration = 0           # The duration of the slice in seconds
@@ -102,12 +102,12 @@ class SalamiSlice:
         return self._cseg
 
     @property
-    def pset_spacing_index(self):
+    def chord_spacing_index(self):
         """
         The pset spacing index of the VSlice
         :return: The pset spacing index
         """
-        return self._pset_spacing_index
+        return self._chord_spacing_index
 
     @property
     def core(self):
@@ -465,7 +465,7 @@ class SalamiSlice:
         cseg = "<"
         for cp in self._cseg:
             cseg += str(cp) + ", "
-        if cseg[len(cseg) - 1] == " ":
+        if cseg[-1] == " ":
             cseg = cseg[:-2]
         cseg += ">"
         return cseg
@@ -478,7 +478,7 @@ class SalamiSlice:
         ipseg = "<"
         for ip in self._ipseg:
             ipseg += str(ip) + ", "
-        if ipseg[len(ipseg) - 1] == " ":
+        if ipseg[-1] == " ":
             ipseg = ipseg[:-2]
         ipseg += ">"
         return ipseg
@@ -558,13 +558,13 @@ class SalamiSlice:
 
         # Calculate pset spacing index
         if len(self._pseg) < 3:
-            self._pset_spacing_index = numpy.nan
+            self._chord_spacing_index = numpy.nan
         else:
             avg = 0
             for p in self._pset:
                 avg += p.p
             avg /= self._p_cardinality
-            self._pset_spacing_index = (avg - self._pseg[0].p) / (self._pseg[len(self._pseg) - 1].p - self._pseg[0].p)
+            self._chord_spacing_index = (avg - self._pseg[0].p) / (self._pseg[-1].p - self._pseg[0].p)
 
         # Calculate set theory info
         sc.pcset = self._pcset
@@ -591,7 +591,7 @@ class SalamiSlice:
         # Calculate ps and ins
         self._ps = len(self._pset)
         if self._ps > 0:
-            self._ins = self._pseg[len(self._pseg) - 1].p - self._pseg[0].p + 1 - self._ps
+            self._ins = self._pseg[-1].p - self._pseg[0].p + 1 - self._ps
         else:
             self._ins = 0
 
@@ -604,5 +604,5 @@ class SalamiSlice:
                 self._ns = self._upper_bound - self._lower_bound + 1
             else:
                 self._lns = self._pseg[0].p - self._lower_bound
-                self._uns = self._upper_bound - self._pseg[len(self._pseg) - 1].p
+                self._uns = self._upper_bound - self._pseg[-1].p
                 self._mediant = (self._lns - self._uns) / 2

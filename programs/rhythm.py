@@ -2,30 +2,16 @@ import pctheory.tempo as tempo
 from fractions import Fraction
 
 divisions = [
-    Fraction(1, 13),
-    Fraction(1, 12),
-    Fraction(1, 11),
-    Fraction(1, 10),
-    Fraction(1, 9),
     Fraction(1, 8),
     Fraction(1, 7),
-    Fraction(2, 13),
     Fraction(1, 6),
-    Fraction(2, 11),
     Fraction(1, 5),
-    Fraction(2, 9),
-    Fraction(3, 13),
     Fraction(1, 4),
-    Fraction(3, 11),
     Fraction(2, 7),
-    Fraction(3, 10),
-    Fraction(4, 13),
     Fraction(1, 3),
-    Fraction(4, 11),
     Fraction(3, 8),
     Fraction(2, 5),
     Fraction(3, 7),
-    Fraction(4, 9),
     Fraction(1, 2),
     Fraction(4, 7),
     Fraction(3, 5),
@@ -42,5 +28,5 @@ divisions = [
 
 divisions.reverse()
 
-tempo.plot_tempo_table([42, 48, 60, 72, 84, 96, 108, 120], divisions)
+tempo.plot_tempo_table([60, 72, 84, 96, 108, 120], divisions)
 
