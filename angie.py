@@ -306,7 +306,8 @@ def make_score():
     """
     s = create_score()
     add_instrument(s, "Violin", "Vln.")
-    add_measures(s, 50, 1, 0, "4/4")
+    num_measures = int(input("Enter the number of measures"))
+    add_measures(s, num_measures, 1, 0, "4/4")
     add_item(s[1], music21.clef.TrebleClef(), 0, 0)
 
     # 1. UPDATE MAPPING HERE IF NECESSARY
@@ -336,17 +337,29 @@ def make_score():
         "w": "b",
         "x": "c",
         "y": "d",
-        "z": "e"
+        "z": "e",
+        " ": " ",
+        "\n": " ",
+        "\t": " "
     }
-    text = "put your text to map here. It doesn't matter if you have uppercase or lowercase, or if you have weird characters in the string like numbers or punctuation 2390A#@$@Q."
+    print("Enter the text to convert: ")
+    text = input()
     text = text.lower()
-    text = re.sub(r'[^A-Za-z]', '', text)
+    text = re.sub(r'[^A-Za-z\s]', '', text)
     mapped_text = [music_mapper[char] for char in text]
-    notes = [music21.note.Note(f"{char}4", quarterLength=1) for char in mapped_text]
+    notes = []
+    for char in mapped_text:
+        if char == ' ':
+            notes.append(music21.note.Rest(quarterLength=1))
+        else:
+            notes.append(music21.note.Note(f"{char}4", quarterLength=1))
     add_sequence(s[1], notes)
+    remove_empty_measures(s)
 
     # 2. SET THE FILE NAME HERE
-    export_to_xml(s, "filename.xml")
+    print("Enter the filename. Remember to add .xml at the end:")
+    filename = input()
+    export_to_xml(s, filename)
 
 
 if __name__ == "__main__":
