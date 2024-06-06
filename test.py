@@ -1,10 +1,14 @@
 import mido
+import algorithms
 
 QTR = 480
 TEMPO_MULTIPLIER = 1000000
 TEMPO = 60
 
-notes = [60, 62, 64, 65, 67, 69, 71, 72] * 4 * 4
+notes = algorithms.wander(60, 200, 
+                          [2, 4, 5, 7, 9, 11, 13, 14, 17], 
+                          [(9, 9), (7, 4), (7, 3), (4, 3), (3, 2), (4, 2), (3, 1), (3, 1), (3, 1)],
+                          (0, 36))
 
 meta_track = mido.MidiTrack()
 meta_track.append(mido.MetaMessage('time_signature', numerator=4, denominator=4, clocks_per_click=24, notated_32nd_notes_per_beat=8, time=0))
