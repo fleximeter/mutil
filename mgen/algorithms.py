@@ -170,9 +170,9 @@ def wander(start_note: int, num_notes: int, intervals: list, weights: list, note
         new_int = _rng.choices(intervals, weights, k=1)[0]
         new_note = pitch.Pitch(notes[-1].p + new_int)
         current_range = note_range(i)
-        while current_range[0] > new_note.p: 
+        while current_range[0] > new_note.p + 60: 
             new_note.p += 12
-        while current_range[1] < new_note.p: 
+        while current_range[1] < new_note.p + 60: 
             new_note.p -= 12
         notes.append(new_note)
     
@@ -204,9 +204,9 @@ def wander_nth_int(start_note: int, num_notes: int, intervals: list, weights: li
             new_int = _rng.choices(intervals, weights, k=1)[0]
         new_note = pitch.Pitch(notes[-1].p + new_int)
         current_range = note_range(i)
-        while current_range[0] > new_note.p: 
+        while current_range[0] > new_note.p + 60:
             new_note.p += 12
-        while current_range[1] < new_note.p: 
+        while current_range[1] < new_note.p + 60:
             new_note.p -= 12
         notes.append(new_note)
     
