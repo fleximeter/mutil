@@ -165,15 +165,19 @@ def wander(start_note: int, num_notes: int, intervals: list, weights: list, note
     intervals += [-i for i in intervals]
     weights = [w[0] for w in weights] + [w[1] for w in weights]
     start_note -= 60
+    smallest_nonzero_interval = 1000
+    for interval in intervals:
+        if interval > 0 and interval < smallest_nonzero_interval:
+            smallest_nonzero_interval = interval
     notes = [pitch.Pitch(start_note)]
     for i in range(num_notes - 1):
         new_int = _rng.choices(intervals, weights, k=1)[0]
         new_note = pitch.Pitch(notes[-1].p + new_int)
         current_range = note_range(i)
         while current_range[0] > new_note.p + 60: 
-            new_note.p += 12
+            new_note.p += smallest_nonzero_interval
         while current_range[1] < new_note.p + 60: 
-            new_note.p -= 12
+            new_note.p -= smallest_nonzero_interval
         notes.append(new_note)
     
     return [p.midi for p in notes]
@@ -196,6 +200,10 @@ def wander_nth_int(start_note: int, num_notes: int, intervals: list, weights: li
     intervals += [-i for i in intervals]
     weights = [w[0] for w in weights] + [w[1] for w in weights]
     start_note -= 60
+    smallest_nonzero_interval = 1000
+    for interval in intervals:
+        if interval > 0 and interval < smallest_nonzero_interval:
+            smallest_nonzero_interval = interval
     notes = [pitch.Pitch(start_note)]
     for i in range(num_notes - 1):
         if i % n == 0:
@@ -205,9 +213,9 @@ def wander_nth_int(start_note: int, num_notes: int, intervals: list, weights: li
         new_note = pitch.Pitch(notes[-1].p + new_int)
         current_range = note_range(i)
         while current_range[0] > new_note.p + 60:
-            new_note.p += 12
+            new_note.p += smallest_nonzero_interval
         while current_range[1] < new_note.p + 60:
-            new_note.p -= 12
+            new_note.p -= smallest_nonzero_interval
         notes.append(new_note)
     
     return [p.midi for p in notes]
