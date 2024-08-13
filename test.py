@@ -1,8 +1,8 @@
-from pctheory import array, group, pcseg, pcset, pseg, pset, pitch, set_complex, tables, tempo, transformations, util
-from fractions import Fraction
-from mgen import xml_gen
+"""
+File: test.py
+"""
 
-score1 = xml_gen.create_score("Randomness Testing", "Jeffrey Martin")
-xml_gen.add_instrument(score1, "Cello", "Vlc.")
+import mgen.algorithms as algorithms
 
-# Create the function for determining range
+z = algorithms.NoteEnvelope([(0, 12), (0, 24), (12, 36)], [0, 15, 30])
+print(z(19))
