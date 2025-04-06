@@ -1,23 +1,30 @@
 # line generator for chamber orchestra piece
 
 from mgen import xml_gen
-from pctheory import pitch, pcset, pcseg, pset, pseg
+from pctheory import pitch
+from mgen.comptools import multiply, rotate
 
 score = xml_gen.create_score("Line Generator", "Jeff Martin")
 xml_gen.add_instrument(score, "Violin", "Vln.")
-xml_gen.add_measures(score, 20, 1, None, "4/4")
+xml_gen.add_measures(score, 50, 1, None, "4/4")
 
-# the sequence of pitch intervals
-int_seq = [-2, 1, 2, -3, -2, 1, 3, -4, 3]
+# the 4 forms of the basic sequence of pitch intervals
+seq = {
+    'p': [-2, 1, 2, -3, -2, 1, 3, -4, 3]
+}
+seq['r'] = seq['p'].copy()
+seq['r'].reverse()
+seq['i'] = multiply(seq['p'], -1)
+seq['ri'] = seq['i'].copy()
+seq['ri'].reverse()
 
-# the original note sequence
-# orig_seq = pseg.make_pseg12(88, 86, 87, 89, 86, 84, 85, 88, 84, 87)
+int_seq = seq['p'] + seq['p'] + rotate(seq['p'], 4) + seq['r'] + rotate(seq['r'], 2) + seq['p'] + seq['r']
 
 # build the sequence with a starting pitch
 seq_builder = [pitch.Pitch(88)]
 
 # the sequence length
-LENGTH = 30
+LENGTH = 100
 
 # add the notes in
 for i in range(LENGTH):
@@ -25,5 +32,6 @@ for i in range(LENGTH):
 rhythm = [1 for i in range(len(seq_builder))]
 mseq = xml_gen.make_music21_list(seq_builder, rhythm)
 xml_gen.add_sequence(score[1], mseq)
-
-score.show()
+xml_gen.remove_empty_measures(score)
+xml_gen.export_to_xml(score, "data/score1.musicxml")
+# score.show()
