@@ -10,7 +10,7 @@ xml_gen.add_measures(score, 50, 1, None, "4/4")
 
 # the 4 forms of the basic sequence of pitch intervals
 seq = {
-    'p': [-2, 1, 2, -3, -2, 1, 3, -4, 3]
+    'p': [-2, 1, 2, -3, -2, 1, 3, -5, 3]
 }
 seq['r'] = seq['p'].copy()
 seq['r'].reverse()
@@ -18,7 +18,7 @@ seq['i'] = multiply(seq['p'], -1)
 seq['ri'] = seq['i'].copy()
 seq['ri'].reverse()
 
-int_seq = seq['p'] + seq['p'] + rotate(seq['p'], 4) + seq['r'] + rotate(seq['r'], 2) + seq['p'] + seq['r']
+int_seq = seq['p'] + seq['p'] + seq['i'] + rotate(seq['p'], 2) + seq['p'] + seq['r']
 
 # build the sequence with a starting pitch
 seq_builder = [pitch.Pitch(88)]
@@ -34,4 +34,4 @@ mseq = xml_gen.make_music21_list(seq_builder, rhythm)
 xml_gen.add_sequence(score[1], mseq)
 xml_gen.remove_empty_measures(score)
 xml_gen.export_to_xml(score, "data/score1.musicxml")
-# score.show()
+score.show()

@@ -25,7 +25,7 @@ def add(l: list, val, in_place: bool = False):
             l2[i] = item + val
         return l2
 
-def lambda_op(l: list, op: function, in_place: bool = False):
+def lambda_op(l: list, op, in_place: bool = False):
     """
     Performs a generic operation on a list
     :param l: The list
