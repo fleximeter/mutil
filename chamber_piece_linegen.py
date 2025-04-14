@@ -18,8 +18,8 @@ seq['i'] = multiply(seq['p'], -1)
 seq['ri'] = seq['i'].copy()
 seq['ri'].reverse()
 
-int_seq = seq['p'] + seq['p'] + seq['i'] + rotate(seq['p'], 2) + seq['p'] + seq['r']
-# int_seq = seq['i'] + seq['p'] + seq['ri'] + rotate(seq['p'], 2) + seq['p'] + seq['r']
+# int_seq = seq['p'] + seq['p'] + seq['i'] + rotate(seq['p'], 2) + seq['p'] + seq['r']
+int_seq = seq['i'] + seq['p'] + seq['ri'] + rotate(seq['p'], 2) + seq['p'] + seq['r']
 
 # build the sequence with a starting pitch
 seq_builder = [pitch.Pitch(88)]
