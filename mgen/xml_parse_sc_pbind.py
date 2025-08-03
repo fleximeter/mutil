@@ -49,7 +49,7 @@ def dump_sc(new_parts):
         for v in p:
             for v2 in v:
                 if len(v2) > 0:
-                    data += "    Pbind(\n        \\instrument, Pseq([\\wt], inf),\n        \\dur, Pseq([\n            "
+                    data += "    Pbind(\n        \\instrument, Pseq([\\default], inf),\n        \\dur, Pseq([\n            "
                     for i in range(len(v2) - 1):
                         if type(v2[i]) == PbindNote:
                             data += f"{v2[i].quarterLength.numerator}/{v2[i].quarterLength.denominator}, "
@@ -75,17 +75,44 @@ def dump_sc(new_parts):
     return data
 
 
-def dump_sc_to_file(file, new_parts):
+def dump_sc_with_tuning(new_parts, reference_midi_note):
     """
-    Writes dumped SC data to a file
-    :param file: The file name
+    Dumps the new part data in SuperCollider Pbind format. The Pbind output is modified
+    to accomodate a SuperCollider function called `~tuner` that will compute the frequency
+    given an input MIDI note number and a reference MIDI note number.
     :param new_parts: New (parsed) parts
-    :param num_measures: The highest numbered measure
-    :return:
+    :param reference_midi_note: The reference MIDI note to tune to
     :return:
     """
-    with open(file, "w") as f:
-        f.write(dump_sc(new_parts))
+    data = "~score = [\n"
+    for p in new_parts:
+        for v in p:
+            for v2 in v:
+                if len(v2) > 0:
+                    data += "    Pbind(\n        \\instrument, Pseq([\\default], inf),\n        \\dur, Pseq([\n            "
+                    for i in range(len(v2) - 1):
+                        if type(v2[i]) == PbindNote:
+                            data += f"{v2[i].quarterLength.numerator}/{v2[i].quarterLength.denominator}, "
+                        else:
+                            data += f"Rest({v2[i].quarterLength.numerator}/{v2[i].quarterLength.denominator}), "
+                    if type(v2[len(v2) - 1]) == PbindNote:
+                        data += f"{v2[len(v2) - 1].quarterLength.numerator}/{v2[len(v2) - 1].quarterLength.denominator}"
+                    else:
+                        data += f"Rest({v2[len(v2) - 1].quarterLength.numerator}/{v2[len(v2) - 1].quarterLength.denominator})"
+                    data += "\n        ], 1),\n"
+                    data += "\n        \\amp, Pseq([0.3], inf),\n        \\freq, Pseq([\n            "
+                    for i in range(len(v2) - 1):
+                        if type(v2[i]) == PbindNote:
+                            data += f"~tuner.({v2[i].midi}, {reference_midi_note}), "
+                        else:
+                            data += "0, "
+                    if type(v2[len(v2) - 1]) == PbindNote:
+                        data += f"~tuner.({v2[len(v2) - 1].midi}, {reference_midi_note})"
+                    else:
+                        data += "0"
+                    data += "\n        ], 1),\n        \\legato, 1.05\n    ),\n"
+    data += "];\n"
+    return data
 
 
 def parse_parts(parts, part_indices=None):
