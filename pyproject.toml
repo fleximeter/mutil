@@ -1,0 +1,19 @@
+[project]
+name = "mutil"
+version = "1.0.0"
+dependencies = [
+    "pctheory", "numpy", "matplotlib", "pandas", "mido", "music21"
+]
+requires-python = ">= 3.11"
+authors = [{name = "Jeff Martin", email="jeffreymartin@outlook.com"}]
+maintainers = [{name = "Jeff Martin", email="jeffreymartin@outlook.com"}]
+description = "Algorithmic composition toolkit"
+readme = "README.md"
+license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mutil"]
