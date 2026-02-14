@@ -10,7 +10,7 @@ This file contains functions for creating Music21 scores and exporting them to M
 import music21
 import numpy
 import xml.etree.ElementTree
-import pctheory
+import pctheory.pitch
 
 def add_item(part, item, measure_no, offset=0):
     """

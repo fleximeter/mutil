@@ -6,6 +6,40 @@ Implements various compositional algorithms
 
 from typing import Callable, Any
 
+class Range:
+    """
+    Represents a range to constrain pitches
+    """
+    def __init__(self, low, high):
+        """
+        Creates a new Range
+        :param low: The low bound
+        :param high: The high bound
+        """
+        if not low < high:
+            raise ValueError(f"The low value must be lower than the high value, but `{low}` is not lower than `{high}`.")
+        self.low = low
+        self.high = high
+        self.mod = high - low + 1
+    
+    def fold(self, val):
+        """
+        Folds a value into the range
+        :param val: The value to fold
+        """
+        fold_range = self.mod * 2 - 2
+        fold_step_1 = (val - self.low) % fold_range
+        if fold_step_1 >= self.mod:
+            fold_step_1 = fold_range - fold_step_1
+        return fold_step_1 + self.low
+    
+    def wrap(self, val):
+        """
+        Wraps a value into the range
+        :param val: The value to wrap
+        """
+        return (val - self.low) % self.mod + self.low
+
 class Rule:
     """
     Represents a grammar rule
