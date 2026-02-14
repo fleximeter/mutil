@@ -10,9 +10,7 @@ This file contains functions for creating Music21 scores and exporting them to M
 import music21
 import numpy
 import xml.etree.ElementTree
-
-from pctheory import pitch
-
+import pctheory
 
 def add_item(part, item, measure_no, offset=0):
     """
@@ -272,8 +270,10 @@ def make_music21_list(items, durations):
                     m_list.append(music21.note.Rest(current_duration))
                 elif type(current_item[0]) == int or type(current_item[0]) == float:
                     m_list.append(music21.chord.Chord([j + 60 for j in current_item], quarterLength=current_duration))
-                elif type(current_item[0]) == pitch.Pitch:
+                elif type(current_item[0]) == pctheory.pitch.Pitch:
                     m_list.append(music21.chord.Chord([music21.pitch.Pitch(p.p / (p.mod / 12) + 60) for p in current_item], quarterLength=current_duration))
+                elif type(current_item[0]) == music21.pitch.Pitch:
+                    m_list.append(music21.chord.Chord(current_item, quarterLength=current_duration))
             
             elif type(current_item) == float or type(current_item) == int:
                 if current_item == -numpy.inf:
@@ -281,8 +281,11 @@ def make_music21_list(items, durations):
                 else:
                     m_list.append(music21.note.Note(current_item + 60, quarterLength=current_duration))
             
-            elif type(current_item) == pitch.Pitch:
+            elif type(current_item) == pctheory.pitch.Pitch:
                 m_list.append(music21.note.Note(music21.pitch.Pitch(items[i].p / (items[i].mod / 12)), quarterLength=current_duration))
+
+            elif type(current_item) == music21.pitch.Pitch:
+                m_list.append(music21.note.Note(current_item, quarterLength=current_duration))
     return m_list
 
 
@@ -343,7 +346,7 @@ def split_pset_for_grand_staff(chord):
     bottom_staff = []
     top_staff = []
     for pitch in chord:
-        if pitch.p < 0:
+        if pctheory.pitch.p < 0:
             bottom_staff.append(pitch)
         else:
             top_staff.append(pitch)
