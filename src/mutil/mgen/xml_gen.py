@@ -111,7 +111,7 @@ def add_sequence(part, item_sequence, lyric_sequence=None, measure_no=1, bar_dur
                     current_bar_duration = part[m].barDuration.quarterLength
 
 
-def add_instrument(score, name, abbreviation):
+def add_instrument(score, name: str, abbreviation: str):
     """
     Adds a violin to the score
     :param score: The score
@@ -119,8 +119,8 @@ def add_instrument(score, name, abbreviation):
     :param abbreviation: The abbreviation of the instrument
     :return:
     """
-    instrument = music21.stream.Part(partName=name, partAbbreviation=abbreviation)
-    score.append(instrument)
+    part = music21.stream.Part(partName=name, partAbbreviation=abbreviation)
+    score.append(part)
 
 
 def add_instrument_multi(score, name, abbreviation, num_staves, symbol="brace", bar_together=True):
@@ -257,7 +257,7 @@ def make_music21_list(items, durations):
     :return: A list of music21 items
     """
     m_list = []
-    if len(items) == len(durations):
+    if len(items) <= len(durations):
         for i in range(len(items)):
             current_item = items[i]
             current_duration = durations[i]
@@ -286,6 +286,9 @@ def make_music21_list(items, durations):
 
             elif type(current_item) == music21.pitch.Pitch:
                 m_list.append(music21.note.Note(current_item, quarterLength=current_duration))
+
+            elif current_item is None:
+                m_list.append(music21.note.Rest(quarterLength=current_duration))
     return m_list
 
 
